@@ -86,8 +86,9 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 
+import com.creativemd.creativecore.common.packet.CreativeCorePacket;
 import com.creativemd.itemphysic.configuration.ItemConfigSystem;
-import com.creativemd.itemphysic.packet.ChannelHandler;
+import com.creativemd.itemphysic.packet.DropPacket;
 import com.creativemd.itemphysic.physics.ClientPhysic;
 import com.creativemd.itemphysic.physics.ServerPhysic;
 import com.google.common.eventbus.EventBus;
@@ -141,13 +142,12 @@ public class ItemDummyContainer extends DummyModContainer {
 
 	}
 	
-	public static EnumMap<Side, FMLEmbeddedChannel> channels;
-	
 	@Subscribe
 	public void init(FMLInitializationEvent evt) {
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 		FMLCommonHandler.instance().bus().register(new EventHandler());
-		channels = NetworkRegistry.INSTANCE.newChannel("IPPacket", new ChannelHandler());
+		
+		CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
 		
 		try{
 			if(!ItemTransformer.isLite && Class.forName("com.creativemd.craftingmanager.api.core.ConfigRegistry") != null)
@@ -159,6 +159,8 @@ public class ItemDummyContainer extends DummyModContainer {
 	
 	public static Configuration config;
 	
+	public static float rotateSpeed = 1.0F;
+	
 	@Subscribe
 	public void preInit(FMLPreInitializationEvent evt) {
 		config = new Configuration(evt.getSuggestedConfigurationFile());
@@ -166,6 +168,7 @@ public class ItemDummyContainer extends DummyModContainer {
 		despawnItem = config.get("Item", "despawn", 6000).getInt(6000);
 		customPickup = config.get("Item", "customPickup", false).getBoolean(false);
 		customThrow = config.get("Item", "customThrow", true).getBoolean(true);
+		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
 		config.save();
 		ServerPhysic.loadItemList();
 	}

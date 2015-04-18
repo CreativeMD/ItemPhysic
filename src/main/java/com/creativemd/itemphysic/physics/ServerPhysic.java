@@ -194,14 +194,25 @@ public class ServerPhysic {
             item.prevPosZ = item.posZ;
             
             float f = 0.98F;
-            
             Fluid fluid = getFluid(item);
             if(fluid == null)
             {
             	item.motionY -= 0.04D;
             }else{
             	double density = (double)fluid.getDensity()/1000D;
-            	double range = 0.005;
+            	double speed = - 1/density * 0.01;
+            	if(canItemSwim(stack))
+	            	speed = 0.05;
+            	
+            	double speedreduction = (speed-item.motionY)/2;
+            	double maxSpeedReduction = 0.05;
+            	if(speedreduction < -maxSpeedReduction)
+            		speedreduction = -maxSpeedReduction;
+            	if(speedreduction > maxSpeedReduction)
+            		speedreduction = maxSpeedReduction;
+            	item.motionY += speedreduction;
+            	
+            	/*double range = 0.005;
             	double amount = 50;
             	double speed = -0.05/(density*5);
             	if(item.motionY > range+speed)
@@ -212,7 +223,7 @@ public class ServerPhysic {
             		item.motionY = -speed;
             	
             	if(canItemSwim(stack))
-            		item.motionY += 0.024*density;
+            		item.motionY += 0.024*density;*/
             	
             	f = (float) (1D/density/1.2);
 
@@ -295,9 +306,16 @@ public class ServerPhysic {
 	
 	public static Fluid getFluid(EntityItem item)
     {
+		return getFluid(item, false);
+    }
+	
+	public static Fluid getFluid(EntityItem item, boolean below)
+    {
         double d0 = item.posY + (double)item.getEyeHeight();
         int i = MathHelper.floor_double(item.posX);
         int j = MathHelper.floor_float((float)MathHelper.floor_double(d0));
+        if(below)
+        	j--;
         int k = MathHelper.floor_double(item.posZ);
         Block block = item.worldObj.getBlock(i, j, k);
         
@@ -306,6 +324,9 @@ public class ServerPhysic {
         	fluid = ((IFluidBlock)block).getFluid();
         else if (block instanceof BlockLiquid)
         	fluid = FluidRegistry.WATER;
+        
+        if(below)
+        	return fluid;
         
         double filled = 1.0f; //If it's not a liquid assume it's a solid block
         if (block instanceof IFluidBlock)

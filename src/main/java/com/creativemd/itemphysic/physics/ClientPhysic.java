@@ -7,6 +7,8 @@ import java.util.Random;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import com.creativemd.itemphysic.ItemDummyContainer;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -28,6 +30,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.fluids.Fluid;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -50,7 +53,7 @@ public class ClientPhysic {
 	@SideOnly(Side.CLIENT)
 	public static void doRender(Entity par1Entity, double x, double y, double z, float par8, float par9)
     {
-		rotation = (double)(System.nanoTime()-tick)/3000000D;
+		rotation = (double)(System.nanoTime()-tick)/2500000*ItemDummyContainer.rotateSpeed;
 		if(!mc.inGameHasFocus)
 			rotation = 0;
 		EntityItem item = ((EntityItem)par1Entity);
@@ -147,7 +150,7 @@ public class ClientPhysic {
                     {
                     	if(item.onGround)
                     	{
-                    		for (int i = 0; i < 4; i++) {
+                    		/*for (int i = 0; i < 4; i++) {
 								double rotation = i*90;
 								double range = 5;
 								if(item.rotationPitch > rotation-range && item.rotationPitch < rotation+range)
@@ -172,25 +175,21 @@ public class ClientPhysic {
                     				if(item.rotationPitch-270 < 0)item.rotationPitch += rotation;
                     				else item.rotationPitch -= rotation;
                     			
-                    		}
+                    		}*/
                     		
                     	}else{
-                    		
-                    		int posX = ((int) item.posX)-1;
-                    		int posY = ((int) item.posY);
-                    		int posZ = ((int) item.posZ);
-                    		Material m1 = item.worldObj.getBlock(posX, posY-1, posZ).getMaterial();
-                    		Material m2 = item.worldObj.getBlock(posX, posY, posZ).getMaterial();
-                    		//item.worldObj.setBlock(posX, posY, posZ, 5);
-                    		boolean m3 = item.isInsideOfMaterial(Material.water);
-                    		boolean m4 =  item.isInWater();
-                        	if(m3 | m1  == Material.water | m2 == Material.water | m4)
-                        		item.rotationPitch += rotation/4;
-                        	else 
-                        		item.rotationPitch += rotation*2;
+                    		double rotation = ClientPhysic.rotation*2;
+                    		Fluid fluid = ServerPhysic.getFluid(item);
+                    		if(fluid == null)
+                    			fluid = ServerPhysic.getFluid(item, true);
+                    		if(fluid != null)
+                    		{
+                    			rotation /= fluid.getDensity()/1000*10;
+                    		}
+                        		
+                    		item.rotationPitch += rotation;
                     	}
-                    }	 
-                    
+                    }                    
                     BlockRenderer.renderBlockAsItem(block, itemstack.getItemDamage(), 1.0F);
                     GL11.glPopMatrix();
                 }
@@ -331,16 +330,26 @@ public class ClientPhysic {
             	GL11.glRotatef(item.rotationYaw, 0.0F, 0.0F, 1.0F);
             }
             
-            GL11.glRotatef(item.rotationPitch, 1.0F, 0.0F, 0.0F);
-            
             if(item != null && !Double.isNaN(item.posX) && !Double.isNaN(item.posY) && !Double.isNaN(item.posZ) && item.worldObj != null && !RenderItem.renderInFrame)
             {
 	            if(item.onGround)item.rotationPitch = 0;
-	            else 
-	            	if(item.isInsideOfMaterial(Material.water) | item.worldObj.getBlock((int)item.posX, (int)item.posY-1, (int)item.posZ).getMaterial().equals(Material.water) | item.worldObj.getBlock((int)item.posX, (int)item.posY, (int)item.posZ).getMaterial().equals(Material.water))
-	            		item.rotationPitch += rotation/400000;	
-	            	else item.rotationPitch += rotation/20000;
+	            else {
+	            	double rotation = ClientPhysic.rotation*2;
+            		Fluid fluid = ServerPhysic.getFluid(item);
+            		if(fluid != null)
+            		{
+            			rotation /= fluid.getDensity()/1000*10;
+            		}
+                		
+            		item.rotationPitch += rotation;
+            		
+	            	//if(item.isInsideOfMaterial(Material.water) | item.worldObj.getBlock((int)item.posX, (int)item.posY-1, (int)item.posZ).getMaterial().equals(Material.water) | item.worldObj.getBlock((int)item.posX, (int)item.posY, (int)item.posZ).getMaterial().equals(Material.water))
+	            		//item.rotationPitch += rotation/1600000*ItemDummyContainer.rotateSpeed;	
+	            	//else item.rotationPitch += rotation/20000*ItemDummyContainer.rotateSpeed;
+	            }
             }
+            
+            GL11.glRotatef(item.rotationPitch, 1.0F, 0.0F, 0.0F);
 
             float f9 = 0.0625F;
             f10 = 0.021875F;
