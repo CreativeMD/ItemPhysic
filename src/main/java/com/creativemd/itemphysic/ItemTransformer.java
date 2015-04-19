@@ -49,7 +49,7 @@ import java.lang.instrument.Instrumentation;
 
 public class ItemTransformer implements IClassTransformer {
 
-	public static boolean isLite = false;
+	public static boolean isLite = true;
 	
 	
 	//NOTE: This doesn't work for some cases like EntityItem and EntityItemFrame

@@ -132,13 +132,16 @@ public class EventHandler {
 	@SubscribeEvent
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
-		if(ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
+		if(!ItemTransformer.isLite)
 		{
-			EntityItem entity = getEntityItem(event.entityPlayer);
-			if(entity != null && !event.entityPlayer.worldObj.isRemote)
+			if(ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
 			{
-				entity.interactFirst(event.entityPlayer);	
-				event.setCanceled(true);
+				EntityItem entity = getEntityItem(event.entityPlayer);
+				if(entity != null && !event.entityPlayer.worldObj.isRemote)
+				{
+					entity.interactFirst(event.entityPlayer);	
+					event.setCanceled(true);
+				}
 			}
 		}
 	}
@@ -158,76 +161,79 @@ public class EventHandler {
 		if(event.phase == Phase.END)
 		{
 			ClientPhysic.tick = System.nanoTime();
-			if(mc == null)
-				mc = Minecraft.getMinecraft();
-			if(renderer == null)
-				renderer = (RenderItem) RenderManager.instance.getEntityClassRenderObject(EntityItem.class);
-			if(mc != null && mc.thePlayer != null && mc.inGameHasFocus)
+			if(!ItemTransformer.isLite)
 			{
-				if(ItemDummyContainer.customPickup)
+				if(mc == null)
+					mc = Minecraft.getMinecraft();
+				if(renderer == null)
+					renderer = (RenderItem) RenderManager.instance.getEntityClassRenderObject(EntityItem.class);
+				if(mc != null && mc.thePlayer != null && mc.inGameHasFocus)
 				{
-					EntityItem entity = getEntityItem(mc.thePlayer);
-					if(entity != null && mc.inGameHasFocus)
+					if(ItemDummyContainer.customPickup)
 					{
-						int space = 15;
-						List list = new ArrayList();
-						entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
-						list.add(entity.getEntityItem().getDisplayName());
-						GL11.glEnable(GL11.GL_BLEND);
-				        GL11.glDisable(GL11.GL_TEXTURE_2D);
-				        GL11.glEnable(GL11.GL_ALPHA_TEST);
-				        //OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-				        Gui.drawRect(0, 0, 100, 100, 100);
-				        GL11.glEnable(GL11.GL_TEXTURE_2D);
-				        GL11.glDisable(GL11.GL_BLEND);
-						for(int zahl = 0; zahl < list.size(); zahl++)
+						EntityItem entity = getEntityItem(mc.thePlayer);
+						if(entity != null && mc.inGameHasFocus)
 						{
-							String text = (String) list.get(zahl);
-							mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(zahl+1)), 16579836);
+							int space = 15;
+							List list = new ArrayList();
+							entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
+							list.add(entity.getEntityItem().getDisplayName());
+							GL11.glEnable(GL11.GL_BLEND);
+					        GL11.glDisable(GL11.GL_TEXTURE_2D);
+					        GL11.glEnable(GL11.GL_ALPHA_TEST);
+					        //OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+					        Gui.drawRect(0, 0, 100, 100, 100);
+					        GL11.glEnable(GL11.GL_TEXTURE_2D);
+					        GL11.glDisable(GL11.GL_BLEND);
+							for(int zahl = 0; zahl < list.size(); zahl++)
+							{
+								String text = (String) list.get(zahl);
+								mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(zahl+1)), 16579836);
+							}
+							//renderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, ((EntityItem)move.entityHit).getEntityItem(), 10, 10);
 						}
-						//renderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, ((EntityItem)move.entityHit).getEntityItem(), 10, 10);
 					}
-				}
-				if(ItemDummyContainer.customThrow)
-				{
-					if(mc.thePlayer.getCurrentEquippedItem() != null)
+					if(ItemDummyContainer.customThrow)
 					{
+						if(mc.thePlayer.getCurrentEquippedItem() != null)
+						{
+							if(mc.gameSettings.keyBindDrop.getIsKeyPressed())
+								power++;
+							else
+							{
+								if(power > 0)
+								{
+									power /= 30;
+									if(power < 1)
+										power = 1;
+									if(power > 6)
+										power = 6;
+									PacketHandler.sendPacketToServer(new DropPacket(power, GuiScreen.isCtrlKeyDown()));
+								}
+								power = 0;
+							}
+						}
+						if(power > 0)
+						{
+							int renderPower = power;
+							renderPower /= 30;
+							if(renderPower < 1)
+								renderPower = 1;
+							if(renderPower > 6)
+								renderPower = 6;
+							String text = "Power:" + renderPower;
+							mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
+						}
+					}else{
 						if(mc.gameSettings.keyBindDrop.getIsKeyPressed())
 							power++;
 						else
-						{
-							if(power > 0)
-							{
-								power /= 30;
-								if(power < 1)
-									power = 1;
-								if(power > 6)
-									power = 6;
-								PacketHandler.sendPacketToServer(new DropPacket(power, GuiScreen.isCtrlKeyDown()));
-							}
 							power = 0;
+						if(power == 1)
+						{
+							int i = GuiScreen.isCtrlKeyDown() ? 3 : 4;
+						    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(i, 0, 0, 0, 0));
 						}
-					}
-					if(power > 0)
-					{
-						int renderPower = power;
-						renderPower /= 30;
-						if(renderPower < 1)
-							renderPower = 1;
-						if(renderPower > 6)
-							renderPower = 6;
-						String text = "Power:" + renderPower;
-						mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
-					}
-				}else{
-					if(mc.gameSettings.keyBindDrop.getIsKeyPressed())
-						power++;
-					else
-						power = 0;
-					if(power == 1)
-					{
-						int i = GuiScreen.isCtrlKeyDown() ? 3 : 4;
-					    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(i, 0, 0, 0, 0));
 					}
 				}
 			}

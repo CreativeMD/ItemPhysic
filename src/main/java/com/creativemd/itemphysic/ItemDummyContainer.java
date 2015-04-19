@@ -121,7 +121,7 @@ public class ItemDummyContainer extends DummyModContainer {
 		ModMetadata meta = getMetadata();
 		meta.modId = "itemphysic";
 		meta.name = "ItemPhysic";
-		meta.version = "1.1.2"; //String.format("%d.%d.%d.%d", majorVersion, minorVersion, revisionVersion, buildVersion);
+		meta.version = "1.1.5"; //String.format("%d.%d.%d.%d", majorVersion, minorVersion, revisionVersion, buildVersion);
 		meta.credits = "CreativeMD";
 		meta.authorList = Arrays.asList("CreativeMD");
 		meta.description = "";
@@ -146,15 +146,17 @@ public class ItemDummyContainer extends DummyModContainer {
 	public void init(FMLInitializationEvent evt) {
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 		FMLCommonHandler.instance().bus().register(new EventHandler());
-		
-		CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
-		
-		try{
-			if(!ItemTransformer.isLite && Class.forName("com.creativemd.craftingmanager.api.core.ConfigRegistry") != null)
-			{
-				ItemConfigSystem.startConfig();
-			}
-		}catch(Exception e){}
+		if(!ItemTransformer.isLite)
+		{
+			CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
+			
+			try{
+				if(!ItemTransformer.isLite && Class.forName("com.creativemd.craftingmanager.api.core.ConfigRegistry") != null)
+				{
+					ItemConfigSystem.startConfig();
+				}
+			}catch(Exception e){}
+		}
 	}
 	
 	public static Configuration config;
@@ -165,9 +167,12 @@ public class ItemDummyContainer extends DummyModContainer {
 	public void preInit(FMLPreInitializationEvent evt) {
 		config = new Configuration(evt.getSuggestedConfigurationFile());
 		config.load();
-		despawnItem = config.get("Item", "despawn", 6000).getInt(6000);
-		customPickup = config.get("Item", "customPickup", false).getBoolean(false);
-		customThrow = config.get("Item", "customThrow", true).getBoolean(true);
+		if(!ItemTransformer.isLite)
+		{
+			despawnItem = config.get("Item", "despawn", 6000).getInt(6000);
+			customPickup = config.get("Item", "customPickup", false).getBoolean(false);
+			customThrow = config.get("Item", "customThrow", true).getBoolean(true);
+		}
 		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
 		config.save();
 		ServerPhysic.loadItemList();
