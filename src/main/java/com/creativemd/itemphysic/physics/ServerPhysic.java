@@ -272,7 +272,7 @@ public class ServerPhysic {
 	            }
             }
             
-            if(item.age < 1)
+            if(item.age < 1 && item.lifespan == 6000)
             	item.lifespan = ItemDummyContainer.despawnItem;
             
             ++item.age;
