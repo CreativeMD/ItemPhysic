@@ -108,6 +108,7 @@ public class ClientPhysic {
                 {
                     GL11.glScalef(1.25F, 1.25F, 1.25F);
                     GL11.glTranslatef(0.0F, 0.05F, 0.0F);
+                    GL11.glTranslatef(0.0F, 0.09F, 0.0F);
                     GL11.glRotatef(-90.0F, 0.0F, 1.0F, 0.0F);
                 }else{
                 	GL11.glRotatef(item.rotationYaw, 0.0F, 1.0F, 0.0F);
@@ -322,6 +323,7 @@ public class ClientPhysic {
 
             if (ItemRenderer.renderInFrame)
             {
+            	GL11.glTranslatef(0.0F, 0.09F, 0.0F);
                 GL11.glRotatef(180.0F, 0.0F, 1.0F, 0.0F);
             }
             else
