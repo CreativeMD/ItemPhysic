@@ -87,8 +87,9 @@ import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 
 import com.creativemd.creativecore.common.packet.CreativeCorePacket;
-import com.creativemd.itemphysic.configuration.ItemConfigSystem;
+import com.creativemd.itemphysic.config.ItemConfigSystem;
 import com.creativemd.itemphysic.packet.DropPacket;
+import com.creativemd.itemphysic.packet.PickupPacket;
 import com.creativemd.itemphysic.physics.ClientPhysic;
 import com.creativemd.itemphysic.physics.ServerPhysic;
 import com.google.common.eventbus.EventBus;
@@ -99,6 +100,7 @@ import cpw.mods.fml.common.DummyModContainer;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.FMLModContainer;
 import cpw.mods.fml.common.LoadController;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModMetadata;
 import cpw.mods.fml.common.event.FMLConstructionEvent;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -150,10 +152,12 @@ public class ItemDummyContainer extends DummyModContainer {
 		{
 			CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
 			
+			CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
+			
 			try{
-				if(!ItemTransformer.isLite && Class.forName("com.creativemd.craftingmanager.api.core.ConfigRegistry") != null)
+				if(!ItemTransformer.isLite && Loader.isModLoaded("ingameconfigmanager"))
 				{
-					ItemConfigSystem.startConfig();
+					ItemConfigSystem.loadConfig();
 				}
 			}catch(Exception e){}
 		}

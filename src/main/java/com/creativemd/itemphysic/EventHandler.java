@@ -5,8 +5,11 @@ import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import com.creativemd.creativecore.client.rendering.RenderHelper2D;
 import com.creativemd.creativecore.common.packet.PacketHandler;
+import com.creativemd.creativecore.lib.Vector3d;
 import com.creativemd.itemphysic.packet.DropPacket;
+import com.creativemd.itemphysic.packet.PickupPacket;
 import com.creativemd.itemphysic.physics.ClientPhysic;
 
 import net.minecraft.client.Minecraft;
@@ -28,6 +31,7 @@ import net.minecraft.util.Vec3;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -50,42 +54,21 @@ public class EventHandler {
 		}
 	}
 	
-	public EntityItem getEntityItem(EntityPlayer player)
+	public static EntityItem getEntityItem(EntityPlayer player, Vec3 vec31, Vec3 vec3)
 	{
-		Vec3 vec31 = player.getLook(1.0F);
 		float f1 = 1.0F;
-		double reach = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
-		Entity entity = player.worldObj.findNearestEntityWithinAABB(EntityItem.class, player.boundingBox.addCoord(vec31.xCoord * reach, vec31.yCoord * reach, vec31.zCoord * reach).expand((double)f1, (double)f1, (double)f1), player);
-		if(entity instanceof EntityItem && player.getDistanceSqToEntity(entity) <= reach)
-			return (EntityItem) entity;
-		return null;
-		/*double d0 = (double)this.mc.playerController.getBlockReachDistance();
-		Vec3 vec31 = player.getLook(1.0F);
-        float f1 = 1.0F;
+        double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
         List list = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, player.boundingBox.addCoord(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0).expand((double)f1, (double)f1, (double)f1));
-        Vec3 vec3 = player.getPosition(1.0F);
+        
         Vec3 vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);
+		double d1 = d0;
         
-        double d1 = d0;
-        player
-        if (this.mc.playerController.extendedReach())
+        if(FMLCommonHandler.instance().getEffectiveSide().isClient())
         {
-            d0 = 6.0D;
-            d1 = 6.0D;
-        }
-        else
-        {
-            if (d0 > 3.0D)
-            {
-                d1 = 3.0D;
-            }
-
-            d0 = d1;
-        }
-        
-        /*if (this.mc.objectMouseOver != null)
-        {
-            d1 = this.mc.objectMouseOver.hitVec.distanceTo(vec3);
+	        if (mc.objectMouseOver != null)
+	        {
+	            d1 = mc.objectMouseOver.hitVec.distanceTo(vec3);
+	        }
         }
         
         double d2 = d1;
@@ -107,27 +90,32 @@ public class EventHandler {
                 }
                 else if (movingobjectposition != null)
                 {
-                    double d3 = vec3.distanceTo(movingobjectposition.hitVec);
-
-                    if (d3 < d2 || d2 == 0.0D)
-                    {
-                        if (entity == this.mc.renderViewEntity.ridingEntity && !entity.canRiderInteract())
-                        {
-                            if (d2 == 0.0D)
-                            {
-                                return (EntityItem) entity;
-                            }
-                        }
-                        else
-                        {
-                            return (EntityItem) entity;
-                        }
-                    }
+                	return (EntityItem) entity;
                 }
             }
         }
-        return null;*/
+        return null;
 	}
+	
+	public static EntityItem getEntityItem(EntityPlayer player)
+	{
+		//Minecraft mc = Minecraft.getMinecraft();
+		/*Vec3 vec31 = player.getLook(1.0F);
+		float f1 = 1.0F;
+		double reach = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
+		Entity entity = player.worldObj.findNearestEntityWithinAABB(EntityItem.class, player.boundingBox.addCoord(vec31.xCoord * reach, vec31.yCoord * reach, vec31.zCoord * reach).expand((double)f1, (double)f1, (double)f1), player);
+		if(entity instanceof EntityItem && player.getDistanceSqToEntity(entity) <= reach)
+			return (EntityItem) entity;
+		return null;*/
+		
+		Vec3 vec31 = player.getLook(1.0F);
+		Vec3 vec3 = player.getPosition(1.0F);
+		return getEntityItem(player, vec31, vec3);
+        
+        
+	}
+	
+	public static boolean cancel = false;
 	
 	@SubscribeEvent
 	public void onPlayerInteract(PlayerInteractEvent event)
@@ -137,9 +125,12 @@ public class EventHandler {
 			if(ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
 			{
 				EntityItem entity = getEntityItem(event.entityPlayer);
-				if(entity != null && !event.entityPlayer.worldObj.isRemote)
+				if(event.entityPlayer.worldObj.isRemote && entity != null)
+					PacketHandler.sendPacketToServer(new PickupPacket(event.entityPlayer.getLook(1.0F), event.entityPlayer.getPosition(1.0F)));
+				if(!event.entityPlayer.worldObj.isRemote && cancel)
 				{
-					entity.interactFirst(event.entityPlayer);	
+					//entity.interactFirst(event.entityPlayer);	
+					cancel = false;
 					event.setCanceled(true);
 				}
 			}
@@ -178,17 +169,39 @@ public class EventHandler {
 							List list = new ArrayList();
 							entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
 							list.add(entity.getEntityItem().getDisplayName());
+							
+							int width = 0;
+							int height = (mc.fontRenderer.FONT_HEIGHT+space+1)*list.size();
+							for(int i = 0; i < list.size(); i++)
+							{
+								String text = (String) list.get(i);
+								width = Math.max(width, mc.fontRenderer.getStringWidth(text)+10);
+							}
+							
 							GL11.glEnable(GL11.GL_BLEND);
 					        GL11.glDisable(GL11.GL_TEXTURE_2D);
 					        GL11.glEnable(GL11.GL_ALPHA_TEST);
+					        
+							GL11.glPushMatrix();
+							GL11.glTranslated(mc.displayWidth/4-width/2, mc.displayHeight/4-height/2-space/2, 0);
+							double rgb = (Math.sin(Math.toRadians((double)System.nanoTime()/10000000D))+1)*0.2;
+							Vec3 color = Vec3.createVectorHelper(rgb, rgb, rgb);
+							//System.out.println(color.xCoord);
+							RenderHelper2D.drawRect(0, 0, width, height, color, 0.3);
+							color = Vec3.createVectorHelper(0, 0, 0);
+							RenderHelper2D.drawRect(1, 1, width-1, height-1, color, 0.1);
+							
+							GL11.glPopMatrix();
+							
+							
 					        //OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-					        Gui.drawRect(0, 0, 100, 100, 100);
+					        //Gui.drawRect(0, 0, 100, 100, 100);
 					        GL11.glEnable(GL11.GL_TEXTURE_2D);
 					        GL11.glDisable(GL11.GL_BLEND);
-							for(int zahl = 0; zahl < list.size(); zahl++)
+							for(int i = 0; i < list.size(); i++)
 							{
-								String text = (String) list.get(zahl);
-								mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(zahl+1)), 16579836);
+								String text = (String) list.get(i);
+								mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(i+1)), 16579836);
 							}
 							//renderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, ((EntityItem)move.entityHit).getEntityItem(), 10, 10);
 						}
