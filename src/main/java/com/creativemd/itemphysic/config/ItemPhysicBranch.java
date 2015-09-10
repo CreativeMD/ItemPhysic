@@ -8,6 +8,8 @@ import com.creativemd.ingameconfigmanager.api.common.segment.BooleanSegment;
 import com.creativemd.ingameconfigmanager.api.common.segment.IntegerSegment;
 import com.creativemd.itemphysic.ItemDummyContainer;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
@@ -18,6 +20,7 @@ public class ItemPhysicBranch extends ConfigBranch{
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	protected Avatar getAvatar() {
 		return new AvatarItemStack(new ItemStack(Items.feather));
 	}

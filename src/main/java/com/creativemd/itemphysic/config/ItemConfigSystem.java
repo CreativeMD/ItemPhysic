@@ -10,7 +10,7 @@ import net.minecraft.item.ItemStack;
 
 public class ItemConfigSystem {
 	
-	public static ModTab tab = new ModTab("ItemPhysic", new AvatarItemStack(new ItemStack(Items.feather)));
+	public static ModTab tab = new ModTab("ItemPhysic", new ItemStack(Items.feather));
 	public static ItemPhysicBranch branch;
 	
 	public static void loadConfig()
