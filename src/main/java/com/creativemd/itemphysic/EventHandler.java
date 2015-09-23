@@ -27,6 +27,7 @@ import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -97,7 +98,7 @@ public class EventHandler {
         return null;
 	}
 	
-	public static EntityItem getEntityItem(EntityPlayer player)
+	public static EntityItem getEntityItem(double distance, EntityPlayer player)
 	{
 		//Minecraft mc = Minecraft.getMinecraft();
 		/*Vec3 vec31 = player.getLook(1.0F);
@@ -110,8 +111,12 @@ public class EventHandler {
 		
 		Vec3 vec31 = player.getLook(1.0F);
 		Vec3 vec3 = player.getPosition(1.0F);
-		return getEntityItem(player, vec31, vec3);
+		EntityItem item = getEntityItem(player, vec31, vec3);
         
+		if(item != null && player.getDistanceToEntity(item) < distance)
+			return item;
+		
+		return null;
         
 	}
 	
@@ -124,9 +129,14 @@ public class EventHandler {
 		{
 			if(ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
 			{
-				EntityItem entity = getEntityItem(event.entityPlayer);
+				double distance = 100;
+				if(event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)
+					distance = event.entityPlayer.getDistance(event.x, event.y, event.z);
+				EntityItem entity = getEntityItem(distance, event.entityPlayer);
 				if(event.entityPlayer.worldObj.isRemote && entity != null)
+				{
 					PacketHandler.sendPacketToServer(new PickupPacket(event.entityPlayer.getLook(1.0F), event.entityPlayer.getPosition(1.0F)));
+				}
 				if(!event.entityPlayer.worldObj.isRemote && cancel)
 				{
 					//entity.interactFirst(event.entityPlayer);	
@@ -162,7 +172,13 @@ public class EventHandler {
 				{
 					if(ItemDummyContainer.customPickup)
 					{
-						EntityItem entity = getEntityItem(mc.thePlayer);
+						double distance = 100;
+						if(mc.objectMouseOver != null)
+							if(mc.objectMouseOver.typeOfHit == MovingObjectType.BLOCK)
+								distance = mc.thePlayer.getDistance(mc.objectMouseOver.blockX, mc.objectMouseOver.blockY, mc.objectMouseOver.blockZ);
+							else if(mc.objectMouseOver.typeOfHit == MovingObjectType.ENTITY)
+								distance = mc.thePlayer.getDistanceToEntity(mc.objectMouseOver.entityHit);
+						EntityItem entity = getEntityItem(distance, mc.thePlayer);
 						if(entity != null && mc.inGameHasFocus)
 						{
 							int space = 15;

@@ -45,7 +45,9 @@ public class PickupPacket extends CreativeCorePacket{
 		EventHandler.cancel = true;
 		EntityItem entity = EventHandler.getEntityItem(player, look, pos);
 		if(entity != null)
-			entity.interactFirst(player);	
+		{
+			entity.interactFirst(player);
+		}
 	}
 
 }

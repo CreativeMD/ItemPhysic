@@ -57,9 +57,9 @@ public class ItemTransformer implements IClassTransformer {
 		"net/minecraft/client/renderer/entity/RenderItem", "net/minecraft/entity/item/EntityItem", "onUpdate", "isBurning",
 		"attackEntityFrom", "net/minecraft/util/DamageSource", "health", "onCollideWithPlayer",
 		"net/minecraft/entity/player/EntityPlayer", "net/minecraft/util/AxisAlignedBB", "getCollisionBox", "canBeCollidedWith",
-		"net/minecraft/client/entity/EntityClientPlayerMP", "dropOneItem", "setPositionAndRotation2"};
+		"net/minecraft/client/entity/EntityClientPlayerMP", "dropOneItem", "setPositionAndRotation2", "interactFirst"};
 	public static final String[] namesOb = new String[]{"/", "a", "sa", "a",
-		"bny", "xk", "h", "al", "a", "ro", "e", "b_", "yz", "azt", "h", "R", "bjk", "a", "a"};
+		"bny", "xk", "h", "al", "a", "ro", "e", "b_", "yz", "azt", "h", "R", "bjk", "a", "a", "c"};
 	
 	public static String patchT(String input, boolean obfuscated)
 	{
