@@ -33,6 +33,7 @@ import net.minecraftforge.client.IItemRenderer.ItemRendererHelper;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -55,6 +56,7 @@ public class EventHandler {
 		}
 	}
 	
+	@Method(modid = "creativecore")
 	public static EntityItem getEntityItem(EntityPlayer player, Vec3 vec31, Vec3 vec3)
 	{
 		float f1 = 1.0F;
@@ -98,6 +100,7 @@ public class EventHandler {
         return null;
 	}
 	
+	@Method(modid = "creativecore")
 	public static EntityItem getEntityItem(double distance, EntityPlayer player)
 	{
 		//Minecraft mc = Minecraft.getMinecraft();
@@ -123,11 +126,12 @@ public class EventHandler {
 	public static boolean cancel = false;
 	
 	@SubscribeEvent
+	@Method(modid = "creativecore")
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
 		if(!ItemTransformer.isLite)
 		{
-			if(ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
+			if(event.world.isRemote && ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
 			{
 				double distance = 100;
 				if(event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)
@@ -137,12 +141,12 @@ public class EventHandler {
 				{
 					PacketHandler.sendPacketToServer(new PickupPacket(event.entityPlayer.getLook(1.0F), event.entityPlayer.getPosition(1.0F)));
 				}
-				if(!event.entityPlayer.worldObj.isRemote && cancel)
-				{
-					//entity.interactFirst(event.entityPlayer);	
-					cancel = false;
-					event.setCanceled(true);
-				}
+			}
+			if(!event.entityPlayer.worldObj.isRemote && cancel)
+			{
+				//entity.interactFirst(event.entityPlayer);	
+				cancel = false;
+				event.setCanceled(true);
 			}
 		}
 	}
@@ -155,6 +159,112 @@ public class EventHandler {
 	@SideOnly(Side.CLIENT)
 	public static RenderItem renderer;
 	
+	@Method(modid = "creativecore")
+	public void renderTickFull()
+	{
+		if(mc == null)
+			mc = Minecraft.getMinecraft();
+		if(renderer == null)
+			renderer = (RenderItem) RenderManager.instance.getEntityClassRenderObject(EntityItem.class);
+		if(mc != null && mc.thePlayer != null && mc.inGameHasFocus)
+		{
+			if(ItemDummyContainer.customPickup)
+			{
+				double distance = 100;
+				if(mc.objectMouseOver != null)
+					if(mc.objectMouseOver.typeOfHit == MovingObjectType.BLOCK)
+						distance = mc.thePlayer.getDistance(mc.objectMouseOver.blockX, mc.objectMouseOver.blockY, mc.objectMouseOver.blockZ);
+					else if(mc.objectMouseOver.typeOfHit == MovingObjectType.ENTITY)
+						distance = mc.thePlayer.getDistanceToEntity(mc.objectMouseOver.entityHit);
+				EntityItem entity = getEntityItem(distance, mc.thePlayer);
+				if(entity != null && mc.inGameHasFocus)
+				{
+					int space = 15;
+					List list = new ArrayList();
+					entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
+					list.add(entity.getEntityItem().getDisplayName());
+					
+					int width = 0;
+					int height = (mc.fontRenderer.FONT_HEIGHT+space+1)*list.size();
+					for(int i = 0; i < list.size(); i++)
+					{
+						String text = (String) list.get(i);
+						width = Math.max(width, mc.fontRenderer.getStringWidth(text)+10);
+					}
+					
+					GL11.glEnable(GL11.GL_BLEND);
+			        GL11.glDisable(GL11.GL_TEXTURE_2D);
+			        GL11.glEnable(GL11.GL_ALPHA_TEST);
+			        
+					GL11.glPushMatrix();
+					GL11.glTranslated(mc.displayWidth/4-width/2, mc.displayHeight/4-height/2-space/2, 0);
+					double rgb = (Math.sin(Math.toRadians((double)System.nanoTime()/10000000D))+1)*0.2;
+					Vec3 color = Vec3.createVectorHelper(rgb, rgb, rgb);
+					//System.out.println(color.xCoord);
+					RenderHelper2D.drawRect(0, 0, width, height, color, 0.3);
+					color = Vec3.createVectorHelper(0, 0, 0);
+					RenderHelper2D.drawRect(1, 1, width-1, height-1, color, 0.1);
+					
+					GL11.glPopMatrix();
+					
+					
+			        //OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+			        //Gui.drawRect(0, 0, 100, 100, 100);
+			        GL11.glEnable(GL11.GL_TEXTURE_2D);
+			        GL11.glDisable(GL11.GL_BLEND);
+					for(int i = 0; i < list.size(); i++)
+					{
+						String text = (String) list.get(i);
+						mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(i+1)), 16579836);
+					}
+					//renderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, ((EntityItem)move.entityHit).getEntityItem(), 10, 10);
+				}
+			}
+			if(ItemDummyContainer.customThrow)
+			{
+				if(mc.thePlayer.getCurrentEquippedItem() != null)
+				{
+					if(mc.gameSettings.keyBindDrop.getIsKeyPressed())
+						power++;
+					else
+					{
+						if(power > 0)
+						{
+							power /= 30;
+							if(power < 1)
+								power = 1;
+							if(power > 6)
+								power = 6;
+							PacketHandler.sendPacketToServer(new DropPacket(power, GuiScreen.isCtrlKeyDown()));
+						}
+						power = 0;
+					}
+				}
+				if(power > 0)
+				{
+					int renderPower = power;
+					renderPower /= 30;
+					if(renderPower < 1)
+						renderPower = 1;
+					if(renderPower > 6)
+						renderPower = 6;
+					String text = "Power:" + renderPower;
+					mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
+				}
+			}else{
+				if(mc.gameSettings.keyBindDrop.getIsKeyPressed())
+					power++;
+				else
+					power = 0;
+				if(power == 1)
+				{
+					int i = GuiScreen.isCtrlKeyDown() ? 3 : 4;
+				    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(i, 0, 0, 0, 0));
+				}
+			}
+		}
+	}
+	
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
 	public void renderTick(RenderTickEvent event)
@@ -164,107 +274,7 @@ public class EventHandler {
 			ClientPhysic.tick = System.nanoTime();
 			if(!ItemTransformer.isLite)
 			{
-				if(mc == null)
-					mc = Minecraft.getMinecraft();
-				if(renderer == null)
-					renderer = (RenderItem) RenderManager.instance.getEntityClassRenderObject(EntityItem.class);
-				if(mc != null && mc.thePlayer != null && mc.inGameHasFocus)
-				{
-					if(ItemDummyContainer.customPickup)
-					{
-						double distance = 100;
-						if(mc.objectMouseOver != null)
-							if(mc.objectMouseOver.typeOfHit == MovingObjectType.BLOCK)
-								distance = mc.thePlayer.getDistance(mc.objectMouseOver.blockX, mc.objectMouseOver.blockY, mc.objectMouseOver.blockZ);
-							else if(mc.objectMouseOver.typeOfHit == MovingObjectType.ENTITY)
-								distance = mc.thePlayer.getDistanceToEntity(mc.objectMouseOver.entityHit);
-						EntityItem entity = getEntityItem(distance, mc.thePlayer);
-						if(entity != null && mc.inGameHasFocus)
-						{
-							int space = 15;
-							List list = new ArrayList();
-							entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
-							list.add(entity.getEntityItem().getDisplayName());
-							
-							int width = 0;
-							int height = (mc.fontRenderer.FONT_HEIGHT+space+1)*list.size();
-							for(int i = 0; i < list.size(); i++)
-							{
-								String text = (String) list.get(i);
-								width = Math.max(width, mc.fontRenderer.getStringWidth(text)+10);
-							}
-							
-							GL11.glEnable(GL11.GL_BLEND);
-					        GL11.glDisable(GL11.GL_TEXTURE_2D);
-					        GL11.glEnable(GL11.GL_ALPHA_TEST);
-					        
-							GL11.glPushMatrix();
-							GL11.glTranslated(mc.displayWidth/4-width/2, mc.displayHeight/4-height/2-space/2, 0);
-							double rgb = (Math.sin(Math.toRadians((double)System.nanoTime()/10000000D))+1)*0.2;
-							Vec3 color = Vec3.createVectorHelper(rgb, rgb, rgb);
-							//System.out.println(color.xCoord);
-							RenderHelper2D.drawRect(0, 0, width, height, color, 0.3);
-							color = Vec3.createVectorHelper(0, 0, 0);
-							RenderHelper2D.drawRect(1, 1, width-1, height-1, color, 0.1);
-							
-							GL11.glPopMatrix();
-							
-							
-					        //OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-					        //Gui.drawRect(0, 0, 100, 100, 100);
-					        GL11.glEnable(GL11.GL_TEXTURE_2D);
-					        GL11.glDisable(GL11.GL_BLEND);
-							for(int i = 0; i < list.size(); i++)
-							{
-								String text = (String) list.get(i);
-								mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(i+1)), 16579836);
-							}
-							//renderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, ((EntityItem)move.entityHit).getEntityItem(), 10, 10);
-						}
-					}
-					if(ItemDummyContainer.customThrow)
-					{
-						if(mc.thePlayer.getCurrentEquippedItem() != null)
-						{
-							if(mc.gameSettings.keyBindDrop.getIsKeyPressed())
-								power++;
-							else
-							{
-								if(power > 0)
-								{
-									power /= 30;
-									if(power < 1)
-										power = 1;
-									if(power > 6)
-										power = 6;
-									PacketHandler.sendPacketToServer(new DropPacket(power, GuiScreen.isCtrlKeyDown()));
-								}
-								power = 0;
-							}
-						}
-						if(power > 0)
-						{
-							int renderPower = power;
-							renderPower /= 30;
-							if(renderPower < 1)
-								renderPower = 1;
-							if(renderPower > 6)
-								renderPower = 6;
-							String text = "Power:" + renderPower;
-							mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
-						}
-					}else{
-						if(mc.gameSettings.keyBindDrop.getIsKeyPressed())
-							power++;
-						else
-							power = 0;
-						if(power == 1)
-						{
-							int i = GuiScreen.isCtrlKeyDown() ? 3 : 4;
-						    mc.thePlayer.sendQueue.addToSendQueue(new C07PacketPlayerDigging(i, 0, 0, 0, 0));
-						}
-					}
-				}
+				renderTickFull();
 			}
 		}
 	}

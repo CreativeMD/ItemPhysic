@@ -102,6 +102,7 @@ import cpw.mods.fml.common.FMLModContainer;
 import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModMetadata;
+import cpw.mods.fml.common.Optional.Method;
 import cpw.mods.fml.common.event.FMLConstructionEvent;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -146,21 +147,31 @@ public class ItemDummyContainer extends DummyModContainer {
 	
 	@Subscribe
 	public void init(FMLInitializationEvent evt) {
-		MinecraftForge.EVENT_BUS.register(new EventHandler());
-		FMLCommonHandler.instance().bus().register(new EventHandler());
+		
 		if(!ItemTransformer.isLite)
 		{
-			CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
-			
-			CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
-			
-			try{
-				if(!ItemTransformer.isLite && Loader.isModLoaded("ingameconfigmanager"))
-				{
-					ItemConfigSystem.loadConfig();
-				}
-			}catch(Exception e){}
+			MinecraftForge.EVENT_BUS.register(new EventHandler());
+			FMLCommonHandler.instance().bus().register(new EventHandler());
+			initFull();
+		}else{
+			MinecraftForge.EVENT_BUS.register(new EventHandlerLite());
+			FMLCommonHandler.instance().bus().register(new EventHandlerLite());
 		}
+	}
+	
+	@Method(modid = "creativecore")
+	public static void initFull()
+	{
+		CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
+		
+		CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
+		
+		try{
+			if(!ItemTransformer.isLite && Loader.isModLoaded("ingameconfigmanager"))
+			{
+				ItemConfigSystem.loadConfig();
+			}
+		}catch(Exception e){}
 	}
 	
 	public static Configuration config;
