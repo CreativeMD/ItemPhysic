@@ -159,6 +159,7 @@ public class EventHandler {
 	@SideOnly(Side.CLIENT)
 	public static RenderItem renderer;
 	
+	@SideOnly(Side.CLIENT)
 	@Method(modid = "creativecore")
 	public void renderTickFull()
 	{
