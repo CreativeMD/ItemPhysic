@@ -2,6 +2,7 @@ package com.creativemd.itemphysic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.lwjgl.opengl.GL11;
 
@@ -182,8 +183,13 @@ public class EventHandler {
 				{
 					int space = 15;
 					List list = new ArrayList();
-					entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
-					list.add(entity.getEntityItem().getDisplayName());
+					try{
+						entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
+						list.add(entity.getEntityItem().getDisplayName());
+					}catch(Exception e){
+						list = new ArrayList();
+						list.add("ERRORED");
+					}
 					
 					int width = 0;
 					int height = (mc.fontRenderer.FONT_HEIGHT+space+1)*list.size();
