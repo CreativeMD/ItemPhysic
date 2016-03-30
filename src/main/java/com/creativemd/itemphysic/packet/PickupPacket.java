@@ -4,8 +4,8 @@ import com.creativemd.creativecore.common.packet.CreativeCorePacket;
 import com.creativemd.itemphysic.EventHandler;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
 public class PickupPacket extends CreativeCorePacket{
@@ -18,7 +18,7 @@ public class PickupPacket extends CreativeCorePacket{
 		
 	}
 	
-	public PickupPacket(Vec3 look, Vec3 pos) {
+	public PickupPacket(Vec3 pos, Vec3 look) {
 		this.look = look;
 		this.pos = pos;
 	}
@@ -43,10 +43,10 @@ public class PickupPacket extends CreativeCorePacket{
 	@Override
 	public void executeServer(EntityPlayer player) {
 		EventHandler.cancel = true;
-		EntityItem entity = EventHandler.getEntityItem(player, look, pos);
-		if(entity != null)
+		MovingObjectPosition result = EventHandler.getEntityItem(player, pos, look);
+		if(result != null)
 		{
-			entity.interactFirst(player);
+			result.entityHit.interactFirst(player);
 		}
 	}
 
