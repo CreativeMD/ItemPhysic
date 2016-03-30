@@ -46,7 +46,7 @@ public class EventHandler {
 	public static Timer getTimer()
 	{
 		if(timer == null)
-			timer = ReflectionHelper.getPrivateValue(Minecraft.class, Minecraft.getMinecraft(), "timer");
+			timer = ReflectionHelper.getPrivateValue(Minecraft.class, Minecraft.getMinecraft(), "timer", "field_71428_T");
 		return timer;
 	}
 	

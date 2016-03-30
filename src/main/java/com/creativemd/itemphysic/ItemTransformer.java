@@ -38,13 +38,13 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ItemTransformer implements IClassTransformer {
 
-	public static boolean isLite = false;
+	public static boolean isLite = true;
 	
 	public static boolean obfuscated = false;
 	
 	public static final String[] names = new String[]{".", "net/minecraft/client/renderer/entity/RenderEntityItem", "doRender", "net/minecraft/entity/item/EntityItem", "net/minecraft/entity/Entity",
 			"net/minecraft/client/renderer/entity/Render", "setPositionAndRotation2", "onUpdate", "isBurning", "attackEntityFrom", "net/minecraft/util/DamageSource", "health",
-			"onCollideWithPlayer", "net/minecraft/entity/player/EntityPlayer", "interactFirst", "net/minecraft/item/ItemStack", "net/minecraft/util/EnumHand", "canBeCollidedWith",
+			"onCollideWithPlayer", "net/minecraft/entity/player/EntityPlayer", "interactFirst", "net/minecraft/item/ItemStack", "canBeCollidedWith",
 			"net/minecraft/client/entity/EntityPlayerSP", "dropOneItem"};
 	public static final String[] namesOb = new String[]{"/", "bjf", "a", "uz", "pk", "biv", "a", "t_", "at", "a", "ow", "e", "d", "wn", "e", "zx", "ad", "bew", "a"};
 	
