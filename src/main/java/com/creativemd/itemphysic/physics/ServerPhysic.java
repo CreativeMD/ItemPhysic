@@ -1,5 +1,8 @@
 package com.creativemd.itemphysic.physics;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Ref;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -7,36 +10,44 @@ import java.util.Random;
 
 import com.creativemd.itemphysic.ItemDummyContainer;
 import com.creativemd.itemphysic.ItemTransformer;
+import com.google.common.base.Optional;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.stats.AchievementList;
+import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.oredict.OreDictionary;
 
 public class ServerPhysic {
 	
-	public static Random random = new Random();
+	public static Random rand = new Random();
 	
 	public static ArrayList swimItem = new ArrayList(); //Can be Material, Block, Item, Stack, String(Contains)
 	public static ArrayList burnItem = new ArrayList(); //Can be Material, Block, Item, Stack, String(Contains)
@@ -78,9 +89,19 @@ public class ServerPhysic {
 		swimItem.add(Items.lead);
 		swimItem.add(Items.painting);
 		swimItem.add(Items.sign);
-		swimItem.add(Items.wooden_door);
-		swimItem.add(Items.saddle);
+		swimItem.add(Items.acacia_boat);
+		swimItem.add(Items.acacia_door);
+		swimItem.add(Items.dark_oak_boat);
+		swimItem.add(Items.dark_oak_door);
+		swimItem.add(Items.birch_boat);
+		swimItem.add(Items.birch_door);
+		swimItem.add(Items.jungle_boat);
+		swimItem.add(Items.jungle_door);
 		swimItem.add(Items.boat);
+		swimItem.add(Items.oak_door);
+		swimItem.add(Items.spruce_boat);
+		swimItem.add(Items.spruce_door);
+		swimItem.add(Items.saddle);
 		swimItem.add(Items.bone);
 		swimItem.add(Items.sugar);
 		swimItem.add(Items.paper);
@@ -103,6 +124,16 @@ public class ServerPhysic {
 		swimItem.add(Items.pumpkin_pie);
 		swimItem.add(Items.name_tag);
 		swimItem.add(Items.enchanted_book);
+		swimItem.add(Items.elytra);
+		swimItem.add(Items.mutton);
+		swimItem.add(Items.cooked_mutton);
+		swimItem.add(Items.rabbit);
+		swimItem.add(Items.cooked_rabbit);
+		swimItem.add(Items.rabbit_stew);
+		swimItem.add(Items.beetroot);
+		swimItem.add(Items.beetroot_seeds);
+		swimItem.add(Items.beetroot_soup);
+		swimItem.add(Items.shield);
 		
 		burnItem.add(Material.wood);
 		burnItem.add(Material.cloth);
@@ -139,9 +170,19 @@ public class ServerPhysic {
 		burnItem.add(Items.lead);
 		burnItem.add(Items.painting);
 		burnItem.add(Items.sign);
-		burnItem.add(Items.wooden_door);
+		swimItem.add(Items.acacia_boat);
+		swimItem.add(Items.acacia_door);
+		swimItem.add(Items.dark_oak_boat);
+		swimItem.add(Items.dark_oak_door);
+		swimItem.add(Items.birch_boat);
+		swimItem.add(Items.birch_door);
+		swimItem.add(Items.jungle_boat);
+		swimItem.add(Items.jungle_door);
+		swimItem.add(Items.boat);
+		swimItem.add(Items.oak_door);
+		swimItem.add(Items.spruce_boat);
+		swimItem.add(Items.spruce_door);
 		burnItem.add(Items.saddle);
-		burnItem.add(Items.boat);
 		burnItem.add(Items.bone);
 		burnItem.add(Items.sugar);
 		burnItem.add(Items.paper);
@@ -164,31 +205,52 @@ public class ServerPhysic {
 		burnItem.add(Items.pumpkin_pie);
 		burnItem.add(Items.name_tag);
 		burnItem.add(Items.enchanted_book);
+		swimItem.add(Items.elytra);
+		swimItem.add(Items.mutton);
+		swimItem.add(Items.cooked_mutton);
+		swimItem.add(Items.rabbit);
+		swimItem.add(Items.cooked_rabbit);
+		swimItem.add(Items.rabbit_stew);
+		swimItem.add(Items.beetroot);
+		swimItem.add(Items.beetroot_seeds);
+		swimItem.add(Items.beetroot_soup);
+		swimItem.add(Items.shield);
 	}
+	
+	public static DataParameter<Optional<ItemStack>> ITEM = null;
 	
 	public static void update(EntityItem item)
 	{
-		ItemStack stack = item.getDataWatcher().getWatchableObjectItemStack(10);
-        if (stack != null && stack.getItem() != null)
-        {
-            if (stack.getItem().onEntityItemUpdate(item))
-            {
-                return;
-            }
-        }
-        
+		if(ITEM == null)
+			ITEM = ReflectionHelper.getPrivateValue(EntityItem.class, null, "ITEM", "field_184525_c", "field_184533_c");
+		ItemStack stack = item.getDataManager().get(ITEM).orNull();
+        if (stack != null && stack.getItem() != null && stack.getItem().onEntityItemUpdate(item)) return;
         if (item.getEntityItem() == null)
         {
             item.setDead();
         }
         else
         {
+        	
+        	if (!item.worldObj.isRemote)
+            {
+        		try{
+        			ReflectionHelper.findMethod(Entity.class, item, new String[]{"setFlag", "func_70052_a"}, int.class, boolean.class).invoke(item, 6, item.isGlowing());
+        		}catch(Exception e){
+        			e.printStackTrace();
+        		}
+        		//item.setFlag(6, item.isGlowing());
+            }
             item.onEntityUpdate();
             
-            if (item.delayBeforeCanPickup > 0)
+            int delay = (Integer)ReflectionHelper.getPrivateValue(EntityItem.class, item, "delayBeforeCanPickup", "delayBeforeCanPickup");
+            
+            if (delay > 0 && delay != 32767)
             {
-                --item.delayBeforeCanPickup;
+            	item.setPickupDelay(delay-1);
+               // --item.delayBeforeCanPickup;
             }
+
             item.prevPosX = item.posX;
             item.prevPosY = item.posY;
             item.prevPosZ = item.posZ;
@@ -233,32 +295,58 @@ public class ServerPhysic {
             	item.motionY += amount;*/
             }
             
-            item.noClip = func_145771_j(item, item.posX, (item.boundingBox.minY + item.boundingBox.maxY) / 2.0D, item.posZ);
+            //item.motionY -= 0.03999999910593033D;
+            try{
+            	item.noClip = (Boolean) ReflectionHelper.findMethod(Entity.class, item, new String[]{"pushOutOfBlocks", "func_145771_j"}, double.class, double.class, double.class).invoke(item, item.posX, (item.getEntityBoundingBox().minY + item.getEntityBoundingBox().maxY) / 2.0D, item.posZ);
+            }catch(Exception e){
+            	e.printStackTrace();
+            }
             item.moveEntity(item.motionX, item.motionY, item.motionZ);
             boolean flag = (int)item.prevPosX != (int)item.posX || (int)item.prevPosY != (int)item.posY || (int)item.prevPosZ != (int)item.posZ;
-            
+
             if (flag || item.ticksExisted % 25 == 0)
             {
-                if (item.worldObj.getBlock(MathHelper.floor_double(item.posX), MathHelper.floor_double(item.posY), MathHelper.floor_double(item.posZ)).getMaterial() == Material.lava && canItemBurn(stack))
+            	if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.lava && canItemBurn(stack))
                 {
-                	item.playSound("random.fizz", 0.4F, 2.0F + random.nextFloat() * 0.4F);
+            		item.playSound(SoundEvents.entity_generic_burn, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
                     for(int zahl = 0; zahl < 100; zahl++)
-                    	item.worldObj.spawnParticle("smoke", item.posX, item.posY, item.posZ, (random.nextFloat()*0.1)-0.05, 0.2*random.nextDouble(), (random.nextFloat()*0.1)-0.05);
+                    	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
                 }
+            	
+                /*if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.lava)
+                {
+                    item.motionY = 0.20000000298023224D;
+                    item.motionX = (double)((rand.nextFloat() - rand.nextFloat()) * 0.2F);
+                    item.motionZ = (double)((rand.nextFloat() - rand.nextFloat()) * 0.2F);
+                    item.playSound(SoundEvents.entity_generic_burn, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+                }*/
 
                 if (!item.worldObj.isRemote)
                 {
-                    searchForOtherItemsNearby(item);
+                	try{
+                		ReflectionHelper.findMethod(EntityItem.class, item, new String[]{"searchForOtherItemsNearby", "func_85054_d"}).invoke(item);
+                	}catch(Exception e){
+                		e.printStackTrace();
+                	}
+                    //item.searchForOtherItemsNearby();
                 }
             }
-            
+
+            //float f = 0.98F;
+
             if (item.onGround)
             {
-                f = item.worldObj.getBlock(MathHelper.floor_double(item.posX), MathHelper.floor_double(item.boundingBox.minY) - 1, MathHelper.floor_double(item.posZ)).slipperiness * 0.98F;
+                f = item.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(item.posX), MathHelper.floor_double(item.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(item.posZ))).getBlock().slipperiness * 0.98F;
             }
-            
+
             item.motionX *= (double)f;
+            //item.motionY *= 0.9800000190734863D;
             item.motionZ *= (double)f;
+
+            /*if (item.onGround)
+            {
+                item.motionY *= -0.5D;
+            }*/
             
             if(fluid == null)
             {           
@@ -272,36 +360,181 @@ public class ServerPhysic {
 	            }
             }
             
-            if(item.age < 1 && item.lifespan == 6000)
+            if(item.getAge() < 1 && item.lifespan == 6000)
             	item.lifespan = ItemDummyContainer.despawnItem;
             
-            ++item.age;
-            
-            if (!item.worldObj.isRemote && item.age >= item.lifespan)
+            if (item.getAge() != -32768)
             {
-                if (stack != null)
-                {   
-                    ItemExpireEvent event = new ItemExpireEvent(item, (stack.getItem() == null ? 6000 : stack.getItem().getEntityLifespan(stack, item.worldObj)));
-                    if (MinecraftForge.EVENT_BUS.post(event))
-                    {
-                        item.lifespan += event.extraLife;
-                    }
-                    else
-                    {
-                        item.setDead();
-                    }
-                }
-                else
-                {
-                    item.setDead();
-                }
+            	try{
+            		ReflectionHelper.findField(EntityItem.class, "age", "field_70292_b").set(item, item.getAge()+1);
+            	}catch(Exception e){
+            		e.printStackTrace();
+            	}
             }
-            
+
+            item.handleWaterMovement();
+
+            if (!item.worldObj.isRemote && item.getAge() >= item.lifespan)
+            {
+                int hook = net.minecraftforge.event.ForgeEventFactory.onItemExpire(item, stack);
+                if (hook < 0) item.setDead();
+                else          item.lifespan += hook;
+            }
             if (stack != null && stack.stackSize <= 0)
             {
                 item.setDead();
             }
         }
+	}	
+	
+	
+	public static void onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer)
+    {
+		onCollideWithPlayer(item, par1EntityPlayer, true);
+    }
+	
+	public static void onCollideWithPlayer(EntityItem item, EntityPlayer player, boolean needsSneak)
+    {
+		if(ItemDummyContainer.customPickup && needsSneak && !player.isSneaking())
+			return;
+        if (!item.worldObj.isRemote)
+        {
+            if (!ItemDummyContainer.customPickup && item.cannotPickup())
+            	return;
+            ItemStack itemstack = item.getEntityItem();
+            int i = itemstack.stackSize;
+
+            int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player, itemstack);
+            if (hook < 0) return;
+
+            if (!item.cannotPickup() && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
+            {
+                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))
+                {
+                	player.addStat(AchievementList.mineWood);
+                }
+
+                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log2))
+                {
+                	player.addStat(AchievementList.mineWood);
+                }
+
+                if (itemstack.getItem() == Items.leather)
+                {
+                	player.addStat(AchievementList.killCow);
+                }
+
+                if (itemstack.getItem() == Items.diamond)
+                {
+                	player.addStat(AchievementList.diamonds);
+                }
+
+                if (itemstack.getItem() == Items.blaze_rod)
+                {
+                	player.addStat(AchievementList.blazeRod);
+                }
+
+                if (itemstack.getItem() == Items.diamond && item.getThrower() != null)
+                {
+                    EntityPlayer entityplayer = item.worldObj.getPlayerEntityByName(item.getThrower());
+
+                    if (entityplayer != null && entityplayer != player)
+                    {
+                        entityplayer.addStat(AchievementList.diamondsToYou);
+                    }
+                }
+
+                net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item);
+                if (!item.isSilent())
+                {
+                	item.worldObj.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.entity_item_pickup, SoundCategory.PLAYERS, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                }
+
+                player.onItemPickup(item, i);
+
+                if (itemstack.stackSize <= 0)
+                {
+                    item.setDead();
+                }
+
+                player.addStat(StatList.func_188056_d(itemstack.getItem()), i);
+            }
+        }
+    }
+	
+	public boolean processInitialInteract(EntityItem item, EntityPlayer player, ItemStack stack, EnumHand hand)
+    {
+		if(ItemDummyContainer.customPickup)
+		{
+			onCollideWithPlayer(item, player, false);
+			return true;
+		}
+        return false;
+    }
+	
+	public static boolean attackEntityFrom(EntityItem item, DamageSource source, float amount)
+    {
+		if (item.isEntityInvulnerable(source))
+        {
+            return false;
+        }
+        else if (item.getEntityItem() != null && item.getEntityItem().getItem() == Items.nether_star && source.isExplosion() && canItemBurn(item.getEntityItem()))
+        {
+            return false;
+        }
+        else
+        {
+        	if((source == DamageSource.lava | source == DamageSource.onFire | source == DamageSource.inFire) && !canItemBurn(item.getEntityItem()))return false;
+        	if(source == DamageSource.cactus)return false;
+        	
+        	try {
+				ReflectionHelper.findMethod(Entity.class, item, new String[]{"setBeenAttacked", "func_70018_K"}).invoke(item);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+        	//item.setBeenAttacked();
+        	try {
+	        	Field health = ReflectionHelper.findField(EntityItem.class, "health", "field_70291_e");
+	        	health.setInt(item, (int)((float)health.getInt(item) - amount));
+	        	
+	            if (health.getInt(item) <= 0)
+	            {
+	            	item.setDead();
+	            }
+	        } catch (Exception e) {
+				e.printStackTrace();
+			}
+
+            return false;
+        }
+    }
+    
+    /*public static double lastPosY;
+	TODO Check if it's necessary!
+	public static void updatePositionBefore(EntityItem item)
+    {
+		lastPosY = item.posY;
+    }
+	
+    public static void updatePosition(EntityItem item, double posY)
+    {
+		double diff = Math.sqrt(Math.pow(lastPosY - posY, 2));
+		if(diff < 0.5D && diff > 0)
+		{
+			item.setPosition(item.posX, lastPosY, item.posZ);
+		}
+    }*/
+	
+	public static boolean isItemBurning(EntityItem item)
+	{
+		boolean flag = item.worldObj != null && item.worldObj.isRemote;
+		try{
+	        if(!(!item.isImmuneToFire() && ((Integer) ReflectionHelper.getPrivateValue(Entity.class, item, "fire", "field_70151_c") > 0 || flag && (Boolean)ReflectionHelper.findMethod(Entity.class, item, new String[]{"getFlag", "func_70083_f"}, int.class).invoke(item, 0))))
+	        	return false;
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+        return canItemBurn(item.getEntityItem());
 	}
 	
 	public static Fluid getFluid(EntityItem item)
@@ -317,7 +550,8 @@ public class ServerPhysic {
         if(below)
         	j--;
         int k = MathHelper.floor_double(item.posZ);
-        Block block = item.worldObj.getBlock(i, j, k);
+        BlockPos pos = new BlockPos(i, j, k);
+        Block block = item.worldObj.getBlockState(pos).getBlock();
         
         Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
         if(fluid == null && block instanceof IFluidBlock)
@@ -331,7 +565,7 @@ public class ServerPhysic {
         double filled = 1.0f; //If it's not a liquid assume it's a solid block
         if (block instanceof IFluidBlock)
         {
-            filled = ((IFluidBlock)block).getFilledPercentage(item.worldObj, i, j, k);
+            filled = ((IFluidBlock)block).getFilledPercentage(item.worldObj, pos);
         }
 
         if (filled < 0)
@@ -348,285 +582,6 @@ public class ServerPhysic {
         }
         return null;
     }
-	
-	public static double lastPosY;
-	
-	public static void updatePositionBefore(EntityItem item)
-    {
-		lastPosY = item.posY;
-    }
-	
-    public static void updatePosition(EntityItem item, double posY)
-    {
-		double diff = Math.sqrt(Math.pow(lastPosY - posY, 2));
-		if(diff < 0.5D && diff > 0)
-		{
-			item.setPosition(item.posX, lastPosY, item.posZ);
-		}
-    }
-	
-	private static void searchForOtherItemsNearby(EntityItem item)
-    {
-        Iterator iterator = item.worldObj.getEntitiesWithinAABB(EntityItem.class, item.boundingBox.expand(0.5D, 0.0D, 0.5D)).iterator();
-
-        while (iterator.hasNext())
-        {
-            EntityItem entityitem = (EntityItem)iterator.next();
-            item.combineItems(entityitem);
-        }
-    }
-	
-	public static boolean func_145771_j(EntityItem item, double p_145771_1_, double p_145771_3_, double p_145771_5_)
-    {
-        int i = MathHelper.floor_double(p_145771_1_);
-        int j = MathHelper.floor_double(p_145771_3_);
-        int k = MathHelper.floor_double(p_145771_5_);
-        double d3 = p_145771_1_ - (double)i;
-        double d4 = p_145771_3_ - (double)j;
-        double d5 = p_145771_5_ - (double)k;
-        List list = item.worldObj.func_147461_a(item.boundingBox);
-
-        if (list.isEmpty() && !item.worldObj.func_147469_q(i, j, k))
-        {
-            return false;
-        }
-        else
-        {
-            boolean flag = !item.worldObj.func_147469_q(i - 1, j, k);
-            boolean flag1 = !item.worldObj.func_147469_q(i + 1, j, k);
-            boolean flag2 = !item.worldObj.func_147469_q(i, j - 1, k);
-            boolean flag3 = !item.worldObj.func_147469_q(i, j + 1, k);
-            boolean flag4 = !item.worldObj.func_147469_q(i, j, k - 1);
-            boolean flag5 = !item.worldObj.func_147469_q(i, j, k + 1);
-            byte b0 = 3;
-            double d6 = 9999.0D;
-
-            if (flag && d3 < d6)
-            {
-                d6 = d3;
-                b0 = 0;
-            }
-
-            if (flag1 && 1.0D - d3 < d6)
-            {
-                d6 = 1.0D - d3;
-                b0 = 1;
-            }
-
-            if (flag3 && 1.0D - d4 < d6)
-            {
-                d6 = 1.0D - d4;
-                b0 = 3;
-            }
-
-            if (flag4 && d5 < d6)
-            {
-                d6 = d5;
-                b0 = 4;
-            }
-
-            if (flag5 && 1.0D - d5 < d6)
-            {
-                d6 = 1.0D - d5;
-                b0 = 5;
-            }
-
-            float f = random.nextFloat() * 0.2F + 0.1F;
-
-            if (b0 == 0)
-            {
-                item.motionX = (double)(-f);
-            }
-
-            if (b0 == 1)
-            {
-                item.motionX = (double)f;
-            }
-
-            if (b0 == 2)
-            {
-                item.motionY = (double)(-f);
-            }
-
-            if (b0 == 3)
-            {
-                item.motionY = (double)f;
-            }
-
-            if (b0 == 4)
-            {
-                item.motionZ = (double)(-f);
-            }
-
-            if (b0 == 5)
-            {
-                item.motionZ = (double)f;
-            }
-
-            return true;
-        }
-    }
-	
-	public static void onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer)
-    {
-		onCollideWithPlayer(item, par1EntityPlayer, true);
-    }
-	
-	public static void onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer, boolean needsSneak)
-    {
-		if(ItemDummyContainer.customPickup && needsSneak && !par1EntityPlayer.isSneaking())
-			return;
-        if (!item.worldObj.isRemote)
-        {
-            if (!ItemDummyContainer.customPickup && item.delayBeforeCanPickup > 0)
-            {
-                return;
-            }
-
-            EntityItemPickupEvent event = new EntityItemPickupEvent(par1EntityPlayer, item);
-
-            if (MinecraftForge.EVENT_BUS.post(event))
-            {
-                return;
-            }
-
-            ItemStack itemstack = item.getEntityItem();
-            int i = itemstack.stackSize;
-
-            if ((ItemDummyContainer.customPickup | item.delayBeforeCanPickup <= 0) && (item.func_145798_i() == null || item.lifespan - item.age <= 200 || item.func_145798_i().equals(par1EntityPlayer.getCommandSenderName())) && (event.getResult() == Result.ALLOW || i <= 0 || par1EntityPlayer.inventory.addItemStackToInventory(itemstack)))
-            {
-                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))
-                {
-                    par1EntityPlayer.triggerAchievement(AchievementList.mineWood);
-                }
-
-                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log2))
-                {
-                    par1EntityPlayer.triggerAchievement(AchievementList.mineWood);
-                }
-
-                if (itemstack.getItem() == Items.leather)
-                {
-                    par1EntityPlayer.triggerAchievement(AchievementList.killCow);
-                }
-
-                if (itemstack.getItem() == Items.diamond)
-                {
-                    par1EntityPlayer.triggerAchievement(AchievementList.diamonds);
-                }
-
-                if (itemstack.getItem() == Items.blaze_rod)
-                {
-                    par1EntityPlayer.triggerAchievement(AchievementList.blazeRod);
-                }
-
-                if (itemstack.getItem() == Items.diamond && item.func_145800_j() != null)
-                {
-                    EntityPlayer entityplayer1 = item.worldObj.getPlayerEntityByName(item.func_145800_j());
-
-                    if (entityplayer1 != null && entityplayer1 != par1EntityPlayer)
-                    {
-                        entityplayer1.triggerAchievement(AchievementList.field_150966_x);
-                    }
-                }
-
-                FMLCommonHandler.instance().firePlayerItemPickupEvent(par1EntityPlayer, item);
-
-                item.worldObj.playSoundAtEntity(par1EntityPlayer, "random.pop", 0.2F, ((random.nextFloat() - random.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                par1EntityPlayer.onItemPickup(item, i);
-
-                if (itemstack.stackSize <= 0)
-                {
-                	item.setDead();
-                }
-            }
-        }
-    }
-	
-	public static boolean interactFirst(EntityItem item, EntityPlayer par1EntityPlayer)
-    {
-		if(ItemDummyContainer.customPickup)
-		{
-			onCollideWithPlayer(item, par1EntityPlayer, false);
-			return true;
-		}
-        return false;
-    }
-	
-	public static boolean attackEntityFrom(EntityItem item, DamageSource par1DamageSource, float par2)
-    {
-		if (item.isEntityInvulnerable())
-        {
-            return false;
-        }
-        else if (item.getEntityItem() != null && item.getEntityItem().getItem() == Items.nether_star && par1DamageSource.isExplosion() && canItemBurn(item.getEntityItem()))
-        {
-            return false;
-        }
-        else
-        {
-        	if((par1DamageSource == DamageSource.lava | par1DamageSource == DamageSource.onFire | par1DamageSource == DamageSource.inFire) && !canItemBurn(item.getEntityItem()))return false;
-        	if(par1DamageSource == DamageSource.cactus)return false;
-        	
-        	setHealth(item, (int) (getHealth(item) - 1));
-        	
-            if (getHealth(item)  <= 0)
-            {
-                item.setDead();
-            }
-
-            return false;
-        }
-    }
-	
-	public static int getHealth(EntityItem item)
-	{
-		boolean obfuscated = false;
-		try{
-			obfuscated = EntityItem.class.getField("health") == null;
-		} catch(Exception e){
-			obfuscated = true;	
-		}
-		String name = ItemTransformer.patchT("health", obfuscated);
-		try {
-			return EntityItem.class.getField(name).getInt(item);
-		} catch (Exception e){
-			try {
-				return EntityItem.class.getField(name).getInt(item);
-			} catch (Exception e1){
-				System.out.println("Field not found health (" + name + ")");
-				return 0;
-			}
-		}
-	}
-	
-	public static void setHealth(EntityItem item, int health)
-	{
-		boolean obfuscated = false;
-		try{
-			obfuscated = EntityItem.class.getField("health") == null;
-		} catch(Exception e){
-			obfuscated = true;	
-		}
-		String name = ItemTransformer.patchT("health", obfuscated);
-		try {
-			EntityItem.class.getField(name).setInt(item, health);
-		} catch (Exception e){
-			try {
-				EntityItem.class.getField(name).setInt(item, health);
-			} catch (Exception e1){
-				System.out.println("Field not found health (" + name + ")");
-			}
-		}
-	}
-	
-	public static boolean isItemBurning(EntityItem item)
-	{
-		boolean flag = item.worldObj != null && item.worldObj.isRemote;
-        if(!(!item.isImmuneToFire() && (flag && (item.getDataWatcher().getWatchableObjectByte(0) & 1 << 0) != 0)))
-        	return false;
-        return canItemBurn(item.getEntityItem());
-	}
 	
 	public static boolean canItemSwim(ItemStack stack)
 	{
@@ -652,7 +607,7 @@ public class ServerPhysic {
 		if(object instanceof ItemBlock)
 		{
 			object = Block.getBlockFromItem((Item) object);
-			material = ((Block)object).getMaterial();
+			material = ((Block)object).getMaterial(null);
 		}
 		
 		int[] ores = OreDictionary.getOreIDs(stack);

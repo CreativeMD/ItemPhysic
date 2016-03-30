@@ -6,19 +6,21 @@ import com.creativemd.itemphysic.EventHandler;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 
 public class PickupPacket extends CreativeCorePacket{
 	
-	public Vec3 look;
-	public Vec3 pos;
+	public Vec3d look;
+	public Vec3d pos;
 	
 	public PickupPacket()
 	{
 		
 	}
 	
-	public PickupPacket(Vec3 look, Vec3 pos) {
+	public PickupPacket(Vec3d pos, Vec3d look) {
 		this.look = look;
 		this.pos = pos;
 	}
@@ -43,10 +45,10 @@ public class PickupPacket extends CreativeCorePacket{
 	@Override
 	public void executeServer(EntityPlayer player) {
 		EventHandler.cancel = true;
-		EntityItem entity = EventHandler.getEntityItem(player, look, pos);
-		if(entity != null)
+		RayTraceResult result = EventHandler.getEntityItem(player, pos, look);
+		if(result != null)
 		{
-			entity.interactFirst(player);
+			result.entityHit.processInitialInteract(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND);
 		}
 	}
 

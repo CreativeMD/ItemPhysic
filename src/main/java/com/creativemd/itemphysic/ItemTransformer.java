@@ -1,117 +1,217 @@
 package com.creativemd.itemphysic;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.DLOAD;
+import static org.objectweb.asm.Opcodes.FLOAD;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.ILOAD;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.IRETURN;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.launchwrapper.IClassTransformer;
-import net.minecraft.util.DamageSource;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.FrameNode;
-import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.MethodNode;
 
-import scala.reflect.internal.Types.MethodType;
+import com.ibm.icu.text.ChineseDateFormat.Field;
 
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
-import java.lang.instrument.Instrumentation;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ItemTransformer implements IClassTransformer {
 
 	public static boolean isLite = false;
 	
+	public static boolean obfuscated = false;
 	
-	//NOTE: This doesn't work for some cases like EntityItem and EntityItemFrame
-	public static final String[] names = new String[]{".", "doRender", "net/minecraft/entity/Entity", "renderWithColor",
-		"net/minecraft/client/renderer/entity/RenderItem", "net/minecraft/entity/item/EntityItem", "onUpdate", "isBurning",
-		"attackEntityFrom", "net/minecraft/util/DamageSource", "health", "onCollideWithPlayer",
-		"net/minecraft/entity/player/EntityPlayer", "net/minecraft/util/AxisAlignedBB", "getCollisionBox", "canBeCollidedWith",
-		"net/minecraft/client/entity/EntityClientPlayerMP", "dropOneItem", "setPositionAndRotation2", "interactFirst"};
-	public static final String[] namesOb = new String[]{"/", "a", "sa", "a",
-		"bny", "xk", "h", "al", "a", "ro", "e", "b_", "yz", "azt", "h", "R", "bjk", "a", "a", "c"};
-	
-	public static String patchT(String input, boolean obfuscated)
-	{
-		if(obfuscated)
-			input = input.replace("health", "field_70291_e");
-		return input;
-	}
+	public static final String[] names = new String[]{".", "net/minecraft/client/renderer/entity/RenderEntityItem", "doRender", "net/minecraft/entity/item/EntityItem", "net/minecraft/entity/Entity",
+			"net/minecraft/client/renderer/entity/Render", "setPositionAndRotation2", "onUpdate", "isBurning", "attackEntityFrom", "net/minecraft/util/DamageSource", "health",
+			"onCollideWithPlayer", "net/minecraft/entity/player/EntityPlayer", "processInitialInteract", "net/minecraft/item/ItemStack", "net/minecraft/util/EnumHand", "canBeCollidedWith",
+			"net/minecraft/client/entity/EntityPlayerSP", "dropOneItem"};
+	public static final String[] namesOb = new String[]{"/", "brx", "a", "yd", "rr", "brn", "a", "m", "aH", "a", "rc", "f", "d", "zi", "a", "adq", "qm", "ap", "bmt", "a"};
 	
 	public static String patch(String input)
 	{
-		for(int zahl = 0; zahl < names.length; zahl++)
-			input = input.replace(names[zahl], namesOb[zahl]);
+		if(obfuscated)
+		{
+			for(int zahl = 0; zahl < names.length; zahl++)
+				input = input.replace(names[zahl], namesOb[zahl]);
+		}
 		return input;
 	}
 	
 	@Override
 	public byte[] transform(String arg0, String arg1, byte[] arg2) {
-		if (arg0.equals("bny") | arg0.contains("net.minecraft.client.renderer.entity.RenderItem")) {
-			System.out.println("[ItemPhysic] Patching " + arg0);
-			arg2 = replaceMethodDoRender(arg0, arg2, ItemPatchingLoader.location, !arg0.contains("net.minecraft.client.renderer.entity.RenderItem"));
+		if (arg0.equals("brx") | arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem")) {
+			obfuscated = !arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem");
+			ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
+			arg2 = replaceMethodDoRender(arg0, arg2);
+		}
+		if(arg0.equals("yd") | arg0.equals("net.minecraft.entity.item.EntityItem"))
+		{
+			obfuscated = !arg0.contains("net.minecraft.entity.item.EntityItem");
+			if(FMLCommonHandler.instance().getEffectiveSide().isClient())
+				arg2 = addPositionMethod(arg0, arg2);
 		}
 		if(!isLite)
 		{
-			if(arg0.equals("xk") | arg0.equals("net.minecraft.entity.item.EntityItem"))
+			if(arg0.equals("yd") | arg0.equals("net.minecraft.entity.item.EntityItem"))
 			{
-				System.out.println("[ItemPhysic] Patching " + arg0);
-				arg2 = replaceMethodOnUpdate(arg0, arg2, ItemPatchingLoader.location, !arg0.equals("net.minecraft.entity.item.EntityItem"));
-				arg2 = addMethodIsBurning(arg0, arg2, ItemPatchingLoader.location, !arg0.equals("net.minecraft.entity.item.EntityItem"));
-				arg2 = addMethodSetPosition(arg0, arg2, ItemPatchingLoader.location, !arg0.equals("net.minecraft.entity.item.EntityItem"));
-				arg2 = replaceMethodAttack(arg0, arg2, ItemPatchingLoader.location, !arg0.equals("net.minecraft.entity.item.EntityItem"));
+				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
+				arg2 = replaceMethodOnUpdate(arg0, arg2);
+				arg2 = addMethodIsBurning(arg0, arg2);
+				arg2 = replaceMethods(arg0, arg2);
 			}
-			
-			if(arg0.equals("bjk") | arg0.equals("net.minecraft.client.entity.EntityClientPlayerMP"))
+
+			if(arg0.equals("bmt") | arg0.equals("net.minecraft.client.entity.EntityPlayerSP"))
 			{
-				System.out.println("[ItemPhysic] Patching " + arg0);
-				arg2 = removeDrop(arg0, arg2, ItemPatchingLoader.location, !arg0.equals("net.minecraft.client.entity.EntityClientPlayerMP"));
+				obfuscated = !arg0.contains("net.minecraft.client.entity.EntityPlayerSP");
+				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
+				arg2 = removeDrop(arg0, arg2);
 			}
 		}
 		return arg2;
 	}
 	
-	public byte[] removeDrop(String name, byte[] bytes, File location, boolean obfuscated)
+	public byte[] replaceMethodDoRender(String name, byte[] bytes)
 	{
-		String invokeName = "dropOneItem";
-		String invokeDESC = "(Z)Lnet/minecraft/entity/item/EntityItem;";
+		String targetMethodName = patch("doRender");
+		String targetDESC = patch("(Lnet/minecraft/entity/item/EntityItem;DDDFF)V");	
 		
+		ClassNode classNode = new ClassNode();
+		ClassReader classReader = new ClassReader(bytes);
+		classReader.accept(classNode, 0);
 		
-		if(obfuscated == true)
+		Iterator<MethodNode> methods = classNode.methods.iterator();
+		while(methods.hasNext())
 		{
-			invokeName = patch(invokeName);
-			invokeDESC = patch(invokeDESC);
+			MethodNode m = methods.next();
+			if ((m.name.equals(targetMethodName) && m.desc.equals(targetDESC)))
+			{
+				m.localVariables.clear();
+				
+				m.instructions.clear();
+				
+				m.instructions.add(new VarInsnNode(ALOAD, 0));
+				m.instructions.add(new VarInsnNode(ALOAD, 1));
+				m.instructions.add(new VarInsnNode(DLOAD, 2));
+				m.instructions.add(new VarInsnNode(DLOAD, 4));
+				m.instructions.add(new VarInsnNode(DLOAD, 6));
+				m.instructions.add(new VarInsnNode(FLOAD, 8));
+				m.instructions.add(new VarInsnNode(FLOAD, 9));
+				m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic", "doRender", patch("(Lnet/minecraft/client/renderer/entity/RenderEntityItem;Lnet/minecraft/entity/Entity;DDDFF)V"), false));
+				
+				m.instructions.add(new VarInsnNode(ALOAD, 0));
+				m.instructions.add(new VarInsnNode(ALOAD, 1));
+				m.instructions.add(new VarInsnNode(DLOAD, 2));
+				m.instructions.add(new VarInsnNode(DLOAD, 4));
+				m.instructions.add(new VarInsnNode(DLOAD, 6));
+				m.instructions.add(new VarInsnNode(FLOAD, 8));
+				m.instructions.add(new VarInsnNode(FLOAD, 9));
+				m.instructions.add(new MethodInsnNode(INVOKESPECIAL, patch("net/minecraft/client/renderer/entity/Render"), targetMethodName, patch("(Lnet/minecraft/entity/Entity;DDDFF)V"), false));
+				
+				
+				m.instructions.add(new InsnNode(RETURN));;
+				break;
+			}
 		}
+		
+		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		classNode.accept(writer);
+		return writer.toByteArray();
+	}
+	
+	/*public byte[] makeFieldsPublic(String name, byte[] bytes, boolean ofuscated, String... fieldNames)
+	{
+		ClassNode classNode = new ClassNode();
+		ClassReader classReader = new ClassReader(bytes);
+		classReader.accept(classNode, 0);
+		
+		Iterator<FieldNode> fields = classNode.fields.iterator();
+		if(fieldNames.length > 0 && fieldNames.length % 2 == 0)
+		{
+			while(fields.hasNext())
+			{
+				FieldNode m = fields.next();
+				for (int i = 0; i < fieldNames.length; i += 2) {
+					String fieldName = patch(fieldNames[i]);
+					String fieldDesc = patch(fieldNames[i+1]);
+					if(m.name.equals(fieldName) && (fieldDesc == null || fieldDesc.equals("") || m.desc.equals(fieldDesc)))
+						m.access = ACC_PUBLIC;
+				}
+			}
+		}
+		
+		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		classNode.accept(writer);
+		return writer.toByteArray();
+	}*/
+	
+	public byte[] addPositionMethod(String name, byte[] bytes)
+	{
+		String targetMethodName = patch("setPositionAndRotation2");
+		String targetMethodDesc = "(DDDFFIZ)V";
+		
+		ClassNode classNode = new ClassNode();
+		ClassReader classReader = new ClassReader(bytes);
+		classReader.accept(classNode, 0);
+		
+		MethodNode m = new MethodNode(ACC_PUBLIC, targetMethodName, targetMethodDesc, null, null);
+		
+		LabelNode label = new LabelNode();
+		m.instructions.add(label);
+		
+		m.instructions.add(new VarInsnNode(ALOAD, 0));
+		m.instructions.add(new VarInsnNode(DLOAD, 1));
+		m.instructions.add(new VarInsnNode(DLOAD, 3));
+		m.instructions.add(new VarInsnNode(DLOAD, 5));
+		m.instructions.add(new VarInsnNode(FLOAD, 7));
+		m.instructions.add(new VarInsnNode(FLOAD, 8));
+		m.instructions.add(new VarInsnNode(ILOAD, 9));
+		m.instructions.add(new VarInsnNode(ILOAD, 10));
+		m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic",  "setPositionAndRotation2", patch("(Lnet/minecraft/entity/item/EntityItem;DDDFFIZ)V"), false));	
+		
+		m.instructions.add(new InsnNode(RETURN));
+		LabelNode label2 = new LabelNode();
+		m.instructions.add(label2);
+		m.localVariables.add(new LocalVariableNode("this", patch("Lnet/minecraft/entity/item/EntityItem;"), null, label, label2, 0));
+		m.localVariables.add(new LocalVariableNode("x", "D", null, label, label2, 1));
+		m.localVariables.add(new LocalVariableNode("y", "D", null, label, label2, 3));
+		m.localVariables.add(new LocalVariableNode("z", "D", null, label, label2, 5));
+		m.localVariables.add(new LocalVariableNode("yaw", "F", null, label, label2, 7));
+		m.localVariables.add(new LocalVariableNode("pitch", "F", null, label, label2, 8));
+		m.localVariables.add(new LocalVariableNode("posRotationIncrements", "I", null, label, label2, 9));
+		m.localVariables.add(new LocalVariableNode("p_180426_10_", "Z", null, label, label2, 10));
+		
+		classNode.methods.add(m);
+		
+		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+		classNode.accept(writer);
+		return writer.toByteArray();
+	}
+	
+	public byte[] removeDrop(String name, byte[] bytes)
+	{
+		String invokeName = patch("dropOneItem");
+		String invokeDESC = patch("(Z)Lnet/minecraft/entity/item/EntityItem;");
 		
 		ClassNode classNode = new ClassNode();
 		ClassReader classReader = new ClassReader(bytes);
@@ -134,68 +234,10 @@ public class ItemTransformer implements IClassTransformer {
 		return writer.toByteArray();
 	}
 	
-	public byte[] addMethodSetPosition(String name, byte[] bytes, File location, boolean obfuscated)
+	public byte[] addMethodIsBurning(String name, byte[] bytes)
 	{
-		String targetMethodName = "setPositionAndRotation2";
-		String targetDESC = "(DDDFFI)V";
-		String entity = "net/minecraft/entity/Entity";
-		String item = "(Lnet/minecraft/entity/item/EntityItem;D)V";
-		String item2 = "(Lnet/minecraft/entity/item/EntityItem;)V";
-		
-		if(obfuscated == true)
-		{
-			targetMethodName = patch(targetMethodName);
-			targetDESC = patch(targetDESC);
-			entity = patch(entity);
-			item = patch(item);
-			item2 = patch(item2);
-		}
-		
-		ClassNode classNode = new ClassNode();
-		ClassReader classReader = new ClassReader(bytes);
-		classReader.accept(classNode, 0);
-		
-		MethodNode m = new MethodNode(ACC_PUBLIC, targetMethodName, targetDESC, null, null);
-		LabelNode label = new LabelNode();
-		m.instructions.add(label);
-		m.instructions.add(new VarInsnNode(ALOAD, 0));
-		m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic",  "updatePositionBefore", item2));
-		
-		m.instructions.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
-		m.instructions.add(new VarInsnNode(ALOAD, 0));
-		m.instructions.add(new VarInsnNode(DLOAD, 1));
-		m.instructions.add(new VarInsnNode(DLOAD, 3));
-		m.instructions.add(new VarInsnNode(DLOAD, 5));
-		m.instructions.add(new VarInsnNode(FLOAD, 7));
-		m.instructions.add(new VarInsnNode(FLOAD, 8));
-		m.instructions.add(new VarInsnNode(ILOAD, 9));
-		m.instructions.add(new MethodInsnNode(INVOKESPECIAL, entity, targetMethodName, targetDESC));
-		
-		m.instructions.add(new VarInsnNode(ALOAD, 0));
-		m.instructions.add(new VarInsnNode(DLOAD, 3));
-		m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic",  "updatePosition", item));		
-		
-		m.instructions.add(new InsnNode(RETURN));
-		LabelNode label2 = new LabelNode();
-		m.instructions.add(label2);
-		m.localVariables.add(new LocalVariableNode("this", "L" + name.replace(".", "/") + ";", null, label, label2, 0));
-		classNode.methods.add(m);
-		
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		classNode.accept(writer);
-		return writer.toByteArray();
-	}
-	
-	public byte[] addMethodIsBurning(String name, byte[] bytes, File location, boolean obfuscated)
-	{
-		String targetMethodName = "isBurning";
-		String targetDESC = "(Lnet/minecraft/entity/item/EntityItem;)Z";
-		
-		if(obfuscated == true)
-		{
-			targetMethodName = patch(targetMethodName);
-			targetDESC = patch(targetDESC);
-		}
+		String targetMethodName = patch("isBurning");
+		String targetDESC = patch("(Lnet/minecraft/entity/item/EntityItem;)Z");
 		
 		ClassNode classNode = new ClassNode();
 		ClassReader classReader = new ClassReader(bytes);
@@ -205,7 +247,7 @@ public class ItemTransformer implements IClassTransformer {
 		LabelNode label = new LabelNode();
 		m.instructions.add(label);
 		m.instructions.add(new VarInsnNode(ALOAD, 0));
-		m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic",  "isItemBurning", targetDESC));
+		m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic",  "isItemBurning", targetDESC, false));
 		m.instructions.add(new InsnNode(IRETURN));
 		LabelNode label2 = new LabelNode();
 		m.instructions.add(label2);
@@ -216,100 +258,27 @@ public class ItemTransformer implements IClassTransformer {
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}
-
-	public byte[] replaceMethodDoRender(String name, byte[] bytes, File location, boolean obfuscated)
-	{
-		String targetMethodName = "doRender";
-		String targetDESC = "(Lnet/minecraft/entity/Entity;DDDFF)V";
-		String newDESC = "(Lnet/minecraft/entity/Entity;DDDFF)V";
-		String targetVar = "renderWithColor";
-		
-		
-		if(obfuscated == true)
-		{
-			targetMethodName = patch(targetMethodName);
-			targetDESC = patch(targetDESC);
-			newDESC = patch(newDESC);
-			targetVar = patch(targetVar);
-		}
-		
-		ClassNode classNode = new ClassNode();
-		ClassReader classReader = new ClassReader(bytes);
-		classReader.accept(classNode, 0);
-		
-		Iterator<MethodNode> methods = classNode.methods.iterator();
-		while(methods.hasNext())
-		{
-			MethodNode m = methods.next();
-			if ((m.name.equals(targetMethodName) && m.desc.equals(targetDESC)))
-			{
-				AbstractInsnNode currentNode = null;
-		
-				@SuppressWarnings("unchecked")
-				Iterator<AbstractInsnNode> iter = m.instructions.iterator();
-				
-				while (iter.hasNext())
-				{
-					currentNode = iter.next();
-					if (currentNode instanceof MethodInsnNode)
-					{
-						/*m.instructions.insertBefore(currentNode, new VarInsnNode(ALOAD, 0));
-						m.instructions.insertBefore(currentNode, new FieldInsnNode(Opcodes.GETFIELD, name.replace(".", "/"), targetVar, "Z"));*/
-						((MethodInsnNode) currentNode).desc = newDESC;
-						((MethodInsnNode) currentNode).owner = "com/creativemd/itemphysic/physics/ClientPhysic";
-						((MethodInsnNode) currentNode).name = "doRender";
-						((MethodInsnNode) currentNode).setOpcode(INVOKESTATIC);
-					}
-				}
-				m.visitEnd();
-				break;
-			}
-		}
-		
-		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-		classNode.accept(writer);
-		return writer.toByteArray();
-	}
 	
-	public byte[] replaceMethodAttack(String name, byte[] bytes, File location, boolean obfuscated)
+	public byte[] replaceMethods(String name, byte[] bytes)
 	{
-		String targetMethodName = "attackEntityFrom";
-		String targetDESC = "(Lnet/minecraft/util/DamageSource;F)Z";
-		String targetNewDESC = "(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/util/DamageSource;F)Z";
-		String fieldName = "health";
-		String targetMethodName2 = "onCollideWithPlayer";
-		String targetDESC2 = "(Lnet/minecraft/entity/player/EntityPlayer;)V";
-		String newDESC2 = "(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)V";
-		String newDESC3 = "(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)Z";
-		String newMethod = "interactFirst";
-		String newMethodDESC = "(Lnet/minecraft/entity/player/EntityPlayer;)Z";
-		String newMethodVar = "Lnet/minecraft/entity/player/EntityPlayer;";
-		String newMethod2 = "canBeCollidedWith";
-		//String newMethodDESC2 = "(Lnet/minecraft/entity/item/EntityItem;)Lnet/minecraft/util/AxisAlignedBB;";
-		//String newMethodDESC3 = "(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/AxisAlignedBB;";
-		
-		if(obfuscated == true)
-		{
-			targetMethodName = patch(targetMethodName);
-			targetDESC = patch(targetDESC);
-			fieldName = patch(fieldName);
-			targetNewDESC = patch(targetNewDESC);
-			targetMethodName2 = patch(targetMethodName2);
-			targetDESC2 = patch(targetDESC2);
-			newDESC3 = patch(newDESC3);
-			newMethod = patch(newMethod);
-			newMethodDESC = patch(newMethodDESC);
-			newMethodVar = patch(newMethodVar);
-			newMethod2 = patch(newMethod2);
-			//newMethodDESC2 = patch(newMethodDESC2);
-			//newMethodDESC3 = patch(newMethodDESC3);
-		}
+		String targetMethodName = patch("attackEntityFrom");
+		String targetDESC = patch("(Lnet/minecraft/util/DamageSource;F)Z");
+		String targetNewDESC = patch("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/util/DamageSource;F)Z");
+		String fieldName = patch("health");
+		String targetMethodName2 = patch("onCollideWithPlayer");
+		String targetDESC2 = patch("(Lnet/minecraft/entity/player/EntityPlayer;)V");
+		String newDESC2 = patch("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)V");
+		String newDESC3 = patch("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;)Z");
+		String newMethod = patch("processInitialInteract");
+		String newMethodDESC = patch("(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;)Z");
+		String newMethodVar = patch("Lnet/minecraft/entity/player/EntityPlayer;");
+		//String newMethod2 = patch("canBeCollidedWith");
 		
 		ClassNode classNode = new ClassNode();
 		ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
 		
-		Iterator<FieldNode> fields = classNode.fields.iterator();
+		/*Iterator<FieldNode> fields = classNode.fields.iterator();
 		while(fields.hasNext())
 		{
 			FieldNode f = fields.next();		
@@ -317,7 +286,7 @@ public class ItemTransformer implements IClassTransformer {
 			{
 				f.access = ACC_PUBLIC;
 			}
-		}
+		}*/
 		Iterator<MethodNode> methods = classNode.methods.iterator();
 		while(methods.hasNext())
 		{
@@ -329,7 +298,7 @@ public class ItemTransformer implements IClassTransformer {
 				m.instructions.add(new VarInsnNode(ALOAD, 0));
 				m.instructions.add(new VarInsnNode(ALOAD, 1));
 				m.instructions.add(new VarInsnNode(FLOAD, 2));
-				m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "attackEntityFrom", targetNewDESC));
+				m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "attackEntityFrom", targetNewDESC, false));
 				m.instructions.add(new InsnNode(IRETURN));
 			}
 			if (m.name.equals(targetMethodName2) && m.desc.equals(targetDESC2))
@@ -337,7 +306,7 @@ public class ItemTransformer implements IClassTransformer {
 				m.instructions.clear();
 				m.instructions.add(new VarInsnNode(ALOAD, 0));
 				m.instructions.add(new VarInsnNode(ALOAD, 1));
-				m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "onCollideWithPlayer", newDESC2));
+				m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "onCollideWithPlayer", newDESC2, false));
 				m.instructions.add(new InsnNode(RETURN));
 			}
 		}
@@ -346,14 +315,19 @@ public class ItemTransformer implements IClassTransformer {
 		m.instructions.add(label);
 		m.instructions.add(new VarInsnNode(ALOAD, 0));
 		m.instructions.add(new VarInsnNode(ALOAD, 1));
-		m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "interactFirst", newDESC3));
+		m.instructions.add(new VarInsnNode(ALOAD, 2));
+		m.instructions.add(new VarInsnNode(ALOAD, 3));
+		m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "processInitialInteract", newDESC3, false));
 		LabelNode label2 = new LabelNode();
 		m.instructions.add(label2);
 		m.instructions.add(new InsnNode(ICONST_1));
 		m.instructions.add(new InsnNode(IRETURN));
 		
+		m.maxLocals = 4;
 		m.localVariables.add(new LocalVariableNode("this", "L" + name.replace(".", "/") + ";", null, label, label2, 0));
-		m.localVariables.add(new LocalVariableNode("par1EntityPlayer", newMethodVar, null, label, label2, 0));
+		m.localVariables.add(new LocalVariableNode("par1EntityPlayer", newMethodVar, null, label, label2, 1));
+		m.localVariables.add(new LocalVariableNode("stack", patch("Lnet/minecraft/item/ItemStack;"), null, label, label2, 2));
+		m.localVariables.add(new LocalVariableNode("hand", patch("Lnet/minecraft/util/EnumHand;"), null, label, label2, 3));
 		classNode.methods.add(m);
 		
 		/*MethodNode method2 = new MethodNode(ACC_PUBLIC, newMethod2, "()Z", null, null);
@@ -372,16 +346,10 @@ public class ItemTransformer implements IClassTransformer {
 		return writer.toByteArray();
 	}
 	
-	public byte[] replaceMethodOnUpdate(String name, byte[] bytes, File location, boolean obfuscated)
+	public byte[] replaceMethodOnUpdate(String name, byte[] bytes)
 	{
-		String targetMethodName = "onUpdate";
-		String targetDESC = "(Lnet/minecraft/entity/item/EntityItem;)V";
-		
-		if(obfuscated == true)
-		{
-			targetMethodName = patch(targetMethodName);
-			targetDESC = patch(targetDESC);
-		}
+		String targetMethodName = patch("onUpdate");
+		String targetDESC = patch("(Lnet/minecraft/entity/item/EntityItem;)V");
 		
 		ClassNode classNode = new ClassNode();
 		ClassReader classReader = new ClassReader(bytes);
@@ -394,7 +362,7 @@ public class ItemTransformer implements IClassTransformer {
 			{
 				m.instructions.clear();
 				m.instructions.add(new VarInsnNode(ALOAD, 0));
-				m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic",  "update", targetDESC));
+				m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic",  "update", targetDESC, false));
 				m.instructions.add(new InsnNode(RETURN));
 			}
 		}

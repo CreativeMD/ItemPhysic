@@ -3,10 +3,10 @@ package com.creativemd.itemphysic;
 import java.io.File;
 import java.util.Map;
 
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin.MCVersion;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 
-@MCVersion(value = "1.7.10")
+@MCVersion(value = "1.9")
 public class ItemPatchingLoader implements IFMLLoadingPlugin {
 	
 	public static File location;
