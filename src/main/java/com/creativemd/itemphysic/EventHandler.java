@@ -22,6 +22,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.Timer;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -29,12 +30,23 @@ import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import scala.collection.parallel.ParIterableLike.Min;
 
 public class EventHandler {
 	
 	public static int Droppower = 1;
+	
+	private static Timer timer = null;
+	
+	public static Timer getTimer()
+	{
+		if(timer == null)
+			timer = ReflectionHelper.getPrivateValue(Minecraft.class, Minecraft.getMinecraft(), "timer");
+		return timer;
+	}
 	
 	@SubscribeEvent
 	public void onToos(ItemTossEvent event)
@@ -110,7 +122,7 @@ public class EventHandler {
 		return null;*/
 		
 		//Vec3d vec31 = player.getLook(1.0F);
-		float partialTicks = mc.renderp.getRenderPartialTicks();
+		float partialTicks = getTimer().renderPartialTicks;
 		Vec3 position = player.getPositionEyes(partialTicks);
 		double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 		Vec3 vec3d1 = player.getLook(partialTicks);
@@ -147,7 +159,7 @@ public class EventHandler {
 					EntityItem entity = (EntityItem) result.entityHit;
 					if(event.entityPlayer.worldObj.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
 					{
-						float partialTicks = mc.getRenderPartialTicks();
+						float partialTicks = getTimer().renderPartialTicks;
 						Vec3 position = event.entityPlayer.getPositionEyes(partialTicks);
 						double d0 = event.entityPlayer.capabilities.isCreativeMode ? 5.0F : 4.5F;
 						Vec3 vec3d1 = event.entityPlayer.getLook(partialTicks);

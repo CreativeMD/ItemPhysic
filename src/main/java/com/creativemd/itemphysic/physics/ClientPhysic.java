@@ -78,9 +78,9 @@ public class ClientPhysic {
         GlStateManager.alphaFunc(516, 0.1F);
         GlStateManager.enableBlend();
         RenderHelper.enableStandardItemLighting();
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
         GlStateManager.pushMatrix();
-        IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.worldObj, (EntityLivingBase)null);
+        IBakedModel ibakedmodel = mc.getRenderItem().getItemModelMesher().getItemModel(itemstack);
         /*int j = 1;
         try {
 			j = (int) ReflectionHelper.findMethod(RenderEntityItem.class, renderer, new String[]{"transformModelCount", "func_177077_a"}, EntityItem.class, double.class, double.class, double.class, float.class, IBakedModel.class).invoke(renderer, entity, x, y, z, partialTicks, ibakedmodel);
@@ -161,7 +161,7 @@ public class ClientPhysic {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         //int j = renderer.transformModelCount(entity, x, y, z, partialTicks, ibakedmodel);
         
-        boolean renderOutlines = ReflectionHelper.getPrivateValue(Render.class, renderer, "renderOutlines", "field_188301_f"/*, "field_178639_r"*/);
+        /*boolean renderOutlines = ReflectionHelper.getPrivateValue(Render.class, renderer, "renderOutlines", "field_188301_f"/*, "field_178639_r");
         
 
         if (!flag1)
@@ -180,7 +180,7 @@ public class ClientPhysic {
 			} catch (Exception e){
 				e.printStackTrace();
 			}
-        }
+        }*/
         //float f9 = 0.0625F;
         //float f10 = 0.021875F;
         for (int k = 0; k < j; ++k)
@@ -199,7 +199,7 @@ public class ClientPhysic {
                 	//GlStateManager.translate(0, 0,  0.0625F+0.021875F);
                 }
 
-                ibakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND, false);
+                ibakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND);
                 mc.getRenderItem().renderItem(itemstack, ibakedmodel);
                 GlStateManager.popMatrix();
             }
@@ -214,18 +214,18 @@ public class ClientPhysic {
                     //GlStateManager.translate(f8, f10, 0.0F);
                 }
 
-                ibakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND, false);
+                ibakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND);
                 mc.getRenderItem().renderItem(itemstack, ibakedmodel);
                 GlStateManager.popMatrix();
                 GlStateManager.translate(0.0F, 0.0F, 0.05375F);
             }
         }
 
-        if (renderOutlines)
+        /*if (renderOutlines)
         {
             GlStateManager.disableOutlineMode();
             GlStateManager.disableColorMaterial();
-        }
+        }*/
 
         GlStateManager.popMatrix();
         GlStateManager.disableRescaleNormal();

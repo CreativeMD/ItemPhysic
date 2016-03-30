@@ -184,13 +184,11 @@ public class ServerPhysic {
 		burnItem.add(Items.rabbit_stew);
 	}
 	
-	public static DataParameter<Optional<ItemStack>> ITEM = null;
+	//public static DataParameter<Optional<ItemStack>> ITEM = null;
 	
 	public static void update(EntityItem item)
 	{
-		if(ITEM == null)
-			ITEM = ReflectionHelper.getPrivateValue(EntityItem.class, null, "ITEM", "field_184525_c", "field_184533_c");
-		ItemStack stack = item.getDataManager().get(ITEM).orNull();
+		ItemStack stack = item.getDataWatcher().getWatchableObjectItemStack(10);
         if (stack != null && stack.getItem() != null && stack.getItem().onEntityItemUpdate(item)) return;
         if (item.getEntityItem() == null)
         {
@@ -199,7 +197,7 @@ public class ServerPhysic {
         else
         {
         	
-        	if (!item.worldObj.isRemote)
+        	/*if (!item.worldObj.isRemote)
             {
         		try{
         			ReflectionHelper.findMethod(Entity.class, item, new String[]{"setFlag", "func_70052_a"}, int.class, boolean.class).invoke(item, 6, item.isGlowing());
@@ -207,7 +205,7 @@ public class ServerPhysic {
         			e.printStackTrace();
         		}
         		//item.setFlag(6, item.isGlowing());
-            }
+            }*/
             item.onEntityUpdate();
             
             int delay = (Integer)ReflectionHelper.getPrivateValue(EntityItem.class, item, "delayBeforeCanPickup", "delayBeforeCanPickup");
@@ -273,9 +271,10 @@ public class ServerPhysic {
 
             if (flag || item.ticksExisted % 25 == 0)
             {
-            	if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.lava && canItemBurn(stack))
+            	if (item.worldObj.getBlockState(new BlockPos(item)).getBlock().getMaterial() == Material.lava && canItemBurn(stack))
                 {
-            		item.playSound(SoundEvents.entity_generic_burn, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+            		item.playSound("random.fizz", 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+            		//item.playSound(SoundEvents.entity_generic_burn, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
                     for(int zahl = 0; zahl < 100; zahl++)
                     	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
                 }
@@ -378,27 +377,27 @@ public class ServerPhysic {
             {
                 if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))
                 {
-                	player.addStat(AchievementList.mineWood);
+                	player.triggerAchievement(AchievementList.mineWood);
                 }
 
                 if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log2))
                 {
-                	player.addStat(AchievementList.mineWood);
+                	player.triggerAchievement(AchievementList.mineWood);
                 }
 
                 if (itemstack.getItem() == Items.leather)
                 {
-                	player.addStat(AchievementList.killCow);
+                	player.triggerAchievement(AchievementList.killCow);
                 }
 
                 if (itemstack.getItem() == Items.diamond)
                 {
-                	player.addStat(AchievementList.diamonds);
+                	player.triggerAchievement(AchievementList.diamonds);
                 }
 
                 if (itemstack.getItem() == Items.blaze_rod)
                 {
-                	player.addStat(AchievementList.blazeRod);
+                	player.triggerAchievement(AchievementList.blazeRod);
                 }
 
                 if (itemstack.getItem() == Items.diamond && item.getThrower() != null)
@@ -407,29 +406,27 @@ public class ServerPhysic {
 
                     if (entityplayer != null && entityplayer != player)
                     {
-                        entityplayer.addStat(AchievementList.diamondsToYou);
+                        entityplayer.triggerAchievement(AchievementList.diamondsToYou);
                     }
                 }
 
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item);
                 if (!item.isSilent())
                 {
-                	item.worldObj.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.entity_item_pickup, SoundCategory.PLAYERS, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                    item.worldObj.playSoundAtEntity(player, "random.pop", 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                 }
 
                 player.onItemPickup(item, i);
 
                 if (itemstack.stackSize <= 0)
                 {
-                    item.setDead();
+                	item.setDead();
                 }
-
-                player.addStat(StatList.func_188056_d(itemstack.getItem()), i);
             }
         }
     }
 	
-	public boolean processInitialInteract(EntityItem item, EntityPlayer player, ItemStack stack, EnumHand hand)
+	public boolean interactFirst(EntityItem item, EntityPlayer player)
     {
 		if(ItemDummyContainer.customPickup)
 		{

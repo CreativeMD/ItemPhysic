@@ -6,7 +6,7 @@ import java.util.Map;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 
-@MCVersion(value = "1.9")
+@MCVersion(value = "1.8.9")
 public class ItemPatchingLoader implements IFMLLoadingPlugin {
 	
 	public static File location;
