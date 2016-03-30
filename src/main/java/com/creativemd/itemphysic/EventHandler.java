@@ -39,8 +39,10 @@ public class EventHandler {
 	
 	public static int Droppower = 1;
 	
-	private static Timer timer = null;
+	@SideOnly(Side.CLIENT)
+	private static Timer timer;
 	
+	@SideOnly(Side.CLIENT)
 	public static Timer getTimer()
 	{
 		if(timer == null)
@@ -109,6 +111,7 @@ public class EventHandler {
         return null;
 	}
 	
+	@SideOnly(Side.CLIENT)
 	@Method(modid = "creativecore")
 	public static MovingObjectPosition getEntityItem(double distance, EntityPlayer player)
 	{
@@ -140,6 +143,7 @@ public class EventHandler {
 	public static boolean cancel = false;
 	
 	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
 	@Method(modid = "creativecore")
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{

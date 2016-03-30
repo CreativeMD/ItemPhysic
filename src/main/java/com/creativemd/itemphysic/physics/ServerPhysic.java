@@ -29,6 +29,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -111,6 +112,7 @@ public class ServerPhysic {
 		swimItem.add(Items.rabbit);
 		swimItem.add(Items.cooked_rabbit);
 		swimItem.add(Items.rabbit_stew);
+		swimItem.add(Blocks.ladder);
 		
 		burnItem.add(Material.wood);
 		burnItem.add(Material.cloth);
@@ -182,6 +184,7 @@ public class ServerPhysic {
 		burnItem.add(Items.rabbit);
 		burnItem.add(Items.cooked_rabbit);
 		burnItem.add(Items.rabbit_stew);
+		burnItem.add(Blocks.ladder);
 	}
 	
 	//public static DataParameter<Optional<ItemStack>> ITEM = null;
@@ -208,7 +211,7 @@ public class ServerPhysic {
             }*/
             item.onEntityUpdate();
             
-            int delay = (Integer)ReflectionHelper.getPrivateValue(EntityItem.class, item, "delayBeforeCanPickup", "delayBeforeCanPickup");
+            int delay = (Integer)ReflectionHelper.getPrivateValue(EntityItem.class, item, "delayBeforeCanPickup", "field_145804_b");
             
             if (delay > 0 && delay != 32767)
             {
@@ -326,13 +329,14 @@ public class ServerPhysic {
 	            }
             }
             
-            if(item.getAge() < 1 && item.lifespan == 6000)
+            int age = ReflectionHelper.getPrivateValue(EntityItem.class, item, "age", "field_70292_b");
+            if(age < 1 && item.lifespan == 6000)
             	item.lifespan = ItemDummyContainer.despawnItem;
             
-            if (item.getAge() != -32768)
+            if (age != -32768)
             {
             	try{
-            		ReflectionHelper.findField(EntityItem.class, "age", "field_70292_b").set(item, item.getAge()+1);
+            		ReflectionHelper.findField(EntityItem.class, "age", "field_70292_b").set(item, age+1);
             	}catch(Exception e){
             		e.printStackTrace();
             	}
@@ -340,7 +344,7 @@ public class ServerPhysic {
 
             item.handleWaterMovement();
 
-            if (!item.worldObj.isRemote && item.getAge() >= item.lifespan)
+            if (!item.worldObj.isRemote && age >= item.lifespan)
             {
                 int hook = net.minecraftforge.event.ForgeEventFactory.onItemExpire(item, stack);
                 if (hook < 0) item.setDead();
@@ -372,8 +376,8 @@ public class ServerPhysic {
 
             int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player, itemstack);
             if (hook < 0) return;
-
-            if (!item.cannotPickup() && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
+            int age = ReflectionHelper.getPrivateValue(EntityItem.class, item, "age", "field_70292_b");
+            if ((item.getOwner() == null || item.lifespan - age <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
             {
                 if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))
                 {
@@ -426,7 +430,7 @@ public class ServerPhysic {
         }
     }
 	
-	public boolean interactFirst(EntityItem item, EntityPlayer player)
+	public static boolean interactFirst(EntityItem item, EntityPlayer player)
     {
 		if(ItemDummyContainer.customPickup)
 		{

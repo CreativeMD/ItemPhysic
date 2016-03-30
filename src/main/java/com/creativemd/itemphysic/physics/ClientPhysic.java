@@ -21,7 +21,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -92,17 +91,27 @@ public class ClientPhysic {
         int j = getModelCount(itemstack);
         float f = 0.25F;
         float f1 = 0;//shouldBob() ? MathHelper.sin(((float)itemIn.getAge() + p_177077_8_) / 10.0F + itemIn.hoverStart) * 0.1F + 0.1F : 0;
+        
         float f2 = ibakedmodel.getItemCameraTransforms().getTransform(ItemCameraTransforms.TransformType.GROUND).scale.y;
         
         GlStateManager.translate((float)x, (float)y, (float)z);
         
+        if (ibakedmodel.isGui3d())
+            GlStateManager.scale(0.5F, 0.5F, 0.5F);
+        
         GL11.glRotatef(90.0F, 1.0F, 0.0F, 0.0F);
     	GL11.glRotatef(item.rotationYaw, 0.0F, 0.0F, 1.0F);
     	
-    	if(is3D)
+    	/*if(is3D)
     		GlStateManager.translate(0, -0.2, -0.08);
     	else
+    		GlStateManager.translate(0, 0, -0.04);*/
+    	if(is3D)
+    		GlStateManager.translate(0, 0, -0.08);
+    	else
     		GlStateManager.translate(0, 0, -0.04);
+    	
+    	
     	
     	
     	//Handle Rotations
@@ -148,12 +157,13 @@ public class ClientPhysic {
 	            }
         	}
         	
-        	double height = 0.2;
+        	GlStateManager.rotate(item.rotationPitch, 1, 0, 0.0F);
+        	/*double height = 0.2;
         	if(is3D)
         		GlStateManager.translate(0, height, 0);
-        	GlStateManager.rotate(item.rotationPitch, 1, 0, 0.0F);
+        	
         	if(is3D)
-        		GlStateManager.translate(0, -height, 0);
+        		GlStateManager.translate(0, -height, 0);*/
         }
         
       

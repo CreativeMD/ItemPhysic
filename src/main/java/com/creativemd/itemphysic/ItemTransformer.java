@@ -46,7 +46,7 @@ public class ItemTransformer implements IClassTransformer {
 			"net/minecraft/client/renderer/entity/Render", "setPositionAndRotation2", "onUpdate", "isBurning", "attackEntityFrom", "net/minecraft/util/DamageSource", "health",
 			"onCollideWithPlayer", "net/minecraft/entity/player/EntityPlayer", "interactFirst", "net/minecraft/item/ItemStack", "net/minecraft/util/EnumHand", "canBeCollidedWith",
 			"net/minecraft/client/entity/EntityPlayerSP", "dropOneItem"};
-	public static final String[] namesOb = new String[]{"/", "brx", "a", "yd", "rr", "brn", "a", "m", "aH", "a", "rc", "f", "d", "zi", "a", "adq", "qm", "ap", "bmt", "a"};
+	public static final String[] namesOb = new String[]{"/", "bjf", "a", "uz", "pk", "biv", "a", "t_", "at", "a", "ow", "e", "d", "wn", "e", "zx", "ad", "bew", "a"};
 	
 	public static String patch(String input)
 	{
@@ -60,12 +60,12 @@ public class ItemTransformer implements IClassTransformer {
 	
 	@Override
 	public byte[] transform(String arg0, String arg1, byte[] arg2) {
-		if (arg0.equals("brx") | arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem")) {
+		if (arg0.equals("bjf") | arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem")) {
 			obfuscated = !arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem");
 			ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
 			arg2 = replaceMethodDoRender(arg0, arg2);
 		}
-		if(arg0.equals("yd") | arg0.equals("net.minecraft.entity.item.EntityItem"))
+		if(arg0.equals("uz") | arg0.equals("net.minecraft.entity.item.EntityItem"))
 		{
 			obfuscated = !arg0.contains("net.minecraft.entity.item.EntityItem");
 			if(FMLCommonHandler.instance().getEffectiveSide().isClient())
@@ -73,7 +73,7 @@ public class ItemTransformer implements IClassTransformer {
 		}
 		if(!isLite)
 		{
-			if(arg0.equals("yd") | arg0.equals("net.minecraft.entity.item.EntityItem"))
+			if(arg0.equals("uz") | arg0.equals("net.minecraft.entity.item.EntityItem"))
 			{
 				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
 				arg2 = replaceMethodOnUpdate(arg0, arg2);
@@ -81,7 +81,7 @@ public class ItemTransformer implements IClassTransformer {
 				arg2 = replaceMethods(arg0, arg2);
 			}
 
-			if(arg0.equals("bmt") | arg0.equals("net.minecraft.client.entity.EntityPlayerSP"))
+			if(arg0.equals("bew") | arg0.equals("net.minecraft.client.entity.EntityPlayerSP"))
 			{
 				obfuscated = !arg0.contains("net.minecraft.client.entity.EntityPlayerSP");
 				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
@@ -268,7 +268,7 @@ public class ItemTransformer implements IClassTransformer {
 		String targetMethodName2 = patch("onCollideWithPlayer");
 		String targetDESC2 = patch("(Lnet/minecraft/entity/player/EntityPlayer;)V");
 		String newDESC2 = patch("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)V");
-		String newDESC3 = patch("(Lnet/minecraft/entity/item/EntityItem;)Z");
+		String newDESC3 = patch("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)Z");
 		String newMethod = patch("interactFirst");
 		String newMethodDESC = patch("(Lnet/minecraft/entity/player/EntityPlayer;)Z");
 		String newMethodVar = patch("Lnet/minecraft/entity/player/EntityPlayer;");
@@ -323,9 +323,9 @@ public class ItemTransformer implements IClassTransformer {
 		m.instructions.add(new InsnNode(ICONST_1));
 		m.instructions.add(new InsnNode(IRETURN));
 		
-		m.maxLocals = 4;
+		m.maxLocals = 2;
 		m.localVariables.add(new LocalVariableNode("this", "L" + name.replace(".", "/") + ";", null, label, label2, 0));
-		m.localVariables.add(new LocalVariableNode("par1EntityPlayer", newMethodVar, null, label, label2, 1));
+		m.localVariables.add(new LocalVariableNode("playerIn", newMethodVar, null, label, label2, 1));
 		//m.localVariables.add(new LocalVariableNode("stack", patch("Lnet/minecraft/item/ItemStack;"), null, label, label2, 2));
 		//m.localVariables.add(new LocalVariableNode("hand", patch("Lnet/minecraft/util/EnumHand;"), null, label, label2, 3));
 		classNode.methods.add(m);
