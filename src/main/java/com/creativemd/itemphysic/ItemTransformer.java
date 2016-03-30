@@ -38,7 +38,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 public class ItemTransformer implements IClassTransformer {
 
-	public static boolean isLite = true;
+	public static boolean isLite = false;
 	
 	public static boolean obfuscated = false;
 	

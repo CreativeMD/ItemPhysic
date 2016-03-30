@@ -142,37 +142,43 @@ public class EventHandler {
 	
 	public static boolean cancel = false;
 	
-	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
+	public void onPlayerInteractClient(PlayerInteractEvent event)
+	{
+		if(ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
+		{
+			double distance = 100;
+			if(mc.objectMouseOver != null)
+				if(mc.objectMouseOver.typeOfHit == MovingObjectType.BLOCK)
+					distance = mc.getRenderViewEntity().getDistance(mc.objectMouseOver.hitVec.xCoord, mc.objectMouseOver.hitVec.yCoord, mc.objectMouseOver.hitVec.zCoord);
+				else if(mc.objectMouseOver.typeOfHit == MovingObjectType.ENTITY)
+					distance = mc.getRenderViewEntity().getDistanceToEntity(mc.objectMouseOver.entityHit);
+			MovingObjectPosition result = getEntityItem(distance, mc.thePlayer);
+			if(result != null)
+			{
+				EntityItem entity = (EntityItem) result.entityHit;
+				if(event.entityPlayer.worldObj.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
+				{
+					float partialTicks = getTimer().renderPartialTicks;
+					Vec3 position = event.entityPlayer.getPositionEyes(partialTicks);
+					double d0 = event.entityPlayer.capabilities.isCreativeMode ? 5.0F : 4.5F;
+					Vec3 vec3d1 = event.entityPlayer.getLook(partialTicks);
+			        Vec3 look = position.addVector(vec3d1.xCoord * d0, vec3d1.yCoord * d0, vec3d1.zCoord * d0);
+			        
+					PacketHandler.sendPacketToServer(new PickupPacket(position, look));
+				}
+			}
+		}
+	}
+	
+	@SubscribeEvent
 	@Method(modid = "creativecore")
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
 		if(!ItemTransformer.isLite)
 		{
-			if(event.world.isRemote && ItemDummyContainer.customPickup && (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_AIR || event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK))
-			{
-				double distance = 100;
-				if(mc.objectMouseOver != null)
-					if(mc.objectMouseOver.typeOfHit == MovingObjectType.BLOCK)
-						distance = mc.getRenderViewEntity().getDistance(mc.objectMouseOver.hitVec.xCoord, mc.objectMouseOver.hitVec.yCoord, mc.objectMouseOver.hitVec.zCoord);
-					else if(mc.objectMouseOver.typeOfHit == MovingObjectType.ENTITY)
-						distance = mc.getRenderViewEntity().getDistanceToEntity(mc.objectMouseOver.entityHit);
-				MovingObjectPosition result = getEntityItem(distance, mc.thePlayer);
-				if(result != null)
-				{
-					EntityItem entity = (EntityItem) result.entityHit;
-					if(event.entityPlayer.worldObj.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
-					{
-						float partialTicks = getTimer().renderPartialTicks;
-						Vec3 position = event.entityPlayer.getPositionEyes(partialTicks);
-						double d0 = event.entityPlayer.capabilities.isCreativeMode ? 5.0F : 4.5F;
-						Vec3 vec3d1 = event.entityPlayer.getLook(partialTicks);
-				        Vec3 look = position.addVector(vec3d1.xCoord * d0, vec3d1.yCoord * d0, vec3d1.zCoord * d0);
-				        
-						PacketHandler.sendPacketToServer(new PickupPacket(position, look));
-					}
-				}
-			}
+			if(event.world.isRemote)
+				onPlayerInteractClient(event);
 			if(!event.entityPlayer.worldObj.isRemote && cancel)
 			{
 				//entity.interactFirst(event.entityPlayer);	
