@@ -138,7 +138,35 @@ public class ClientPhysic {
             		}
                 		
             		item.rotationPitch += rotation;
+        		}else if(ItemDummyContainer.oldRotation){
+        			for (int side = 0; side < 4; side++) {
+                        double rotation = side*90;
+                        double range = 5;
+                        if(item.rotationPitch > rotation-range && item.rotationPitch < rotation+range)
+                            item.rotationPitch = (float)rotation;
+                    }
+                    if(item.rotationPitch != 0 && item.rotationPitch != 90 && item.rotationPitch != 180 && item.rotationPitch != 270)
+                    {
+                        double Abstand0 = Math.abs(item.rotationPitch);
+                        double Abstand90 = Math.abs(item.rotationPitch-90);
+                        double Abstand180 = Math.abs(item.rotationPitch-180);
+                        double Abstand270 = Math.abs(item.rotationPitch-270);
+                        if(Abstand0 <= Abstand90 && Abstand0 <= Abstand180 && Abstand0 <= Abstand270)
+                            if(item.rotationPitch < 0)item.rotationPitch += rotation;
+                            else item.rotationPitch -= rotation;
+                        if(Abstand90 < Abstand0 && Abstand90 <= Abstand180 && Abstand90 <= Abstand270)
+                            if(item.rotationPitch-90 < 0)item.rotationPitch += rotation;
+                            else item.rotationPitch -= rotation;
+                        if(Abstand180 < Abstand90 && Abstand180 < Abstand0 && Abstand180 <= Abstand270)
+                            if(item.rotationPitch-180 < 0)item.rotationPitch += rotation;
+                            else item.rotationPitch -= rotation;
+                        if(Abstand270 < Abstand90 && Abstand270 < Abstand180 && Abstand270 < Abstand0)
+                            if(item.rotationPitch-270 < 0)item.rotationPitch += rotation;
+                            else item.rotationPitch -= rotation;
+                       
+                    }
         		}
+        			
         	}else{
         		
 	        	if(item != null && !Double.isNaN(item.posX) && !Double.isNaN(item.posY) && !Double.isNaN(item.posZ) && item.worldObj != null)

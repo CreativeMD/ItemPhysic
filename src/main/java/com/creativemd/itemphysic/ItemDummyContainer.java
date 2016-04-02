@@ -95,6 +95,7 @@ public class ItemDummyContainer extends DummyModContainer {
 			despawnItem = config.get("Item", "despawn", 6000).getInt(6000);
 			customPickup = config.get("Item", "customPickup", false).getBoolean(false);
 			customThrow = config.get("Item", "customThrow", true).getBoolean(true);
+			oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
 		}
 		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
 		config.save();
@@ -116,5 +117,6 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static int despawnItem;
 	public static boolean customPickup;
 	public static boolean customThrow;
+	public static boolean oldRotation;
 	
 }
