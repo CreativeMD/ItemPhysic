@@ -134,6 +134,9 @@ public class ServerPhysic {
 		swimItem.add(Items.beetroot_seeds);
 		swimItem.add(Items.beetroot_soup);
 		swimItem.add(Items.shield);
+		swimItem.add(Items.wheat_seeds);
+		swimItem.add(Items.pumpkin_seeds);
+		swimItem.add(Items.melon_seeds);
 		
 		burnItem.add(Material.wood);
 		burnItem.add(Material.cloth);
@@ -215,6 +218,9 @@ public class ServerPhysic {
 		burnItem.add(Items.beetroot_seeds);
 		burnItem.add(Items.beetroot_soup);
 		burnItem.add(Items.shield);
+		burnItem.add(Items.wheat_seeds);
+		burnItem.add(Items.pumpkin_seeds);
+		burnItem.add(Items.melon_seeds);
 	}
 	
 	public static DataParameter<Optional<ItemStack>> ITEM = null;
@@ -243,7 +249,7 @@ public class ServerPhysic {
             }
             item.onEntityUpdate();
             
-            int delay = (Integer)ReflectionHelper.getPrivateValue(EntityItem.class, item, "delayBeforeCanPickup", "delayBeforeCanPickup");
+            int delay = (Integer)ReflectionHelper.getPrivateValue(EntityItem.class, item, "delayBeforeCanPickup", "field_145804_b");
             
             if (delay > 0 && delay != 32767)
             {
@@ -360,13 +366,13 @@ public class ServerPhysic {
 	            }
             }
             
-            if(item.getAge() < 1 && item.lifespan == 6000)
+            if(getAge(item) < 1 && item.lifespan == 6000)
             	item.lifespan = ItemDummyContainer.despawnItem;
             
-            if (item.getAge() != -32768)
+            if (getAge(item) != -32768)
             {
             	try{
-            		ReflectionHelper.findField(EntityItem.class, "age", "field_70292_b").set(item, item.getAge()+1);
+            		ReflectionHelper.findField(EntityItem.class, "age", "field_70292_b").set(item, getAge(item)+1);
             	}catch(Exception e){
             		e.printStackTrace();
             	}
@@ -374,7 +380,7 @@ public class ServerPhysic {
 
             item.handleWaterMovement();
 
-            if (!item.worldObj.isRemote && item.getAge() >= item.lifespan)
+            if (!item.worldObj.isRemote && getAge(item) >= item.lifespan)
             {
                 int hook = net.minecraftforge.event.ForgeEventFactory.onItemExpire(item, stack);
                 if (hook < 0) item.setDead();
@@ -385,7 +391,12 @@ public class ServerPhysic {
                 item.setDead();
             }
         }
-	}	
+	}
+	
+	public static int getAge(EntityItem item)
+	{
+		return (Integer) ReflectionHelper.getPrivateValue(EntityItem.class, item, "age", "field_70292_b");
+	}
 	
 	
 	public static void onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer)
@@ -407,7 +418,7 @@ public class ServerPhysic {
             int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player, itemstack);
             if (hook < 0) return;
 
-            if (!item.cannotPickup() && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
+            if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - getAge(item) <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
             {
                 if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))
                 {
@@ -462,7 +473,7 @@ public class ServerPhysic {
         }
     }
 	
-	public boolean processInitialInteract(EntityItem item, EntityPlayer player, ItemStack stack, EnumHand hand)
+	public static boolean processInitialInteract(EntityItem item, EntityPlayer player, ItemStack stack, EnumHand hand)
     {
 		if(ItemDummyContainer.customPickup)
 		{
@@ -508,22 +519,6 @@ public class ServerPhysic {
             return false;
         }
     }
-    
-    /*public static double lastPosY;
-	TODO Check if it's necessary!
-	public static void updatePositionBefore(EntityItem item)
-    {
-		lastPosY = item.posY;
-    }
-	
-    public static void updatePosition(EntityItem item, double posY)
-    {
-		double diff = Math.sqrt(Math.pow(lastPosY - posY, 2));
-		if(diff < 0.5D && diff > 0)
-		{
-			item.setPosition(item.posX, lastPosY, item.posZ);
-		}
-    }*/
 	
 	public static boolean isItemBurning(EntityItem item)
 	{
