@@ -303,7 +303,7 @@ public class EventHandler {
 				if(mc.gameSettings.keyBindDrop.isPressed())
 				{
 					CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
-				    mc.thePlayer.sendQueue.addToSendQueue(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
+				    mc.thePlayer.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
 				}
 			}
 		}

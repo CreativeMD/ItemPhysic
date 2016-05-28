@@ -50,7 +50,7 @@ public class ClientPhysic {
 	
 	public static ResourceLocation getEntityTexture()
 	{
-		return TextureMap.locationBlocksTexture;
+		return TextureMap.LOCATION_BLOCKS_TEXTURE;
 	}
 	
 	@SideOnly(Side.CLIENT)

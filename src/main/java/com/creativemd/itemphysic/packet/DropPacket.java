@@ -50,7 +50,7 @@ public class DropPacket extends CreativeCorePacket{
     public void executeServer(EntityPlayer player)
     {
     	EventHandler.Droppower = power;
-    	player.dropOneItem(control);
+    	player.dropItem(control);
     	EventHandler.Droppower = 1;
     	
     }

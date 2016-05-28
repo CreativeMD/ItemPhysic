@@ -54,173 +54,173 @@ public class ServerPhysic {
 	
 	public static void loadItemList()
 	{
-		swimItem.add(Material.wood);
-		swimItem.add(Material.cloth);
-		swimItem.add(Material.sponge);
-		swimItem.add(Material.packedIce);
-		swimItem.add(Material.ice);
-		swimItem.add(Material.leaves);
-		swimItem.add(Material.plants);
-		swimItem.add(Material.carpet);
-		swimItem.add(Material.snow);
-		swimItem.add(Material.cactus);
-		swimItem.add(Material.cake);
-		swimItem.add(Material.vine);
-		swimItem.add(Material.web);
-		swimItem.add(Material.grass);
+		swimItem.add(Material.WOOD);
+		swimItem.add(Material.CLOTH);
+		swimItem.add(Material.SPONGE);
+		swimItem.add(Material.PACKED_ICE);
+		swimItem.add(Material.ICE);
+		swimItem.add(Material.LEAVES);
+		swimItem.add(Material.PLANTS);
+		swimItem.add(Material.CARPET);
+		swimItem.add(Material.SNOW);
+		swimItem.add(Material.CACTUS);
+		swimItem.add(Material.CAKE);
+		swimItem.add(Material.VINE);
+		swimItem.add(Material.WEB);
+		swimItem.add(Material.GRASS);
 		swimItem.add("axe");
 		swimItem.add("shovel");
 		swimItem.add("hoe");
 		swimItem.add("sword");
-		swimItem.add(Items.apple);
-		swimItem.add(Items.bow);
-		swimItem.add(Items.bowl);
-		swimItem.add(Items.arrow);
-		swimItem.add(Items.apple);
-		swimItem.add(Items.string);
-		swimItem.add(Items.feather);
-		swimItem.add(Items.wheat);
-		swimItem.add(Items.bread);
-		swimItem.add(Items.leather);
-		swimItem.add(Items.leather_boots);
-		swimItem.add(Items.leather_chestplate);
-		swimItem.add(Items.leather_helmet);
-		swimItem.add(Items.leather_leggings);
-		swimItem.add(Items.lead);
-		swimItem.add(Items.painting);
-		swimItem.add(Items.sign);
-		swimItem.add(Items.acacia_boat);
-		swimItem.add(Items.acacia_door);
-		swimItem.add(Items.dark_oak_boat);
-		swimItem.add(Items.dark_oak_door);
-		swimItem.add(Items.birch_boat);
-		swimItem.add(Items.birch_door);
-		swimItem.add(Items.jungle_boat);
-		swimItem.add(Items.jungle_door);
-		swimItem.add(Items.boat);
-		swimItem.add(Items.oak_door);
-		swimItem.add(Items.spruce_boat);
-		swimItem.add(Items.spruce_door);
-		swimItem.add(Items.saddle);
-		swimItem.add(Items.bone);
-		swimItem.add(Items.sugar);
-		swimItem.add(Items.paper);
-		swimItem.add(Items.book);
-		swimItem.add(Items.egg);
-		swimItem.add(Items.fishing_rod);
-		swimItem.add(Items.dye);
-		swimItem.add(Items.cake);
-		swimItem.add(Items.bed);
-		swimItem.add(Items.bread);
-		swimItem.add(Items.melon);
-		swimItem.add(Items.shears);
-		swimItem.add(Items.writable_book);
-		swimItem.add(Items.written_book);
-		swimItem.add(Items.carrot);
-		swimItem.add(Items.potato);
-		swimItem.add(Items.poisonous_potato);
-		swimItem.add(Items.baked_potato);
-		swimItem.add(Items.map);
-		swimItem.add(Items.pumpkin_pie);
-		swimItem.add(Items.name_tag);
-		swimItem.add(Items.enchanted_book);
-		swimItem.add(Items.elytra);
-		swimItem.add(Items.mutton);
-		swimItem.add(Items.cooked_mutton);
-		swimItem.add(Items.rabbit);
-		swimItem.add(Items.cooked_rabbit);
-		swimItem.add(Items.rabbit_stew);
-		swimItem.add(Items.beetroot);
-		swimItem.add(Items.beetroot_seeds);
-		swimItem.add(Items.beetroot_soup);
-		swimItem.add(Items.shield);
-		swimItem.add(Items.wheat_seeds);
-		swimItem.add(Items.pumpkin_seeds);
-		swimItem.add(Items.melon_seeds);
+		swimItem.add(Items.APPLE);
+		swimItem.add(Items.BOW);
+		swimItem.add(Items.BOWL);
+		swimItem.add(Items.ARROW);
+		swimItem.add(Items.APPLE);
+		swimItem.add(Items.STRING);
+		swimItem.add(Items.FEATHER);
+		swimItem.add(Items.WHEAT);
+		swimItem.add(Items.BREAD);
+		swimItem.add(Items.LEATHER);
+		swimItem.add(Items.LEATHER_BOOTS);
+		swimItem.add(Items.LEATHER_CHESTPLATE);
+		swimItem.add(Items.LEATHER_HELMET);
+		swimItem.add(Items.LEATHER_LEGGINGS);
+		swimItem.add(Items.LEAD);
+		swimItem.add(Items.PAINTING);
+		swimItem.add(Items.SIGN);
+		swimItem.add(Items.ACACIA_BOAT);
+		swimItem.add(Items.ACACIA_DOOR);
+		swimItem.add(Items.DARK_OAK_BOAT);
+		swimItem.add(Items.DARK_OAK_DOOR);
+		swimItem.add(Items.BIRCH_BOAT);
+		swimItem.add(Items.BIRCH_DOOR);
+		swimItem.add(Items.JUNGLE_BOAT);
+		swimItem.add(Items.JUNGLE_DOOR);
+		swimItem.add(Items.BOAT);
+		swimItem.add(Items.OAK_DOOR);
+		swimItem.add(Items.SPRUCE_BOAT);
+		swimItem.add(Items.SPRUCE_DOOR);
+		swimItem.add(Items.SADDLE);
+		swimItem.add(Items.BONE);
+		swimItem.add(Items.SUGAR);
+		swimItem.add(Items.PAPER);
+		swimItem.add(Items.BOOK);
+		swimItem.add(Items.EGG);
+		swimItem.add(Items.FISHING_ROD);
+		swimItem.add(Items.DYE);
+		swimItem.add(Items.CAKE);
+		swimItem.add(Items.BED);
+		swimItem.add(Items.BREAD);
+		swimItem.add(Items.MELON);
+		swimItem.add(Items.SHEARS);
+		swimItem.add(Items.WRITABLE_BOOK);
+		swimItem.add(Items.WRITTEN_BOOK);
+		swimItem.add(Items.CARROT);
+		swimItem.add(Items.POTATO);
+		swimItem.add(Items.POISONOUS_POTATO);
+		swimItem.add(Items.BAKED_POTATO);
+		swimItem.add(Items.MAP);
+		swimItem.add(Items.PUMPKIN_PIE);
+		swimItem.add(Items.NAME_TAG);
+		swimItem.add(Items.ENCHANTED_BOOK);
+		swimItem.add(Items.ELYTRA);
+		swimItem.add(Items.MUTTON);
+		swimItem.add(Items.COOKED_MUTTON);
+		swimItem.add(Items.RABBIT);
+		swimItem.add(Items.COOKED_RABBIT);
+		swimItem.add(Items.RABBIT_STEW);
+		swimItem.add(Items.BEETROOT);
+		swimItem.add(Items.BEETROOT_SEEDS);
+		swimItem.add(Items.BEETROOT_SOUP);
+		swimItem.add(Items.SHIELD);
+		swimItem.add(Items.WHEAT_SEEDS);
+		swimItem.add(Items.PUMPKIN_SEEDS);
+		swimItem.add(Items.MELON_SEEDS);
 		
-		burnItem.add(Material.wood);
-		burnItem.add(Material.cloth);
-		burnItem.add(Material.sponge);
-		burnItem.add(Material.packedIce);
-		burnItem.add(Material.ice);
-		burnItem.add(Material.leaves);
-		burnItem.add(Material.plants);
-		burnItem.add(Material.carpet);
-		burnItem.add(Material.snow);
-		burnItem.add(Material.cactus);
-		burnItem.add(Material.cake);
-		burnItem.add(Material.vine);
-		burnItem.add(Material.web);
-		burnItem.add(Material.grass);
+		burnItem.add(Material.WOOD);
+		burnItem.add(Material.CLOTH);
+		burnItem.add(Material.SPONGE);
+		burnItem.add(Material.PACKED_ICE);
+		burnItem.add(Material.ICE);
+		burnItem.add(Material.LEAVES);
+		burnItem.add(Material.PLANTS);
+		burnItem.add(Material.CARPET);
+		burnItem.add(Material.SNOW);
+		burnItem.add(Material.CACTUS);
+		burnItem.add(Material.CAKE);
+		burnItem.add(Material.VINE);
+		burnItem.add(Material.WEB);
+		burnItem.add(Material.GRASS);
 		burnItem.add("axe");
 		burnItem.add("shovel");
 		burnItem.add("hoe");
 		burnItem.add("sword");
-		burnItem.add(Items.apple);
-		burnItem.add(Items.bow);
-		burnItem.add(Items.bowl);
-		burnItem.add(Items.arrow);
-		burnItem.add(Items.apple);
-		burnItem.add(Items.string);
-		burnItem.add(Items.feather);
-		burnItem.add(Items.wheat);
-		burnItem.add(Items.bread);
-		burnItem.add(Items.leather);
-		burnItem.add(Items.leather_boots);
-		burnItem.add(Items.leather_chestplate);
-		burnItem.add(Items.leather_helmet);
-		burnItem.add(Items.leather_leggings);
-		burnItem.add(Items.lead);
-		burnItem.add(Items.painting);
-		burnItem.add(Items.sign);
-		burnItem.add(Items.acacia_boat);
-		burnItem.add(Items.acacia_door);
-		burnItem.add(Items.dark_oak_boat);
-		burnItem.add(Items.dark_oak_door);
-		burnItem.add(Items.birch_boat);
-		burnItem.add(Items.birch_door);
-		burnItem.add(Items.jungle_boat);
-		burnItem.add(Items.jungle_door);
-		burnItem.add(Items.boat);
-		burnItem.add(Items.oak_door);
-		burnItem.add(Items.spruce_boat);
-		burnItem.add(Items.spruce_door);
-		burnItem.add(Items.saddle);
-		burnItem.add(Items.bone);
-		burnItem.add(Items.sugar);
-		burnItem.add(Items.paper);
-		burnItem.add(Items.book);
-		burnItem.add(Items.egg);
-		burnItem.add(Items.fishing_rod);
-		burnItem.add(Items.dye);
-		burnItem.add(Items.cake);
-		burnItem.add(Items.bed);
-		burnItem.add(Items.bread);
-		burnItem.add(Items.melon);
-		burnItem.add(Items.shears);
-		burnItem.add(Items.writable_book);
-		burnItem.add(Items.written_book);
-		burnItem.add(Items.carrot);
-		burnItem.add(Items.potato);
-		burnItem.add(Items.poisonous_potato);
-		burnItem.add(Items.baked_potato);
-		burnItem.add(Items.map);
-		burnItem.add(Items.pumpkin_pie);
-		burnItem.add(Items.name_tag);
-		burnItem.add(Items.enchanted_book);
-		burnItem.add(Items.elytra);
-		burnItem.add(Items.mutton);
-		burnItem.add(Items.cooked_mutton);
-		burnItem.add(Items.rabbit);
-		burnItem.add(Items.cooked_rabbit);
-		burnItem.add(Items.rabbit_stew);
-		burnItem.add(Items.beetroot);
-		burnItem.add(Items.beetroot_seeds);
-		burnItem.add(Items.beetroot_soup);
-		burnItem.add(Items.shield);
-		burnItem.add(Items.wheat_seeds);
-		burnItem.add(Items.pumpkin_seeds);
-		burnItem.add(Items.melon_seeds);
+		burnItem.add(Items.APPLE);
+		burnItem.add(Items.BOW);
+		burnItem.add(Items.BOWL);
+		burnItem.add(Items.ARROW);
+		burnItem.add(Items.APPLE);
+		burnItem.add(Items.STRING);
+		burnItem.add(Items.FEATHER);
+		burnItem.add(Items.WHEAT);
+		burnItem.add(Items.BREAD);
+		burnItem.add(Items.LEATHER);
+		burnItem.add(Items.LEATHER_BOOTS);
+		burnItem.add(Items.LEATHER_CHESTPLATE);
+		burnItem.add(Items.LEATHER_HELMET);
+		burnItem.add(Items.LEATHER_LEGGINGS);
+		burnItem.add(Items.LEAD);
+		burnItem.add(Items.PAINTING);
+		burnItem.add(Items.SIGN);
+		burnItem.add(Items.ACACIA_BOAT);
+		burnItem.add(Items.ACACIA_DOOR);
+		burnItem.add(Items.DARK_OAK_BOAT);
+		burnItem.add(Items.DARK_OAK_DOOR);
+		burnItem.add(Items.BIRCH_BOAT);
+		burnItem.add(Items.BIRCH_DOOR);
+		burnItem.add(Items.JUNGLE_BOAT);
+		burnItem.add(Items.JUNGLE_DOOR);
+		burnItem.add(Items.BOAT);
+		burnItem.add(Items.OAK_DOOR);
+		burnItem.add(Items.SPRUCE_BOAT);
+		burnItem.add(Items.SPRUCE_DOOR);
+		burnItem.add(Items.SADDLE);
+		burnItem.add(Items.BONE);
+		burnItem.add(Items.SUGAR);
+		burnItem.add(Items.PAPER);
+		burnItem.add(Items.BOOK);
+		burnItem.add(Items.EGG);
+		burnItem.add(Items.FISHING_ROD);
+		burnItem.add(Items.DYE);
+		burnItem.add(Items.CAKE);
+		burnItem.add(Items.BED);
+		burnItem.add(Items.BREAD);
+		burnItem.add(Items.MELON);
+		burnItem.add(Items.SHEARS);
+		burnItem.add(Items.WRITABLE_BOOK);
+		burnItem.add(Items.WRITTEN_BOOK);
+		burnItem.add(Items.CARROT);
+		burnItem.add(Items.POTATO);
+		burnItem.add(Items.POISONOUS_POTATO);
+		burnItem.add(Items.BAKED_POTATO);
+		burnItem.add(Items.MAP);
+		burnItem.add(Items.PUMPKIN_PIE);
+		burnItem.add(Items.NAME_TAG);
+		burnItem.add(Items.ENCHANTED_BOOK);
+		burnItem.add(Items.ELYTRA);
+		burnItem.add(Items.MUTTON);
+		burnItem.add(Items.COOKED_MUTTON);
+		burnItem.add(Items.RABBIT);
+		burnItem.add(Items.COOKED_RABBIT);
+		burnItem.add(Items.RABBIT_STEW);
+		burnItem.add(Items.BEETROOT);
+		burnItem.add(Items.BEETROOT_SEEDS);
+		burnItem.add(Items.BEETROOT_SOUP);
+		burnItem.add(Items.SHIELD);
+		burnItem.add(Items.WHEAT_SEEDS);
+		burnItem.add(Items.PUMPKIN_SEEDS);
+		burnItem.add(Items.MELON_SEEDS);
 	}
 	
 	public static DataParameter<Optional<ItemStack>> ITEM = null;
@@ -312,9 +312,9 @@ public class ServerPhysic {
 
             if (flag || item.ticksExisted % 25 == 0)
             {
-            	if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.lava && canItemBurn(stack))
+            	if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && canItemBurn(stack))
                 {
-            		item.playSound(SoundEvents.entity_generic_burn, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+            		item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
                     for(int zahl = 0; zahl < 100; zahl++)
                     	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
                 }
@@ -420,45 +420,45 @@ public class ServerPhysic {
 
             if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - getAge(item) <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
             {
-                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log))
+                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.LOG))
                 {
-                	player.addStat(AchievementList.mineWood);
+                	player.addStat(AchievementList.MINE_WOOD);
                 }
 
-                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.log2))
+                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.LOG2))
                 {
-                	player.addStat(AchievementList.mineWood);
+                	player.addStat(AchievementList.MINE_WOOD);
                 }
 
-                if (itemstack.getItem() == Items.leather)
+                if (itemstack.getItem() == Items.LEATHER)
                 {
-                	player.addStat(AchievementList.killCow);
+                	player.addStat(AchievementList.KILL_COW);
                 }
 
-                if (itemstack.getItem() == Items.diamond)
+                if (itemstack.getItem() == Items.DIAMOND)
                 {
-                	player.addStat(AchievementList.diamonds);
+                	player.addStat(AchievementList.DIAMONDS);
                 }
 
-                if (itemstack.getItem() == Items.blaze_rod)
+                if (itemstack.getItem() == Items.BLAZE_ROD)
                 {
-                	player.addStat(AchievementList.blazeRod);
+                	player.addStat(AchievementList.BLAZE_ROD);
                 }
 
-                if (itemstack.getItem() == Items.diamond && item.getThrower() != null)
+                if (itemstack.getItem() == Items.DIAMOND && item.getThrower() != null)
                 {
                     EntityPlayer entityplayer = item.worldObj.getPlayerEntityByName(item.getThrower());
 
                     if (entityplayer != null && entityplayer != player)
                     {
-                        entityplayer.addStat(AchievementList.diamondsToYou);
+                        entityplayer.addStat(AchievementList.DIAMONDS_TO_YOU);
                     }
                 }
 
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item);
                 if (!item.isSilent())
                 {
-                	item.worldObj.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.entity_item_pickup, SoundCategory.PLAYERS, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                	item.worldObj.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                 }
 
                 player.onItemPickup(item, i);
@@ -468,7 +468,7 @@ public class ServerPhysic {
                     item.setDead();
                 }
 
-                player.addStat(StatList.func_188056_d(itemstack.getItem()), i);
+                player.addStat(StatList.getObjectsPickedUpStats(itemstack.getItem()), i);
             }
         }
     }
@@ -489,7 +489,7 @@ public class ServerPhysic {
         {
             return false;
         }
-        else if (item.getEntityItem() != null && item.getEntityItem().getItem() == Items.nether_star && source.isExplosion() && canItemBurn(item.getEntityItem()))
+        else if (item.getEntityItem() != null && item.getEntityItem().getItem() == Items.NETHER_STAR && source.isExplosion() && canItemBurn(item.getEntityItem()))
         {
             return false;
         }
