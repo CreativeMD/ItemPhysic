@@ -54,7 +54,7 @@ public class ClientPhysic {
 	}
 	
 	@SideOnly(Side.CLIENT)
-    public static void setPositionAndRotation2(EntityItem item, double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean p_180426_10_)
+	public static void setPositionAndRotationDirect(EntityItem item, double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
     {
 		item.setPosition(x, y, z);		
 		

@@ -34,6 +34,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpt
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -163,8 +164,16 @@ public class EventHandler {
 				double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 				Vec3d vec3d1 = player.getLook(partialTicks);
 		        Vec3d look = position.addVector(vec3d1.xCoord * d0, vec3d1.yCoord * d0, vec3d1.zCoord * d0);
+		        if(event instanceof RightClickBlock)
+		        {
+		        	((RightClickBlock) event).setUseBlock(Result.DENY);
+		        	((RightClickBlock) event).setUseItem(Result.DENY);
+		        	if(event.isCancelable())
+		        		event.setCanceled(true);
+		        }
+		        //System.out.println(result.entityHit.getUniqueID());
 		        
-				PacketHandler.sendPacketToServer(new PickupPacket(position, look));
+				PacketHandler.sendPacketToServer(new PickupPacket(result.entityHit.getUniqueID()));
 			}
 		}
 	}
@@ -178,11 +187,14 @@ public class EventHandler {
 			{
 				onPlayerInteractClient(event, world, player);
 			}
-			if(!player.worldObj.isRemote && cancel)
+			if(!player.worldObj.isRemote)
 			{
 				//entity.interactFirst(event.entityPlayer);	
-				cancel = false;
-				event.setCanceled(true);
+				if(cancel)
+				{
+					cancel = false;
+					event.setCanceled(true);
+				}
 			}
 		}
 	}

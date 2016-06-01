@@ -68,6 +68,7 @@ public class ServerPhysic {
 		swimItem.add(Material.VINE);
 		swimItem.add(Material.WEB);
 		swimItem.add(Material.GRASS);
+		swimItem.add(Blocks.SNOW);
 		swimItem.add("axe");
 		swimItem.add("shovel");
 		swimItem.add("hoe");
@@ -152,6 +153,7 @@ public class ServerPhysic {
 		burnItem.add(Material.VINE);
 		burnItem.add(Material.WEB);
 		burnItem.add(Material.GRASS);
+		burnItem.add(Blocks.SNOW);
 		burnItem.add("axe");
 		burnItem.add("shovel");
 		burnItem.add("hoe");

@@ -43,29 +43,33 @@ public class ItemTransformer implements IClassTransformer {
 	public static boolean obfuscated = false;
 	
 	public static final String[] names = new String[]{".", "net/minecraft/client/renderer/entity/RenderEntityItem", "doRender", "net/minecraft/entity/item/EntityItem", "net/minecraft/entity/Entity",
-			"net/minecraft/client/renderer/entity/Render", "setPositionAndRotation2", "onUpdate", "isBurning", "attackEntityFrom", "net/minecraft/util/DamageSource", "health",
+			"net/minecraft/client/renderer/entity/Render", "setPositionAndRotationDirect", "onUpdate", "isBurning", "attackEntityFrom", "net/minecraft/util/DamageSource",
 			"onCollideWithPlayer", "net/minecraft/entity/player/EntityPlayer", "processInitialInteract", "net/minecraft/item/ItemStack", "net/minecraft/util/EnumHand", "canBeCollidedWith",
-			"net/minecraft/client/entity/EntityPlayerSP", "dropOneItem"};
-	public static final String[] namesOb = new String[]{"/", "brx", "a", "yd", "rr", "brn", "a", "m", "aH", "a", "rc", "f", "d", "zj", "a", "adq", "qm", "ap", "bmt", "a"};
+			"net/minecraft/client/entity/EntityPlayerSP", "dropItem"};
+	public static final String[] namesOb = new String[]{"/", "bru", "a", "yd", "rr", "brk", "a", "m", "aH", "a", "rc", "d", "zj", "a", "adq", "qm", "ap", "bmr", "a"};
+	
+	public static String forcePatch(String input)
+	{
+		for(int zahl = 0; zahl < names.length; zahl++)
+			input = input.replace(names[zahl], namesOb[zahl]);
+		return input;
+	}
 	
 	public static String patch(String input)
 	{
 		if(obfuscated)
-		{
-			for(int zahl = 0; zahl < names.length; zahl++)
-				input = input.replace(names[zahl], namesOb[zahl]);
-		}
+			return forcePatch(input);
 		return input;
 	}
 	
 	@Override
 	public byte[] transform(String arg0, String arg1, byte[] arg2) {
-		if (arg0.equals("brx") | arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem")) {
+		if (arg0.equals(forcePatch("net.minecraft.client.renderer.entity.RenderEntityItem")) | arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem")) {
 			obfuscated = !arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem");
 			ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
 			arg2 = replaceMethodDoRender(arg0, arg2);
 		}
-		if(arg0.equals("yd") | arg0.equals("net.minecraft.entity.item.EntityItem"))
+		if(arg0.equals(forcePatch("net.minecraft.entity.item.EntityItem")) | arg0.equals("net.minecraft.entity.item.EntityItem"))
 		{
 			obfuscated = !arg0.contains("net.minecraft.entity.item.EntityItem");
 			if(FMLCommonHandler.instance().getEffectiveSide().isClient())
@@ -73,7 +77,7 @@ public class ItemTransformer implements IClassTransformer {
 		}
 		if(!isLite)
 		{
-			if(arg0.equals("yd") | arg0.equals("net.minecraft.entity.item.EntityItem"))
+			if(arg0.equals(forcePatch("net.minecraft.entity.item.EntityItem")) | arg0.equals("net.minecraft.entity.item.EntityItem"))
 			{
 				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
 				arg2 = replaceMethodOnUpdate(arg0, arg2);
@@ -81,7 +85,7 @@ public class ItemTransformer implements IClassTransformer {
 				arg2 = replaceMethods(arg0, arg2);
 			}
 
-			if(arg0.equals("bmt") | arg0.equals("net.minecraft.client.entity.EntityPlayerSP"))
+			if(arg0.equals(forcePatch("net.minecraft.client.entity.EntityPlayerSP")) | arg0.equals("net.minecraft.client.entity.EntityPlayerSP"))
 			{
 				obfuscated = !arg0.contains("net.minecraft.client.entity.EntityPlayerSP");
 				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
@@ -167,7 +171,7 @@ public class ItemTransformer implements IClassTransformer {
 	
 	public byte[] addPositionMethod(String name, byte[] bytes)
 	{
-		String targetMethodName = patch("setPositionAndRotation2");
+		String targetMethodName = patch("setPositionAndRotationDirect");
 		String targetMethodDesc = "(DDDFFIZ)V";
 		
 		ClassNode classNode = new ClassNode();
@@ -187,7 +191,7 @@ public class ItemTransformer implements IClassTransformer {
 		m.instructions.add(new VarInsnNode(FLOAD, 8));
 		m.instructions.add(new VarInsnNode(ILOAD, 9));
 		m.instructions.add(new VarInsnNode(ILOAD, 10));
-		m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic",  "setPositionAndRotation2", patch("(Lnet/minecraft/entity/item/EntityItem;DDDFFIZ)V"), false));	
+		m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic",  "setPositionAndRotationDirect", patch("(Lnet/minecraft/entity/item/EntityItem;DDDFFIZ)V"), false));	
 		
 		m.instructions.add(new InsnNode(RETURN));
 		LabelNode label2 = new LabelNode();
@@ -210,7 +214,7 @@ public class ItemTransformer implements IClassTransformer {
 	
 	public byte[] removeDrop(String name, byte[] bytes)
 	{
-		String invokeName = patch("dropOneItem");
+		String invokeName = patch("dropItem");
 		String invokeDESC = patch("(Z)Lnet/minecraft/entity/item/EntityItem;");
 		
 		ClassNode classNode = new ClassNode();
@@ -264,7 +268,6 @@ public class ItemTransformer implements IClassTransformer {
 		String targetMethodName = patch("attackEntityFrom");
 		String targetDESC = patch("(Lnet/minecraft/util/DamageSource;F)Z");
 		String targetNewDESC = patch("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/util/DamageSource;F)Z");
-		String fieldName = patch("health");
 		String targetMethodName2 = patch("onCollideWithPlayer");
 		String targetDESC2 = patch("(Lnet/minecraft/entity/player/EntityPlayer;)V");
 		String newDESC2 = patch("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)V");
