@@ -24,6 +24,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -92,6 +93,7 @@ public class ItemTransformer implements IClassTransformer {
 				arg2 = removeDrop(arg0, arg2);
 			}
 		}
+		
 		return arg2;
 	}
 	
