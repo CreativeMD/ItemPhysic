@@ -258,9 +258,9 @@ public class EventHandler {
 						double rgb = (Math.sin(Math.toRadians((double)System.nanoTime()/10000000D))+1)*0.2;
 						Vec3d color = new Vec3d(rgb, rgb, rgb);
 						//System.out.println(color.xCoord);
-						//RenderHelper2D.drawRect(0, 0, width, height, color, 0.3); TODO ADD IT AGAIN
+						//RenderHelper2D.drawRect(0, 0, width, height, color, 0.3);
 						color = new Vec3d(0, 0, 0);
-						//RenderHelper2D.drawRect(1, 1, width-1, height-1, color, 0.1); TODO ADD IT AGAIN
+						//RenderHelper2D.drawRect(1, 1, width-1, height-1, color, 0.1);
 						GL11.glPopMatrix();
 						
 						
