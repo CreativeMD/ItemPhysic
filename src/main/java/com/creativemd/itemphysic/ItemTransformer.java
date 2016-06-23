@@ -30,11 +30,9 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import com.ibm.icu.text.ChineseDateFormat.Field;
-
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class ItemTransformer implements IClassTransformer {
 
@@ -58,6 +56,17 @@ public class ItemTransformer implements IClassTransformer {
 		return input;
 	}
 	
+	public Side getEffectiveSide()
+    {
+        Thread thr = Thread.currentThread();
+        if (thr.getName().equals("Server thread") || thr.getName().startsWith("Netty Server IO"))
+        {
+            return Side.SERVER;
+        }
+
+        return Side.CLIENT;
+    }
+	
 	@Override
 	public byte[] transform(String arg0, String arg1, byte[] arg2) {
 		if (arg0.equals("bjf") | arg0.contains("net.minecraft.client.renderer.entity.RenderEntityItem")) {
@@ -68,14 +77,15 @@ public class ItemTransformer implements IClassTransformer {
 		if(arg0.equals("uz") | arg0.equals("net.minecraft.entity.item.EntityItem"))
 		{
 			obfuscated = !arg0.contains("net.minecraft.entity.item.EntityItem");
-			if(FMLCommonHandler.instance().getEffectiveSide().isClient())
+			if(getEffectiveSide().isClient())
 				arg2 = addPositionMethod(arg0, arg2);
 		}
 		if(!isLite)
 		{
 			if(arg0.equals("uz") | arg0.equals("net.minecraft.entity.item.EntityItem"))
 			{
-				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
+				System.out.println("[ItemPhysic] Patching " + arg0);
+				//ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
 				arg2 = replaceMethodOnUpdate(arg0, arg2);
 				arg2 = addMethodIsBurning(arg0, arg2);
 				arg2 = replaceMethods(arg0, arg2);
@@ -84,7 +94,7 @@ public class ItemTransformer implements IClassTransformer {
 			if(arg0.equals("bew") | arg0.equals("net.minecraft.client.entity.EntityPlayerSP"))
 			{
 				obfuscated = !arg0.contains("net.minecraft.client.entity.EntityPlayerSP");
-				ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
+				//ItemDummyContainer.logger.info("[ItemPhysic] Patching " + arg0);
 				arg2 = removeDrop(arg0, arg2);
 			}
 		}
