@@ -227,170 +227,57 @@ public class ServerPhysic {
 	
 	public static DataParameter<Optional<ItemStack>> ITEM = null;
 	
-	public static void update(EntityItem item)
+	
+	//replace with if (!this.func_189652_ae()) { this.motionY -= 0.03999999910593033D; } 
+	public static void updatePre(EntityItem item)
 	{
-		if(ITEM == null)
-			ITEM = ReflectionHelper.getPrivateValue(EntityItem.class, null, "ITEM", "field_184525_c", "field_184533_c");
-		ItemStack stack = item.getDataManager().get(ITEM).orNull();
-        if (stack != null && stack.getItem() != null && stack.getItem().onEntityItemUpdate(item)) return;
-        if (item.getEntityItem() == null)
+		ItemStack stack = item.getEntityItem();
+		float f = 0.98F;
+        fluid = getFluid(item);
+        if(fluid == null)
         {
-            item.setDead();
-        }
-        else
-        {
+        	item.motionY -= 0.04D;
+        }else{
+        	double density = (double)fluid.getDensity()/1000D;
+        	double speed = - 1/density * 0.01;
+        	if(canItemSwim(stack))
+            	speed = 0.05;
         	
-        	if (!item.worldObj.isRemote)
-            {
-        		try{
-        			ReflectionHelper.findMethod(Entity.class, item, new String[]{"setFlag", "func_70052_a"}, int.class, boolean.class).invoke(item, 6, item.isGlowing());
-        		}catch(Exception e){
-        			e.printStackTrace();
-        		}
-        		//item.setFlag(6, item.isGlowing());
-            }
-            item.onEntityUpdate();
+        	double speedreduction = (speed-item.motionY)/2;
+        	double maxSpeedReduction = 0.05;
+        	if(speedreduction < -maxSpeedReduction)
+        		speedreduction = -maxSpeedReduction;
+        	if(speedreduction > maxSpeedReduction)
+        		speedreduction = maxSpeedReduction;
+        	item.motionY += speedreduction;
+        	f = (float) (1D/density/1.2);
+        }
+	}
+	
+	//replace with: if (this.worldObj.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA) { this.motionY = 0.20000000298023224D; this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F); }
+	public static void updateBurn(EntityItem item)
+	{
+		if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && canItemBurn(item.getEntityItem()))
+        {
+    		item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+            for(int zahl = 0; zahl < 100; zahl++)
+            	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
+        }
+	}
+	
+	public static Fluid fluid;
+	
+	//Remove this.motionY *= 0.9800000190734863D;
+	//Replace with: if (this.onGround){ this.motionY *= -0.5D; }
+	public static void updatePost(EntityItem item)
+	{
+		if(fluid == null)
+        {
+            item.motionY *= 0.98D;
             
-            int delay = (Integer)ReflectionHelper.getPrivateValue(EntityItem.class, item, "delayBeforeCanPickup", "field_145804_b");
-            
-            if (delay > 0 && delay != 32767)
-            {
-            	item.setPickupDelay(delay-1);
-               // --item.delayBeforeCanPickup;
-            }
-
-            item.prevPosX = item.posX;
-            item.prevPosY = item.posY;
-            item.prevPosZ = item.posZ;
-            
-            float f = 0.98F;
-            Fluid fluid = getFluid(item);
-            if(fluid == null)
-            {
-            	item.motionY -= 0.04D;
-            }else{
-            	double density = (double)fluid.getDensity()/1000D;
-            	double speed = - 1/density * 0.01;
-            	if(canItemSwim(stack))
-	            	speed = 0.05;
-            	
-            	double speedreduction = (speed-item.motionY)/2;
-            	double maxSpeedReduction = 0.05;
-            	if(speedreduction < -maxSpeedReduction)
-            		speedreduction = -maxSpeedReduction;
-            	if(speedreduction > maxSpeedReduction)
-            		speedreduction = maxSpeedReduction;
-            	item.motionY += speedreduction;
-            	
-            	/*double range = 0.005;
-            	double amount = 50;
-            	double speed = -0.05/(density*5);
-            	if(item.motionY > range+speed)
-            		item.motionY -= density/amount;
-            	else if(item.motionY < range-speed)
-            		item.motionY += density/amount;
-            	else
-            		item.motionY = -speed;
-            	
-            	if(canItemSwim(stack))
-            		item.motionY += 0.024*density;*/
-            	
-            	f = (float) (1D/density/1.2);
-
-            	/*double amount = 0.03*((double)fluid.getDensity()/1000D);
-            	if(canItemSwim(stack))
-            		amount += 0.05;
-            	item.motionY += amount;*/
-            }
-            
-            //item.motionY -= 0.03999999910593033D;
-            try{
-            	item.noClip = (Boolean) ReflectionHelper.findMethod(Entity.class, item, new String[]{"pushOutOfBlocks", "func_145771_j"}, double.class, double.class, double.class).invoke(item, item.posX, (item.getEntityBoundingBox().minY + item.getEntityBoundingBox().maxY) / 2.0D, item.posZ);
-            }catch(Exception e){
-            	e.printStackTrace();
-            }
-            item.moveEntity(item.motionX, item.motionY, item.motionZ);
-            boolean flag = (int)item.prevPosX != (int)item.posX || (int)item.prevPosY != (int)item.posY || (int)item.prevPosZ != (int)item.posZ;
-
-            if (flag || item.ticksExisted % 25 == 0)
-            {
-            	if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && canItemBurn(stack))
-                {
-            		item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-                    for(int zahl = 0; zahl < 100; zahl++)
-                    	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
-                }
-            	
-                /*if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.lava)
-                {
-                    item.motionY = 0.20000000298023224D;
-                    item.motionX = (double)((rand.nextFloat() - rand.nextFloat()) * 0.2F);
-                    item.motionZ = (double)((rand.nextFloat() - rand.nextFloat()) * 0.2F);
-                    item.playSound(SoundEvents.entity_generic_burn, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-                }*/
-
-                if (!item.worldObj.isRemote)
-                {
-                	try{
-                		ReflectionHelper.findMethod(EntityItem.class, item, new String[]{"searchForOtherItemsNearby", "func_85054_d"}).invoke(item);
-                	}catch(Exception e){
-                		e.printStackTrace();
-                	}
-                    //item.searchForOtherItemsNearby();
-                }
-            }
-
-            //float f = 0.98F;
-
             if (item.onGround)
             {
-                f = item.worldObj.getBlockState(new BlockPos(MathHelper.floor_double(item.posX), MathHelper.floor_double(item.getEntityBoundingBox().minY) - 1, MathHelper.floor_double(item.posZ))).getBlock().slipperiness * 0.98F;
-            }
-
-            item.motionX *= (double)f;
-            //item.motionY *= 0.9800000190734863D;
-            item.motionZ *= (double)f;
-
-            /*if (item.onGround)
-            {
-                item.motionY *= -0.5D;
-            }*/
-            
-            if(fluid == null)
-            {           
-	            
-	            item.motionY *= 0.98D;
-	            
-	            
-	            if (item.onGround)
-	            {
-	            	item.motionY *= -0.5D;
-	            }
-            }
-            
-            if(getAge(item) < 1 && item.lifespan == 6000)
-            	item.lifespan = ItemDummyContainer.despawnItem;
-            
-            if (getAge(item) != -32768)
-            {
-            	try{
-            		ReflectionHelper.findField(EntityItem.class, "age", "field_70292_b").set(item, getAge(item)+1);
-            	}catch(Exception e){
-            		e.printStackTrace();
-            	}
-            }
-
-            item.handleWaterMovement();
-
-            if (!item.worldObj.isRemote && getAge(item) >= item.lifespan)
-            {
-                int hook = net.minecraftforge.event.ForgeEventFactory.onItemExpire(item, stack);
-                if (hook < 0) item.setDead();
-                else          item.lifespan += hook;
-            }
-            if (stack != null && stack.stackSize <= 0)
-            {
-                item.setDead();
+            	item.motionY *= -0.5D;
             }
         }
 	}
@@ -399,7 +286,6 @@ public class ServerPhysic {
 	{
 		return (Integer) ReflectionHelper.getPrivateValue(EntityItem.class, item, "age", "field_70292_b");
 	}
-	
 	
 	public static void onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer)
     {
