@@ -26,6 +26,7 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -148,9 +149,10 @@ public class ItemTransformer extends CreativeTransformer{
 					replaceLabel(m.instructions, new FieldInsnNode(Opcodes.GETSTATIC, materialClassName, TransformerNames.patchFieldName("LAVA", materialClassName), "L" + materialClassName + ";"), nodes, 5, true);
 					
 					//Post
-					removeLabel(m.instructions, new LineNumberNode(152, null), 1);
+					removeLabel(m.instructions, new LdcInsnNode(new Double("0.9800000190734863")), 1);
 					nodes = getCallingNodes("updatePost", updateDESC);
-					replaceLabel(m.instructions, new LineNumberNode(155, null), null, 1, true);
+					//new LineNumberNode(155, null)
+					replaceLabelBefore(m.instructions, new LdcInsnNode(new Double("-0.5")), nodes, 1, 1, true, false);
 					
 					//Add Burning
 					m = new MethodNode(ACC_PUBLIC, TransformerNames.patchMethodName("isBurning", "()Z", patchClassName("net/minecraft/entity/Entity")), "()Z", null, null);
