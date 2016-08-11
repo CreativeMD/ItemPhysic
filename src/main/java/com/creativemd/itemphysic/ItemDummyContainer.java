@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.creativemd.creativecore.common.packet.CreativeCorePacket;
+import com.creativemd.itemphysic.config.ItemConfigSystem;
 import com.creativemd.itemphysic.packet.DropPacket;
 import com.creativemd.itemphysic.packet.PickupPacket;
 import com.creativemd.itemphysic.physics.ClientPhysic;
@@ -80,6 +81,13 @@ public class ItemDummyContainer extends DummyModContainer {
 		CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
 		
 		CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
+		
+		try{
+			if(!ItemTransformer.isLite && Loader.isModLoaded("ingameconfigmanager"))
+			{
+				ItemConfigSystem.loadConfig();
+			}
+		}catch(Exception e){}
 	}
 	
 	public static Configuration config;
