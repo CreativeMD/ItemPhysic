@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.creativemd.creativecore.common.packet.CreativeCorePacket;
 import com.creativemd.itemphysic.EventHandler;
+import com.creativemd.itemphysic.physics.ServerPhysic;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
@@ -70,9 +71,12 @@ public class PickupPacket extends CreativeCorePacket{
 		EventHandler.cancel = true;
 		//RayTraceResult result = EventHandler.getEntityItem(player, pos, look);
 		Entity item = ((WorldServer) player.worldObj).getEntityFromUuid(uuid);
+		System.out.println("Trying to find entity item!");
 		if(item != null && item instanceof EntityItem)
 		{
-			item.processInitialInteract(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND);
+			System.out.println("Found it!");
+			ServerPhysic.processInitialInteract((EntityItem) item, player, player.getHeldItem(EnumHand.MAIN_HAND), EnumHand.MAIN_HAND);
+			//item.processInitialInteract(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND);
 		}
 	}
 

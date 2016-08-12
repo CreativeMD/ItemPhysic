@@ -205,8 +205,8 @@ public class ItemTransformer extends CreativeTransformer{
 					m.instructions.add(new InsnNode(IRETURN));
 					
 					m.maxLocals = 4;
-					m.localVariables.add(new LocalVariableNode("this", "L" + patchClassName(className.replace(".", "/")) + ";", null, label, label2, 0));
-					m.localVariables.add(new LocalVariableNode("par1EntityPlayer", patchDESC("Lnet/minecraft/entity/player/EntityPlayer;"), null, label, label2, 1));
+					m.localVariables.add(new LocalVariableNode("this", patchDESC("Lnet/minecraft/entity/item/EntityItem;"), null, label, label2, 0));
+					m.localVariables.add(new LocalVariableNode("player", patchDESC("Lnet/minecraft/entity/player/EntityPlayer;"), null, label, label2, 1));
 					m.localVariables.add(new LocalVariableNode("stack", patchDESC("Lnet/minecraft/item/ItemStack;"), null, label, label2, 2));
 					m.localVariables.add(new LocalVariableNode("hand", patchDESC("Lnet/minecraft/util/EnumHand;"), null, label, label2, 3));
 					node.methods.add(m);
