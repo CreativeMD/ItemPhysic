@@ -2,10 +2,10 @@ package com.creativemd.itemphysic.config;
 
 import com.creativemd.creativecore.client.avatar.Avatar;
 import com.creativemd.creativecore.client.avatar.AvatarItemStack;
-import com.creativemd.ingameconfigmanager.api.common.branch.ConfigBranch;
-import com.creativemd.ingameconfigmanager.api.common.branch.ConfigSegmentCollection;
-import com.creativemd.ingameconfigmanager.api.common.segment.BooleanSegment;
-import com.creativemd.ingameconfigmanager.api.common.segment.IntegerSegment;
+import com.creativemd.igcm.api.common.branch.ConfigBranch;
+import com.creativemd.igcm.api.common.branch.ConfigSegmentCollection;
+import com.creativemd.igcm.api.common.segment.BooleanSegment;
+import com.creativemd.igcm.api.common.segment.IntegerSegment;
 import com.creativemd.itemphysic.ItemDummyContainer;
 
 import net.minecraft.init.Items;
