@@ -65,7 +65,7 @@ public class EventHandler {
         //Vec3d vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);
 		double d1 = d0;
         
-        if(FMLCommonHandler.instance().getEffectiveSide().isClient())
+        if(player.getEntityWorld().isRemote)
         {
 	        if (mc.objectMouseOver != null)
 	        {
