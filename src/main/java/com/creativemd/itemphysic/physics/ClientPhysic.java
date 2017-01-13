@@ -93,7 +93,7 @@ public class ClientPhysic {
         RenderHelper.enableStandardItemLighting();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.pushMatrix();
-        IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.worldObj, (EntityLivingBase)null);
+        IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.world, (EntityLivingBase)null);
         /*int j = 1;
         try {
 			j = (int) ReflectionHelper.findMethod(RenderEntityItem.class, renderer, new String[]{"transformModelCount", "func_177077_a"}, EntityItem.class, double.class, double.class, double.class, float.class, IBakedModel.class).invoke(renderer, entity, x, y, z, partialTicks, ibakedmodel);
@@ -169,7 +169,7 @@ public class ClientPhysic {
         			
         	}else{
         		
-	        	if(item != null && !Double.isNaN(item.posX) && !Double.isNaN(item.posY) && !Double.isNaN(item.posZ) && item.worldObj != null)
+	        	if(item != null && !Double.isNaN(item.posX) && !Double.isNaN(item.posY) && !Double.isNaN(item.posZ) && item.world != null)
 	            {
 		            if(item.onGround)item.rotationPitch = 0;
 		            else {
@@ -283,19 +283,19 @@ public class ClientPhysic {
     {
         int i = 1;
 
-        if (stack.stackSize > 48)
+        if (stack.getCount() > 48)
         {
             i = 5;
         }
-        else if (stack.stackSize > 32)
+        else if (stack.getCount() > 32)
         {
             i = 4;
         }
-        else if (stack.stackSize > 16)
+        else if (stack.getCount() > 16)
         {
             i = 3;
         }
-        else if (stack.stackSize > 1)
+        else if (stack.getCount() > 1)
         {
             i = 2;
         }

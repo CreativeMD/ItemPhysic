@@ -70,7 +70,7 @@ public class PickupPacket extends CreativeCorePacket{
 	public void executeServer(EntityPlayer player) {
 		EventHandler.cancel = true;
 		//RayTraceResult result = EventHandler.getEntityItem(player, pos, look);
-		Entity item = ((WorldServer) player.worldObj).getEntityFromUuid(uuid);
+		Entity item = ((WorldServer) player.world).getEntityFromUuid(uuid);
 		System.out.println("Trying to find entity item!");
 		if(item != null && item instanceof EntityItem)
 		{

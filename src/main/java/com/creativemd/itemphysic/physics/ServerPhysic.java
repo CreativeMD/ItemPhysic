@@ -257,11 +257,11 @@ public class ServerPhysic {
 	//replace with: if (this.worldObj.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA) { this.motionY = 0.20000000298023224D; this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F); }
 	public static void updateBurn(EntityItem item)
 	{
-		if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && canItemBurn(item.getEntityItem()))
+		if (item.world.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && canItemBurn(item.getEntityItem()))
         {
     		item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
             for(int zahl = 0; zahl < 100; zahl++)
-            	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
+            	item.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
         }
 	}
 	
@@ -296,12 +296,12 @@ public class ServerPhysic {
     {
 		if(ItemDummyContainer.customPickup && needsSneak && !player.isSneaking())
 			return;
-        if (!item.worldObj.isRemote)
+        if (!item.world.isRemote)
         {
             if (!ItemDummyContainer.customPickup && item.cannotPickup())
             	return;
             ItemStack itemstack = item.getEntityItem();
-            int i = itemstack.stackSize;
+            int i = itemstack.getCount();
 
             int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player, itemstack);
             if (hook < 0) return;
@@ -335,7 +335,7 @@ public class ServerPhysic {
 
                 if (itemstack.getItem() == Items.DIAMOND && item.getThrower() != null)
                 {
-                    EntityPlayer entityplayer = item.worldObj.getPlayerEntityByName(item.getThrower());
+                    EntityPlayer entityplayer = item.world.getPlayerEntityByName(item.getThrower());
 
                     if (entityplayer != null && entityplayer != player)
                     {
@@ -346,12 +346,12 @@ public class ServerPhysic {
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item);
                 if (!item.isSilent())
                 {
-                	item.worldObj.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                	item.world.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
                 }
 
                 player.onItemPickup(item, i);
 
-                if (itemstack.stackSize <= 0)
+                if (itemstack.isEmpty())
                 {
                     item.setDead();
                 }
@@ -383,8 +383,8 @@ public class ServerPhysic {
         }
         else
         {
-        	if((source == DamageSource.lava | source == DamageSource.onFire | source == DamageSource.inFire) && !canItemBurn(item.getEntityItem()))return false;
-        	if(source == DamageSource.cactus)return false;
+        	if((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !canItemBurn(item.getEntityItem()))return false;
+        	if(source == DamageSource.CACTUS)return false;
         	
         	try {
 				ReflectionHelper.findMethod(Entity.class, item, new String[]{"setBeenAttacked", "func_70018_K"}).invoke(item);
@@ -410,7 +410,7 @@ public class ServerPhysic {
 	
 	public static boolean isItemBurning(EntityItem item)
 	{
-		boolean flag = item.worldObj != null && item.worldObj.isRemote;
+		boolean flag = item.world != null && item.world.isRemote;
 		try{
 	        if(!(!item.isImmuneToFire() && ((Integer) ReflectionHelper.getPrivateValue(Entity.class, item, "fire", "field_70151_c") > 0 || flag && (Boolean)ReflectionHelper.findMethod(Entity.class, item, new String[]{"getFlag", "func_70083_f"}, int.class).invoke(item, 0))))
 	        	return false;
@@ -428,13 +428,13 @@ public class ServerPhysic {
 	public static Fluid getFluid(EntityItem item, boolean below)
     {
         double d0 = item.posY + (double)item.getEyeHeight();
-        int i = MathHelper.floor_double(item.posX);
-        int j = MathHelper.floor_float((float)MathHelper.floor_double(d0));
+        int i = MathHelper.floor(item.posX);
+        int j = MathHelper.floor((float)MathHelper.floor(d0));
         if(below)
         	j--;
-        int k = MathHelper.floor_double(item.posZ);
+        int k = MathHelper.floor(item.posZ);
         BlockPos pos = new BlockPos(i, j, k);
-        Block block = item.worldObj.getBlockState(pos).getBlock();
+        Block block = item.world.getBlockState(pos).getBlock();
         
         Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
         if(fluid == null && block instanceof IFluidBlock)
@@ -448,7 +448,7 @@ public class ServerPhysic {
         double filled = 1.0f; //If it's not a liquid assume it's a solid block
         if (block instanceof IFluidBlock)
         {
-            filled = ((IFluidBlock)block).getFilledPercentage(item.worldObj, pos);
+            filled = ((IFluidBlock)block).getFilledPercentage(item.world, pos);
         }
 
         if (filled < 0)

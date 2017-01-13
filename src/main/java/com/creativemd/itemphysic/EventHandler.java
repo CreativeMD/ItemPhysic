@@ -60,7 +60,7 @@ public class EventHandler {
 	{
 		float f1 = 3.0F;
 		double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
-        List list = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().addCoord(position.xCoord, position.yCoord, position.zCoord).expand((double)f1, (double)f1, (double)f1));
+        List list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().addCoord(position.xCoord, position.yCoord, position.zCoord).expand((double)f1, (double)f1, (double)f1));
         //System.out.println("Found " + list.size() + " items in range!");
         //Vec3d vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);
 		double d1 = d0;
@@ -113,7 +113,7 @@ public class EventHandler {
 		/*Vec3 vec31 = player.getLook(1.0F);
 		float f1 = 1.0F;
 		double reach = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
-		Entity entity = player.worldObj.findNearestEntityWithinAABB(EntityItem.class, player.boundingBox.addCoord(vec31.xCoord * reach, vec31.yCoord * reach, vec31.zCoord * reach).expand((double)f1, (double)f1, (double)f1), player);
+		Entity entity = player.world.findNearestEntityWithinAABB(EntityItem.class, player.boundingBox.addCoord(vec31.xCoord * reach, vec31.yCoord * reach, vec31.zCoord * reach).expand((double)f1, (double)f1, (double)f1), player);
 		if(entity instanceof EntityItem && player.getDistanceSqToEntity(entity) <= reach)
 			return (EntityItem) entity;
 		return null;*/
@@ -153,7 +153,7 @@ public class EventHandler {
 				distance = mc.getRenderViewEntity().getDistance(mc.objectMouseOver.hitVec.xCoord, mc.objectMouseOver.hitVec.yCoord, mc.objectMouseOver.hitVec.zCoord);
 			else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
 				distance = mc.getRenderViewEntity().getDistanceToEntity(mc.objectMouseOver.entityHit);
-		RayTraceResult result = getEntityItem(distance, mc.thePlayer);
+		RayTraceResult result = getEntityItem(distance, mc.player);
 		if(result != null)
 		{
 			EntityItem entity = (EntityItem) result.entityHit;
@@ -187,7 +187,7 @@ public class EventHandler {
 			{
 				onPlayerInteractClient(event, world, player);
 			}
-			if(!player.worldObj.isRemote)
+			if(!player.world.isRemote)
 			{
 				//entity.interactFirst(event.entityPlayer);	
 				if(cancel)
@@ -215,7 +215,7 @@ public class EventHandler {
 			mc = Minecraft.getMinecraft();
 		//if(renderer == null)
 			//renderer = (RenderItem) mc.getRenderManager().getEntityClassRenderObject(EntityItem.class);
-		if(mc != null && mc.thePlayer != null && mc.inGameHasFocus)
+		if(mc != null && mc.player != null && mc.inGameHasFocus)
 		{
 			if(ItemDummyContainer.customPickup)
 			{
@@ -225,7 +225,7 @@ public class EventHandler {
 						distance = mc.getRenderViewEntity().getDistance(mc.objectMouseOver.hitVec.xCoord, mc.objectMouseOver.hitVec.yCoord, mc.objectMouseOver.hitVec.zCoord);
 					else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
 						distance = mc.getRenderViewEntity().getDistanceToEntity(mc.objectMouseOver.entityHit);
-				RayTraceResult result = getEntityItem(distance, mc.thePlayer);
+				RayTraceResult result = getEntityItem(distance, mc.player);
 				if(result != null)
 				{
 					EntityItem entity = (EntityItem) result.entityHit;
@@ -234,7 +234,7 @@ public class EventHandler {
 						int space = 15;
 						List list = new ArrayList();
 						try{
-							entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.thePlayer, list, true);
+							entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.player, list, true);
 							list.add(entity.getEntityItem().getDisplayName());
 						}catch(Exception e){
 							list = new ArrayList();
@@ -282,7 +282,7 @@ public class EventHandler {
 			}
 			if(ItemDummyContainer.customThrow)
 			{
-				if(mc.thePlayer.getHeldItemMainhand() != null)
+				if(mc.player.getHeldItemMainhand() != null)
 				{
 					if(mc.gameSettings.keyBindDrop.isKeyDown())
 						power++;
@@ -315,7 +315,7 @@ public class EventHandler {
 				if(mc.gameSettings.keyBindDrop.isPressed())
 				{
 					CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
-				    mc.thePlayer.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
+				    mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
 				}
 			}
 		}
