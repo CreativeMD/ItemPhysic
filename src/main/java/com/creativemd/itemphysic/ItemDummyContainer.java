@@ -100,9 +100,9 @@ public class ItemDummyContainer extends DummyModContainer {
 		config.load();
 		if(!ItemTransformer.isLite)
 		{
-			despawnItem = config.get("Item", "despawn", 6000).getInt(6000);
-			customPickup = config.get("Item", "customPickup", false).getBoolean(false);
-			customThrow = config.get("Item", "customThrow", true).getBoolean(true);
+			despawnItem = config.get("Item", "despawn", 6000).getInt();
+			customPickup = config.get("Item", "customPickup", false).getBoolean();
+			customThrow = config.get("Item", "customThrow", true).getBoolean();
 		}
 		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
 		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
