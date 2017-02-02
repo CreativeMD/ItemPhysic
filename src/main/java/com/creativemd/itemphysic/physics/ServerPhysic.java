@@ -35,7 +35,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -280,6 +279,9 @@ public class ServerPhysic {
             	item.motionY *= -0.5D;
             }
         }
+		
+		if(item.lifespan == 6000 && item.lifespan != ItemDummyContainer.despawnItem)
+			item.lifespan = ItemDummyContainer.despawnItem;
 	}
 	
 	public static int getAge(EntityItem item)
