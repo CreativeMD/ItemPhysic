@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
 
+import javax.annotation.Resource;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -37,6 +39,7 @@ import com.creativemd.creativecore.transformer.CreativeTransformer;
 import com.creativemd.creativecore.transformer.Transformer;
 import com.creativemd.creativecore.transformer.TransformerNames;
 
+@Resource
 public class ItemTransformer extends CreativeTransformer{
 	
 	public ItemTransformer() {

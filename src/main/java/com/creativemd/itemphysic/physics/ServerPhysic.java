@@ -434,6 +434,8 @@ public class ServerPhysic {
         	j--;
         int k = MathHelper.floor_double(item.posZ);
         BlockPos pos = new BlockPos(i, j, k);
+        if(item.worldObj == null)
+        	return null;
         Block block = item.worldObj.getBlockState(pos).getBlock();
         
         Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
