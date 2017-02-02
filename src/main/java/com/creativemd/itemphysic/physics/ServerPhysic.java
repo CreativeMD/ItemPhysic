@@ -482,7 +482,7 @@ public class ServerPhysic {
 	
 	public static boolean contains(ArrayList list, ItemStack stack)
 	{
-		if(stack == null || stack.getItem() == null)
+		if(stack.isEmpty() || stack.getItem() == null)
 			return false;
 			
 		Object object = stack.getItem();
