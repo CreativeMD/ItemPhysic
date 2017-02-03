@@ -289,9 +289,13 @@ public class ServerPhysic {
 		return (Integer) ReflectionHelper.getPrivateValue(EntityItem.class, item, "age", "field_70292_b");
 	}
 	
-	public static void onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer)
+	public static boolean onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer)
     {
-		onCollideWithPlayer(item, par1EntityPlayer, true);
+		if(ItemDummyContainer.customPickup && !par1EntityPlayer.isSneaking())
+			return false;
+        if (!item.world.isRemote || (!ItemDummyContainer.customPickup && item.cannotPickup()))
+            return false;
+        return true;
     }
 	
 	public static void onCollideWithPlayer(EntityItem item, EntityPlayer player, boolean needsSneak)
