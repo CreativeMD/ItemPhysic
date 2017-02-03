@@ -27,6 +27,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
@@ -144,7 +145,7 @@ public class ItemTransformer extends CreativeTransformer{
 					
 					//Pre
 					ArrayList<AbstractInsnNode> nodes = getCallingNodes("updatePre", updateDESC);					
-					replaceLabel(m.instructions, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, patchDESC("net/minecraft/entity/item/EntityItem"), TransformerNames.patchMethodName("func_189652_ae", "()Z", patchClassName("net/minecraft/entity/Entity")), "()Z", false), nodes, 2, true);
+					replaceLabel(m.instructions, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, patchDESC("net/minecraft/entity/item/EntityItem"), TransformerNames.patchMethodName("hasNoGravity", "()Z", patchClassName("net/minecraft/entity/Entity")), "()Z", false), nodes, 2, true);
 					
 					//Burning
 					String materialClassName = patchClassName("net/minecraft/block/material/Material");
@@ -184,11 +185,23 @@ public class ItemTransformer extends CreativeTransformer{
 					String collideDESC = patchDESC("(Lnet/minecraft/entity/player/EntityPlayer;)V");
 					m = findMethod(node, TransformerNames.patchMethodName("onCollideWithPlayer", collideDESC, patchClassName("net/minecraft/entity/Entity")), collideDESC);
 					
-					m.instructions.clear();
-					m.instructions.add(new VarInsnNode(ALOAD, 0));
-					m.instructions.add(new VarInsnNode(ALOAD, 1));
-					m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "onCollideWithPlayer", patchDESC("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)V"), false));
-					m.instructions.add(new InsnNode(RETURN));
+					//m.instructions.clear();
+					AbstractInsnNode before = m.instructions.getFirst();
+					LabelNode label0 = new LabelNode();
+					LabelNode labelElse = new LabelNode();
+					LabelNode labelIf = new LabelNode();
+					m.instructions.insertBefore(before, label0);
+					m.instructions.insertBefore(before, new VarInsnNode(ALOAD, 0));
+					m.instructions.insertBefore(before, new VarInsnNode(ALOAD, 1));
+					m.instructions.insertBefore(before, new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "onCollideWithPlayer", patchDESC("(Lnet/minecraft/entity/item/EntityItem;Lnet/minecraft/entity/player/EntityPlayer;)Z"), false));
+					
+					m.instructions.insertBefore(before, new JumpInsnNode(Opcodes.IFEQ, labelElse));
+					
+					m.instructions.insertBefore(before, labelIf);
+					m.instructions.insertBefore(before, new InsnNode(RETURN));
+					
+					m.instructions.insertBefore(before, labelElse);
+					m.instructions.remove(before);
 					
 					//processInitialInteract
 					String interactDESC = patchDESC("(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;)Z");
