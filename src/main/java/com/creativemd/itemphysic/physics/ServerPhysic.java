@@ -433,6 +433,9 @@ public class ServerPhysic {
 	
 	public static Fluid getFluid(EntityItem item, boolean below)
     {
+		if(item.world == null)
+        	return null;
+		
         double d0 = item.posY + (double)item.getEyeHeight();
         int i = MathHelper.floor(item.posX);
         int j = MathHelper.floor((float)MathHelper.floor(d0));
@@ -440,6 +443,7 @@ public class ServerPhysic {
         	j--;
         int k = MathHelper.floor(item.posZ);
         BlockPos pos = new BlockPos(i, j, k);
+        
         Block block = item.world.getBlockState(pos).getBlock();
         
         Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
