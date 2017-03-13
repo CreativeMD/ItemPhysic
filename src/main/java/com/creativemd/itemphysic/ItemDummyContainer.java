@@ -83,7 +83,7 @@ public class ItemDummyContainer extends DummyModContainer {
 		CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
 		
 		try{
-			if(!ItemTransformer.isLite && Loader.isModLoaded("ingameconfigmanager"))
+			if(!ItemTransformer.isLite && Loader.isModLoaded("igcm"))
 			{
 				ItemConfigSystem.loadConfig();
 			}
