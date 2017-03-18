@@ -33,7 +33,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class ItemDummyContainer extends DummyModContainer {
 	
 	public static final String modid = "itemphysic";
-	public static final String version = "1.3.0";
+	public static final String version = "1.4.0";
 	
 	public ItemDummyContainer() {
 
@@ -82,6 +82,8 @@ public class ItemDummyContainer extends DummyModContainer {
 		
 		CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
 		
+		ServerPhysic.loadItemList();
+		
 		try{
 			if(!ItemTransformer.isLite && Loader.isModLoaded("ingameconfigmanager"))
 			{
@@ -100,14 +102,15 @@ public class ItemDummyContainer extends DummyModContainer {
 		config.load();
 		if(!ItemTransformer.isLite)
 		{
-			despawnItem = config.get("Item", "despawn", 6000).getInt(6000);
-			customPickup = config.get("Item", "customPickup", false).getBoolean(false);
-			customThrow = config.get("Item", "customThrow", true).getBoolean(true);
+			despawnItem = config.get("Item", "despawn", 6000).getInt();
+			customPickup = config.get("Item", "customPickup", false).getBoolean();
+			customThrow = config.get("Item", "customThrow", true).getBoolean();
+			fallSounds = config.getBoolean("fallSounds", "Item", true, "If a sound should be played if an entityitem falls on the ground");
 		}
 		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
 		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
 		config.save();
-		ServerPhysic.loadItemList();
+		
 	}
 	
 	@Subscribe
@@ -126,5 +129,6 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static boolean customPickup;
 	public static boolean customThrow;
 	public static boolean oldRotation;
+	public static boolean fallSounds;
 	
 }

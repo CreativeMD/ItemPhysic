@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -35,6 +36,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -80,7 +82,7 @@ public class EventHandler {
             if(entity instanceof EntityItem)
             {
             	
-                AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().expandXyz((double)entity.getCollisionBorderSize());
+                AxisAlignedBB axisalignedbb = new AxisAlignedBB(entity.getEntityBoundingBox().minX, entity.getEntityBoundingBox().minY, entity.getEntityBoundingBox().minZ, entity.getEntityBoundingBox().maxX, entity.getEntityBoundingBox().maxY, entity.getEntityBoundingBox().maxZ).expandXyz((double) 0.2);
                 RayTraceResult movingobjectposition = axisalignedbb.calculateIntercept(position, look);
                 
                 if(movingobjectposition != null)
@@ -127,7 +129,7 @@ public class EventHandler {
         
         RayTraceResult result = getEntityItem(player, position, look);
         
-		if(result != null && player.getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord) < distance)
+		if(result != null && position.distanceTo(result.hitVec) < distance)
 			return result;
 		
 		return null;
@@ -148,19 +150,19 @@ public class EventHandler {
 	public void onPlayerInteractClient(PlayerInteractEvent event, World world, EntityPlayer player)
 	{
 		double distance = 100;
+		Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 		if(mc.objectMouseOver != null)
 			if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-				distance = mc.getRenderViewEntity().getDistance(mc.objectMouseOver.hitVec.xCoord, mc.objectMouseOver.hitVec.yCoord, mc.objectMouseOver.hitVec.zCoord);
+				distance = position.distanceTo(mc.objectMouseOver.hitVec);
 			else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-				distance = mc.getRenderViewEntity().getDistanceToEntity(mc.objectMouseOver.entityHit);
-		RayTraceResult result = getEntityItem(distance, mc.thePlayer);
+				distance = mc.objectMouseOver.entityHit.getDistance(position.xCoord, position.yCoord, position.zCoord);
+		RayTraceResult result = getEntityItem(distance, mc.player);
 		if(result != null)
 		{
 			EntityItem entity = (EntityItem) result.entityHit;
 			if(world.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
 			{
 				float partialTicks = mc.getRenderPartialTicks();
-				Vec3d position = player.getPositionEyes(partialTicks);
 				double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 				Vec3d vec3d1 = player.getLook(partialTicks);
 		        Vec3d look = position.addVector(vec3d1.xCoord * d0, vec3d1.yCoord * d0, vec3d1.zCoord * d0);
@@ -220,12 +222,13 @@ public class EventHandler {
 			if(ItemDummyContainer.customPickup)
 			{
 				double distance = 100;
+				Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 				if(mc.objectMouseOver != null)
 					if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-						distance = mc.getRenderViewEntity().getDistance(mc.objectMouseOver.hitVec.xCoord, mc.objectMouseOver.hitVec.yCoord, mc.objectMouseOver.hitVec.zCoord);
+						distance = position.distanceTo(mc.objectMouseOver.hitVec);
 					else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-						distance = mc.getRenderViewEntity().getDistanceToEntity(mc.objectMouseOver.entityHit);
-				RayTraceResult result = getEntityItem(distance, mc.thePlayer);
+						distance = mc.objectMouseOver.entityHit.getDistance(position.xCoord, position.yCoord, position.zCoord);
+				RayTraceResult result = getEntityItem(distance, mc.player);
 				if(result != null)
 				{
 					EntityItem entity = (EntityItem) result.entityHit;
@@ -282,40 +285,50 @@ public class EventHandler {
 			}
 			if(ItemDummyContainer.customThrow)
 			{
-				if(mc.thePlayer.getHeldItemMainhand() != null)
-				{
-					if(mc.gameSettings.keyBindDrop.isKeyDown())
-						power++;
-					else
-					{
-						if(power > 0)
-						{
-							power /= 30;
-							if(power < 1)
-								power = 1;
-							if(power > 6)
-								power = 6;
-							PacketHandler.sendPacketToServer(new DropPacket(power, GuiScreen.isCtrlKeyDown()));
-						}
-						power = 0;
-					}
-				}
 				if(power > 0)
 				{
 					int renderPower = power;
-					renderPower /= 30;
+					renderPower /= 6;
 					if(renderPower < 1)
 						renderPower = 1;
 					if(renderPower > 6)
 						renderPower = 6;
-					String text = "Power:" + renderPower;
-					mc.fontRendererObj.drawString(text, mc.displayWidth/4-mc.fontRendererObj.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
+					String text = "Power: " + renderPower;
+					mc.player.sendStatusMessage(new TextComponentString(text), true);
+					//mc.fontRendererObj.drawString(text, mc.displayWidth/4-mc.fontRendererObj.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
 				}
 			}else{
 				if(mc.gameSettings.keyBindDrop.isPressed())
 				{
 					CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
 				    mc.thePlayer.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
+				}
+			}
+		}
+	}
+	
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void gameTick(ClientTickEvent event)
+	{
+		if(event.phase == Phase.END)
+		{
+			if(mc.player != null && mc.player.getHeldItemMainhand() != null)
+			{
+				if(mc.gameSettings.keyBindDrop.isKeyDown())
+					power++;
+				else
+				{
+					if(power > 0)
+					{
+						power /= 6;
+						if(power < 1)
+							power = 1;
+						if(power > 6)
+							power = 6;
+						PacketHandler.sendPacketToServer(new DropPacket(power, GuiScreen.isCtrlKeyDown()));
+					}
+					power = 0;
 				}
 			}
 		}

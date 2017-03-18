@@ -8,6 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import com.creativemd.creativecore.common.utils.sorting.SortingList;
+import com.creativemd.creativecore.common.utils.stack.InfoFuel;
+import com.creativemd.creativecore.common.utils.stack.InfoName;
 import com.creativemd.itemphysic.ItemDummyContainer;
 import com.creativemd.itemphysic.ItemTransformer;
 import com.google.common.base.Optional;
@@ -15,6 +18,7 @@ import com.google.common.base.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -32,6 +36,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.MinecraftForge;
@@ -48,180 +53,38 @@ public class ServerPhysic {
 	
 	public static Random rand = new Random();
 	
-	public static ArrayList swimItem = new ArrayList(); //Can be Material, Block, Item, Stack, String(Contains)
-	public static ArrayList burnItem = new ArrayList(); //Can be Material, Block, Item, Stack, String(Contains)
+	public static SortingList swimmingItems = new SortingList();
+	public static SortingList burningItems = new SortingList();
+	public static SortingList undestroyableItems = new SortingList();
+	public static SortingList ignitingItems = new SortingList();
 	
 	public static void loadItemList()
 	{
-		swimItem.add(Material.WOOD);
-		swimItem.add(Material.CLOTH);
-		swimItem.add(Material.SPONGE);
-		swimItem.add(Material.PACKED_ICE);
-		swimItem.add(Material.ICE);
-		swimItem.add(Material.LEAVES);
-		swimItem.add(Material.PLANTS);
-		swimItem.add(Material.CARPET);
-		swimItem.add(Material.SNOW);
-		swimItem.add(Material.CACTUS);
-		swimItem.add(Material.CAKE);
-		swimItem.add(Material.VINE);
-		swimItem.add(Material.WEB);
-		swimItem.add(Material.GRASS);
-		swimItem.add(Blocks.SNOW);
-		swimItem.add("axe");
-		swimItem.add("shovel");
-		swimItem.add("hoe");
-		swimItem.add("sword");
-		swimItem.add(Items.APPLE);
-		swimItem.add(Items.BOW);
-		swimItem.add(Items.BOWL);
-		swimItem.add(Items.ARROW);
-		swimItem.add(Items.APPLE);
-		swimItem.add(Items.STRING);
-		swimItem.add(Items.FEATHER);
-		swimItem.add(Items.WHEAT);
-		swimItem.add(Items.BREAD);
-		swimItem.add(Items.LEATHER);
-		swimItem.add(Items.LEATHER_BOOTS);
-		swimItem.add(Items.LEATHER_CHESTPLATE);
-		swimItem.add(Items.LEATHER_HELMET);
-		swimItem.add(Items.LEATHER_LEGGINGS);
-		swimItem.add(Items.LEAD);
-		swimItem.add(Items.PAINTING);
-		swimItem.add(Items.SIGN);
-		swimItem.add(Items.ACACIA_BOAT);
-		swimItem.add(Items.ACACIA_DOOR);
-		swimItem.add(Items.DARK_OAK_BOAT);
-		swimItem.add(Items.DARK_OAK_DOOR);
-		swimItem.add(Items.BIRCH_BOAT);
-		swimItem.add(Items.BIRCH_DOOR);
-		swimItem.add(Items.JUNGLE_BOAT);
-		swimItem.add(Items.JUNGLE_DOOR);
-		swimItem.add(Items.BOAT);
-		swimItem.add(Items.OAK_DOOR);
-		swimItem.add(Items.SPRUCE_BOAT);
-		swimItem.add(Items.SPRUCE_DOOR);
-		swimItem.add(Items.SADDLE);
-		swimItem.add(Items.BONE);
-		swimItem.add(Items.SUGAR);
-		swimItem.add(Items.PAPER);
-		swimItem.add(Items.BOOK);
-		swimItem.add(Items.EGG);
-		swimItem.add(Items.FISHING_ROD);
-		swimItem.add(Items.DYE);
-		swimItem.add(Items.CAKE);
-		swimItem.add(Items.BED);
-		swimItem.add(Items.BREAD);
-		swimItem.add(Items.MELON);
-		swimItem.add(Items.SHEARS);
-		swimItem.add(Items.WRITABLE_BOOK);
-		swimItem.add(Items.WRITTEN_BOOK);
-		swimItem.add(Items.CARROT);
-		swimItem.add(Items.POTATO);
-		swimItem.add(Items.POISONOUS_POTATO);
-		swimItem.add(Items.BAKED_POTATO);
-		swimItem.add(Items.MAP);
-		swimItem.add(Items.PUMPKIN_PIE);
-		swimItem.add(Items.NAME_TAG);
-		swimItem.add(Items.ENCHANTED_BOOK);
-		swimItem.add(Items.ELYTRA);
-		swimItem.add(Items.MUTTON);
-		swimItem.add(Items.COOKED_MUTTON);
-		swimItem.add(Items.RABBIT);
-		swimItem.add(Items.COOKED_RABBIT);
-		swimItem.add(Items.RABBIT_STEW);
-		swimItem.add(Items.BEETROOT);
-		swimItem.add(Items.BEETROOT_SEEDS);
-		swimItem.add(Items.BEETROOT_SOUP);
-		swimItem.add(Items.SHIELD);
-		swimItem.add(Items.WHEAT_SEEDS);
-		swimItem.add(Items.PUMPKIN_SEEDS);
-		swimItem.add(Items.MELON_SEEDS);
+		swimmingItems.addSortingObjects(Material.WOOD, Material.CLOTH, Material.SPONGE, Material.PACKED_ICE, Material.ICE, Material.LEAVES, Material.PLANTS, Material.CARPET,
+				Material.SNOW, Material.CACTUS, Material.CAKE, Material.VINE, Material.WEB, Blocks.SNOW, new InfoName("wooden"),
+				Items.APPLE, Items.BOW, Items.BOWL, Items.ARROW, Items.APPLE, Items.STRING, Items.FEATHER,
+				Items.WHEAT, Items.BREAD, Items.PAINTING, Items.SIGN, Items.ACACIA_BOAT, Items.ACACIA_DOOR, Items.DARK_OAK_BOAT, Items.DARK_OAK_DOOR,
+				Items.BIRCH_BOAT, Items.BIRCH_DOOR, Items.JUNGLE_BOAT, Items.JUNGLE_DOOR, Items.BOAT, Items.OAK_DOOR, Items.SPRUCE_BOAT, Items.SPRUCE_DOOR,
+				Items.SADDLE, Items.BONE, Items.SUGAR, Items.EGG, Items.FISHING_ROD, Items.DYE, Items.CAKE, Items.BED, Items.MELON, Items.SHEARS,
+				Items.CARROT, Items.POTATO, Items.POISONOUS_POTATO, Items.BAKED_POTATO, Items.PUMPKIN_PIE,
+				Items.ELYTRA, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT, Items.COOKED_RABBIT, Items.RABBIT_STEW, Items.BEETROOT, Items.BEETROOT_SEEDS,
+				Items.BEETROOT_SOUP, Items.SHIELD, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, Items.SNOWBALL);
 		
-		burnItem.add(Material.WOOD);
-		burnItem.add(Material.CLOTH);
-		burnItem.add(Material.SPONGE);
-		burnItem.add(Material.PACKED_ICE);
-		burnItem.add(Material.ICE);
-		burnItem.add(Material.LEAVES);
-		burnItem.add(Material.PLANTS);
-		burnItem.add(Material.CARPET);
-		burnItem.add(Material.SNOW);
-		burnItem.add(Material.CACTUS);
-		burnItem.add(Material.CAKE);
-		burnItem.add(Material.VINE);
-		burnItem.add(Material.WEB);
-		burnItem.add(Material.GRASS);
-		burnItem.add(Blocks.SNOW);
-		burnItem.add("axe");
-		burnItem.add("shovel");
-		burnItem.add("hoe");
-		burnItem.add("sword");
-		burnItem.add(Items.APPLE);
-		burnItem.add(Items.BOW);
-		burnItem.add(Items.BOWL);
-		burnItem.add(Items.ARROW);
-		burnItem.add(Items.APPLE);
-		burnItem.add(Items.STRING);
-		burnItem.add(Items.FEATHER);
-		burnItem.add(Items.WHEAT);
-		burnItem.add(Items.BREAD);
-		burnItem.add(Items.LEATHER);
-		burnItem.add(Items.LEATHER_BOOTS);
-		burnItem.add(Items.LEATHER_CHESTPLATE);
-		burnItem.add(Items.LEATHER_HELMET);
-		burnItem.add(Items.LEATHER_LEGGINGS);
-		burnItem.add(Items.LEAD);
-		burnItem.add(Items.PAINTING);
-		burnItem.add(Items.SIGN);
-		burnItem.add(Items.ACACIA_BOAT);
-		burnItem.add(Items.ACACIA_DOOR);
-		burnItem.add(Items.DARK_OAK_BOAT);
-		burnItem.add(Items.DARK_OAK_DOOR);
-		burnItem.add(Items.BIRCH_BOAT);
-		burnItem.add(Items.BIRCH_DOOR);
-		burnItem.add(Items.JUNGLE_BOAT);
-		burnItem.add(Items.JUNGLE_DOOR);
-		burnItem.add(Items.BOAT);
-		burnItem.add(Items.OAK_DOOR);
-		burnItem.add(Items.SPRUCE_BOAT);
-		burnItem.add(Items.SPRUCE_DOOR);
-		burnItem.add(Items.SADDLE);
-		burnItem.add(Items.BONE);
-		burnItem.add(Items.SUGAR);
-		burnItem.add(Items.PAPER);
-		burnItem.add(Items.BOOK);
-		burnItem.add(Items.EGG);
-		burnItem.add(Items.FISHING_ROD);
-		burnItem.add(Items.DYE);
-		burnItem.add(Items.CAKE);
-		burnItem.add(Items.BED);
-		burnItem.add(Items.BREAD);
-		burnItem.add(Items.MELON);
-		burnItem.add(Items.SHEARS);
-		burnItem.add(Items.WRITABLE_BOOK);
-		burnItem.add(Items.WRITTEN_BOOK);
-		burnItem.add(Items.CARROT);
-		burnItem.add(Items.POTATO);
-		burnItem.add(Items.POISONOUS_POTATO);
-		burnItem.add(Items.BAKED_POTATO);
-		burnItem.add(Items.MAP);
-		burnItem.add(Items.PUMPKIN_PIE);
-		burnItem.add(Items.NAME_TAG);
-		burnItem.add(Items.ENCHANTED_BOOK);
-		burnItem.add(Items.ELYTRA);
-		burnItem.add(Items.MUTTON);
-		burnItem.add(Items.COOKED_MUTTON);
-		burnItem.add(Items.RABBIT);
-		burnItem.add(Items.COOKED_RABBIT);
-		burnItem.add(Items.RABBIT_STEW);
-		burnItem.add(Items.BEETROOT);
-		burnItem.add(Items.BEETROOT_SEEDS);
-		burnItem.add(Items.BEETROOT_SOUP);
-		burnItem.add(Items.SHIELD);
-		burnItem.add(Items.WHEAT_SEEDS);
-		burnItem.add(Items.PUMPKIN_SEEDS);
-		burnItem.add(Items.MELON_SEEDS);
+		burningItems.addSortingObjects(Material.WOOD, Material.CLOTH, Material.SPONGE, Material.PACKED_ICE, Material.ICE, Material.LEAVES, Material.PLANTS, Material.CARPET,
+				Material.SNOW, Material.CACTUS, Material.CAKE, Material.VINE, Material.WEB, Material.GRASS, Blocks.SNOW, new InfoName("axe"), new InfoName("wooden"),
+				new InfoName("shovel"),	new InfoName("hoe"), new InfoName("sword"), Items.APPLE, Items.BOW, Items.BOWL, Items.ARROW, Items.APPLE, Items.STRING, Items.FEATHER,
+				Items.WHEAT, Items.BREAD, Items.LEATHER, Items.LEATHER_BOOTS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_LEGGINGS, Items.LEAD,
+				Items.PAINTING, Items.SIGN, Items.ACACIA_BOAT, Items.ACACIA_DOOR, Items.DARK_OAK_BOAT, Items.DARK_OAK_DOOR, Items.BIRCH_BOAT, Items.BIRCH_DOOR,
+				Items.JUNGLE_BOAT, Items.JUNGLE_DOOR, Items.BOAT, Items.OAK_DOOR, Items.SPRUCE_BOAT, Items.SPRUCE_DOOR, Items.SADDLE, Items.BONE, Items.SUGAR,
+				Items.PAPER, Items.BOOK, Items.EGG, Items.FISHING_ROD, Items.DYE, Items.CAKE, Items.BED, Items.MELON, Items.SHEARS, Items.WRITABLE_BOOK,
+				Items.WRITTEN_BOOK, Items.CARROT, Items.POTATO, Items.POISONOUS_POTATO, Items.BAKED_POTATO, Items.MAP, Items.PUMPKIN_PIE, Items.NAME_TAG, Items.ENCHANTED_BOOK,
+				Items.ELYTRA, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT, Items.COOKED_RABBIT, Items.RABBIT_STEW, Items.BEETROOT, Items.BEETROOT_SEEDS,
+				Items.BEETROOT_SOUP, Items.SHIELD, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, new InfoFuel(), Items.SPIDER_EYE, Items.ROTTEN_FLESH,
+				Items.SNOWBALL);
+		
+		undestroyableItems.addSortingObjects(Items.NETHER_STAR, Blocks.BEDROCK, Blocks.OBSIDIAN, Material.BARRIER);
+		
+		ignitingItems.addSortingObjects(Material.LAVA, Blocks.TORCH, Items.LAVA_BUCKET, Items.BLAZE_POWDER);
 	}
 	
 	public static DataParameter<Optional<ItemStack>> ITEM = null;
@@ -239,7 +102,7 @@ public class ServerPhysic {
         }else{
         	double density = (double)fluid.getDensity()/1000D;
         	double speed = - 1/density * 0.01;
-        	if(canItemSwim(stack))
+        	if(swimmingItems.canPass(stack))
             	speed = 0.05;
         	
         	double speedreduction = (speed-item.motionY)/2;
@@ -255,13 +118,20 @@ public class ServerPhysic {
 	
 	//replace with: if (this.worldObj.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA) { this.motionY = 0.20000000298023224D; this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F); }
 	public static void updateBurn(EntityItem item)
-	{
-		if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && canItemBurn(item.getEntityItem()))
+	{	
+		if (item.worldObj.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && burningItems.canPass(item.getEntityItem()))
         {
     		item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-            for(int zahl = 0; zahl < 100; zahl++)
+            for(int i = 0; i < 100; i++)
             	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
         }
+		
+		if(item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getEntityItem()))
+		{
+			IBlockState state = item.world.getBlockState(new BlockPos(item).down());
+			if(state.getMaterial().getCanBurn())
+				item.world.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
+		}
 	}
 	
 	public static Fluid fluid;
@@ -278,10 +148,15 @@ public class ServerPhysic {
             {
             	item.motionY *= -0.5D;
             }
+        }else{
+        	item.motionX /= fluid.getDensity()/950D;
+        	item.motionZ /= fluid.getDensity()/950D;
         }
 		
 		if(item.lifespan == 6000 && item.lifespan != ItemDummyContainer.despawnItem)
 			item.lifespan = ItemDummyContainer.despawnItem;
+		
+		
 	}
 	
 	public static int getAge(EntityItem item)
@@ -289,13 +164,19 @@ public class ServerPhysic {
 		return (Integer) ReflectionHelper.getPrivateValue(EntityItem.class, item, "age", "field_70292_b");
 	}
 	
+	public static void updateFallState(EntityItem item, double y, boolean onGroundIn, IBlockState state, BlockPos pos)
+    {
+        if (onGroundIn && item.fallDistance > 0.0F)
+        	item.playSound(SoundEvents.BLOCK_CLOTH_FALL, Math.min(1, item.fallDistance/10), (float) Math.random()*1F+1);
+    }
+	
 	public static boolean onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer)
     {
 		if(ItemDummyContainer.customPickup && !par1EntityPlayer.isSneaking())
-			return false;
-        if (!item.worldObj.isRemote || (!ItemDummyContainer.customPickup && item.cannotPickup()))
-            return false;
-        return true;
+			return true;
+        if (item.worldObj.isRemote || item.cannotPickup())
+            return true;
+        return false;
     }
 	
 	public static void onCollideWithPlayer(EntityItem item, EntityPlayer player, boolean needsSneak)
@@ -383,14 +264,14 @@ public class ServerPhysic {
         {
             return false;
         }
-        else if (item.getEntityItem() != null && item.getEntityItem().getItem() == Items.NETHER_STAR && source.isExplosion() && canItemBurn(item.getEntityItem()))
+        else if (!item.getEntityItem().isEmpty() && undestroyableItems.canPass(item.getEntityItem()))
         {
             return false;
         }
         else
         {
-        	if((source == DamageSource.lava | source == DamageSource.onFire | source == DamageSource.inFire) && !canItemBurn(item.getEntityItem()))return false;
-        	if(source == DamageSource.cactus)return false;
+        	if((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !burningItems.canPass(item.getEntityItem()))return false;
+        	if(source == DamageSource.CACTUS)return false;
         	
         	try {
 				ReflectionHelper.findMethod(Entity.class, item, new String[]{"setBeenAttacked", "func_70018_K"}).invoke(item);
@@ -423,7 +304,7 @@ public class ServerPhysic {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-        return canItemBurn(item.getEntityItem());
+        return burningItems.canPass(item.getEntityItem());
 	}
 	
 	public static Fluid getFluid(EntityItem item)
@@ -475,52 +356,4 @@ public class ServerPhysic {
         }
         return null;
     }
-	
-	public static boolean canItemSwim(ItemStack stack)
-	{
-		return contains(swimItem, stack);
-	}
-	
-	public static boolean canItemBurn(ItemStack stack)
-	{
-		if(TileEntityFurnace.isItemFuel(stack))
-			return true;
-		return contains(burnItem, stack);
-	}
-	
-	public static boolean contains(ArrayList list, ItemStack stack)
-	{
-		if(stack == null || stack.getItem() == null)
-			return false;
-			
-		Object object = stack.getItem();
-		
-		Material material = null;
-		
-		if(object instanceof ItemBlock)
-		{
-			object = Block.getBlockFromItem((Item) object);
-			material = ((Block)object).getMaterial(null);
-		}
-		
-		int[] ores = OreDictionary.getOreIDs(stack);
-		
-		for (int i = 0; i < list.size(); i++) {
-			if(list.get(i) instanceof ItemStack && ItemStack.areItemStacksEqual(stack, (ItemStack) list.get(i)))
-				return true;
-			
-			if(list.get(i) == object)
-				return true;
-			
-			if(list.get(i) == material)
-				return true;
-			
-			if(list.get(i) instanceof String)
-			for (int j = 0; j < ores.length; j++) {
-				if(OreDictionary.getOreName(ores[j]).contains((CharSequence) list.get(i)))
-					return true;
-			}
-		}
-		return false;
-	}
 }
