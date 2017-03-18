@@ -223,6 +223,40 @@ public class ItemTransformer extends CreativeTransformer{
 					m.localVariables.add(new LocalVariableNode("stack", patchDESC("Lnet/minecraft/item/ItemStack;"), null, label, label2, 2));
 					m.localVariables.add(new LocalVariableNode("hand", patchDESC("Lnet/minecraft/util/EnumHand;"), null, label, label2, 3));
 					node.methods.add(m);
+					
+					//updateFallState
+					String updateFallStateDESC = patchDESC("(DZLnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;)V");
+					String updateFallStateName = TransformerNames.patchMethodName("updateFallState", updateFallStateDESC, patchClassName("net/minecraft/entity/Entity"));
+					m = new MethodNode(ACC_PUBLIC, updateFallStateName, updateFallStateDESC, null, null);
+					label = new LabelNode();
+					m.instructions.add(label);
+					m.instructions.add(new VarInsnNode(ALOAD, 0));
+					m.instructions.add(new VarInsnNode(DLOAD, 1));
+					m.instructions.add(new VarInsnNode(ILOAD, 3));
+					m.instructions.add(new VarInsnNode(ALOAD, 4));
+					m.instructions.add(new VarInsnNode(ALOAD, 5));
+					m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "updateFallState", patchDESC( "(Lnet/minecraft/entity/item/EntityItem;DZLnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;)V"), false));
+					m.instructions.add(new LabelNode());
+					
+					m.instructions.add(new VarInsnNode(ALOAD, 0));
+					m.instructions.add(new VarInsnNode(DLOAD, 1));
+					m.instructions.add(new VarInsnNode(ILOAD, 3));
+					m.instructions.add(new VarInsnNode(ALOAD, 4));
+					m.instructions.add(new VarInsnNode(ALOAD, 5));
+					m.instructions.add(new MethodInsnNode(INVOKESPECIAL, patchClassName("net/minecraft/entity/Entity"), updateFallStateName, updateFallStateDESC, false));
+					label2 = new LabelNode();
+					m.instructions.add(label2);
+					m.instructions.add(new InsnNode(RETURN));
+					
+					m.maxLocals = 5;
+					m.maxStack = 6;
+					
+					m.localVariables.add(new LocalVariableNode("this", patchDESC("Lnet/minecraft/entity/item/EntityItem;"), null, label, label2, 0));
+					m.localVariables.add(new LocalVariableNode("y", "D", null, label, label2, 1));
+					m.localVariables.add(new LocalVariableNode("onGroundIn", "Z", null, label, label2, 3));
+					m.localVariables.add(new LocalVariableNode("state", patchDESC("Lnet/minecraft/block/state/IBlockState;"), null, label, label2, 4));
+					m.localVariables.add(new LocalVariableNode("pos", patchDESC("Lnet/minecraft/util/math/BlockPos;"), null, label, label2, 5));
+					node.methods.add(m);
 				}
 			});
 			addTransformer(new Transformer("net.minecraft.client.entity.EntityPlayerSP") {

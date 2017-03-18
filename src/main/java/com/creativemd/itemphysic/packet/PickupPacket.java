@@ -71,10 +71,8 @@ public class PickupPacket extends CreativeCorePacket{
 		EventHandler.cancel = true;
 		//RayTraceResult result = EventHandler.getEntityItem(player, pos, look);
 		Entity item = ((WorldServer) player.world).getEntityFromUuid(uuid);
-		System.out.println("Trying to find entity item!");
 		if(item != null && item instanceof EntityItem)
 		{
-			System.out.println("Found it!");
 			ServerPhysic.processInitialInteract((EntityItem) item, player, player.getHeldItem(EnumHand.MAIN_HAND), EnumHand.MAIN_HAND);
 			//item.processInitialInteract(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND);
 		}
