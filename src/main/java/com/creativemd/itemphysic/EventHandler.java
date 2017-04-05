@@ -232,7 +232,7 @@ public class EventHandler {
 				if(result != null)
 				{
 					EntityItem entity = (EntityItem) result.entityHit;
-					if(entity != null && mc.inGameHasFocus && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
+					if(entity != null && mc.inGameHasFocus && ItemDummyContainer.showTooltip && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
 					{
 						int space = 15;
 						List list = new ArrayList();
