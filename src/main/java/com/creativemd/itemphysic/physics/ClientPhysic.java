@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.renderer.tileentity.RenderItemFrame;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -119,7 +120,7 @@ public class ClientPhysic {
     	
     	
     	//Handle Rotations
-        if (is3D || mc.getRenderManager().options != null)
+        if (item.getAge() > 0 && (is3D || mc.getRenderManager().options != null))
         {
             //float f3 = (((float)item.getAge() + partialTicks) / 20.0F + item.hoverStart) * (180F / (float)Math.PI);
             //GlStateManager.rotate(f3, 0.0F, 1.0F, 0.0F);
