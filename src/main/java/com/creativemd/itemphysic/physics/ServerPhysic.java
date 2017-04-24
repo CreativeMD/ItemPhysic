@@ -126,11 +126,11 @@ public class ServerPhysic {
             	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
         }
 		
-		if(!item.world.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getEntityItem()))
+		if(!item.worldObj.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getEntityItem()))
 		{
-			IBlockState state = item.world.getBlockState(new BlockPos(item).down());
+			IBlockState state = item.worldObj.getBlockState(new BlockPos(item).down());
 			if(state.getMaterial().getCanBurn())
-				item.world.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
+				item.worldObj.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
 		}
 	}
 	
@@ -264,14 +264,14 @@ public class ServerPhysic {
         {
             return false;
         }
-        else if (!item.getEntityItem().isEmpty() && undestroyableItems.canPass(item.getEntityItem()))
+        else if (item.getEntityItem() != null && undestroyableItems.canPass(item.getEntityItem()))
         {
             return false;
         }
         else
         {
-        	if((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !burningItems.canPass(item.getEntityItem()))return false;
-        	if(source == DamageSource.CACTUS)return false;
+        	if((source == DamageSource.lava | source == DamageSource.onFire | source == DamageSource.inFire) && !burningItems.canPass(item.getEntityItem()))return false;
+        	if(source == DamageSource.cactus)return false;
         	
         	try {
 				ReflectionHelper.findMethod(Entity.class, item, new String[]{"setBeenAttacked", "func_70018_K"}).invoke(item);

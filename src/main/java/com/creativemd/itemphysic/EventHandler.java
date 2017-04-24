@@ -156,7 +156,7 @@ public class EventHandler {
 				distance = position.distanceTo(mc.objectMouseOver.hitVec);
 			else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
 				distance = mc.objectMouseOver.entityHit.getDistance(position.xCoord, position.yCoord, position.zCoord);
-		RayTraceResult result = getEntityItem(distance, mc.player);
+		RayTraceResult result = getEntityItem(distance, mc.thePlayer);
 		if(result != null)
 		{
 			EntityItem entity = (EntityItem) result.entityHit;
@@ -228,7 +228,7 @@ public class EventHandler {
 						distance = position.distanceTo(mc.objectMouseOver.hitVec);
 					else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
 						distance = mc.objectMouseOver.entityHit.getDistance(position.xCoord, position.yCoord, position.zCoord);
-				RayTraceResult result = getEntityItem(distance, mc.player);
+				RayTraceResult result = getEntityItem(distance, mc.thePlayer);
 				if(result != null)
 				{
 					EntityItem entity = (EntityItem) result.entityHit;
@@ -294,8 +294,7 @@ public class EventHandler {
 					if(renderPower > 6)
 						renderPower = 6;
 					String text = "Power: " + renderPower;
-					mc.player.sendStatusMessage(new TextComponentString(text), true);
-					//mc.fontRendererObj.drawString(text, mc.displayWidth/4-mc.fontRendererObj.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
+					mc.fontRendererObj.drawString(text, mc.displayWidth/4-mc.fontRendererObj.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
 				}
 			}else{
 				if(mc.gameSettings.keyBindDrop.isPressed())
@@ -313,7 +312,7 @@ public class EventHandler {
 	{
 		if(event.phase == Phase.END)
 		{
-			if(mc.player != null && mc.player.getHeldItemMainhand() != null)
+			if(mc.thePlayer != null && mc.thePlayer.getHeldItemMainhand() != null)
 			{
 				if(mc.gameSettings.keyBindDrop.isKeyDown())
 					power++;
