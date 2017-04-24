@@ -62,7 +62,8 @@ public class EventHandler {
 	{
 		float f1 = 3.0F;
 		double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
-        List list = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().addCoord(position.xCoord, position.yCoord, position.zCoord).expand((double)f1, (double)f1, (double)f1));
+		Vec3d include = look.subtract(position);
+        List list = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().addCoord(include.xCoord, include.yCoord, include.zCoord).expand((double)f1, (double)f1, (double)f1));
         //System.out.println("Found " + list.size() + " items in range!");
         //Vec3d vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);
 		double d1 = d0;
