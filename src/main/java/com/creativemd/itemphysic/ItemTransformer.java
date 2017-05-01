@@ -60,27 +60,41 @@ public class ItemTransformer extends CreativeTransformer{
 				MethodNode m = findMethod(node, method, desc);
 				m.localVariables.clear();
 				
-				m.instructions.clear();
+				m.instructions.add(new LabelNode());
 				
-				m.instructions.add(new VarInsnNode(ALOAD, 0));
-				m.instructions.add(new VarInsnNode(ALOAD, 1));
-				m.instructions.add(new VarInsnNode(DLOAD, 2));
-				m.instructions.add(new VarInsnNode(DLOAD, 4));
-				m.instructions.add(new VarInsnNode(DLOAD, 6));
-				m.instructions.add(new VarInsnNode(FLOAD, 8));
-				m.instructions.add(new VarInsnNode(FLOAD, 9));
-				m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic", "doRender", patchDESC("(L" + patchClassName("net/minecraft/client/renderer/entity/RenderEntityItem") + ";Lnet/minecraft/entity/Entity;DDDFF)V"), false));
+				AbstractInsnNode before = m.instructions.getFirst();
 				
-				m.instructions.add(new VarInsnNode(ALOAD, 0));
-				m.instructions.add(new VarInsnNode(ALOAD, 1));
-				m.instructions.add(new VarInsnNode(DLOAD, 2));
-				m.instructions.add(new VarInsnNode(DLOAD, 4));
-				m.instructions.add(new VarInsnNode(DLOAD, 6));
-				m.instructions.add(new VarInsnNode(FLOAD, 8));
-				m.instructions.add(new VarInsnNode(FLOAD, 9));
-				m.instructions.add(new MethodInsnNode(INVOKESPECIAL, patchClassName("net/minecraft/client/renderer/entity/Render"), method, patchDESC("(Lnet/minecraft/entity/Entity;DDDFF)V"), false));
+				//If
+				m.instructions.insertBefore(before, new VarInsnNode(ALOAD, 0));
+				m.instructions.insertBefore(before, new VarInsnNode(ALOAD, 1));
+				m.instructions.insertBefore(before, new VarInsnNode(DLOAD, 2));
+				m.instructions.insertBefore(before, new VarInsnNode(DLOAD, 4));
+				m.instructions.insertBefore(before, new VarInsnNode(DLOAD, 6));
+				m.instructions.insertBefore(before, new VarInsnNode(FLOAD, 8));
+				m.instructions.insertBefore(before, new VarInsnNode(FLOAD, 9));
+				m.instructions.insertBefore(before, new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic", "doRender", patchDESC("(L" + patchClassName("net/minecraft/client/renderer/entity/RenderEntityItem") + ";Lnet/minecraft/entity/Entity;DDDFF)Z"), false));
 				
-				m.instructions.add(new InsnNode(RETURN));
+				LabelNode elseNode = new LabelNode();
+				m.instructions.insertBefore(before, new JumpInsnNode(Opcodes.IFEQ, elseNode));
+				
+				//Then
+				m.instructions.insertBefore(before, new LabelNode());
+				
+				m.instructions.insertBefore(before, new VarInsnNode(ALOAD, 0));
+				m.instructions.insertBefore(before, new VarInsnNode(ALOAD, 1));
+				m.instructions.insertBefore(before, new VarInsnNode(DLOAD, 2));
+				m.instructions.insertBefore(before, new VarInsnNode(DLOAD, 4));
+				m.instructions.insertBefore(before, new VarInsnNode(DLOAD, 6));
+				m.instructions.insertBefore(before, new VarInsnNode(FLOAD, 8));
+				m.instructions.insertBefore(before, new VarInsnNode(FLOAD, 9));
+				m.instructions.insertBefore(before, new MethodInsnNode(INVOKESPECIAL, patchClassName("net/minecraft/client/renderer/entity/Render"), method, patchDESC("(Lnet/minecraft/entity/Entity;DDDFF)V"), false));
+				
+				m.instructions.insertBefore(before, new InsnNode(RETURN));
+				
+				//Else
+				m.instructions.insertBefore(before, elseNode);
+				m.instructions.insertBefore(before, new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
+				
 			}
 		});
 		addTransformer(new Transformer("net.minecraft.entity.item.EntityItem") {
