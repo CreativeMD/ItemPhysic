@@ -73,7 +73,7 @@ public class ClientPhysic {
 		if(!mc.inGameHasFocus)
 			rotation = 0;
 		
-		IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.world, (EntityLivingBase)null);
+		IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.worldObj, (EntityLivingBase)null);
 		
         boolean is3D = ibakedmodel.isGui3d();
 		boolean applyEffects = item.getAge() > 0 && (is3D || mc.getRenderManager().options != null);
