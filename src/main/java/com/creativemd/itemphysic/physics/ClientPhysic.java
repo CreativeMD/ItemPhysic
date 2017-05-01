@@ -57,20 +57,27 @@ public class ClientPhysic {
 	@SideOnly(Side.CLIENT)
 	public static void setPositionAndRotationDirect(EntityItem item, double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
     {
-		item.setPosition(x, y, z);		
-		
-		//item.setRotation(yaw, pitch);
+		item.setPosition(x, y, z);
     }
 
 	@SideOnly(Side.CLIENT)
-	public static void doRender(RenderEntityItem renderer, Entity entity, double x, double y, double z, float entityYaw, float partialTicks)
-    {
+	public static boolean doRender(RenderEntityItem renderer, Entity entity, double x, double y, double z, float entityYaw, float partialTicks)
+	{
+		EntityItem item = (EntityItem) entity;
+		ItemStack itemstack = item.getEntityItem();
+		
+		if(item.getAge() == 0)
+			return false;
+		
 		rotation = (double)(System.nanoTime()-tick)/2500000*ItemDummyContainer.rotateSpeed;
 		if(!mc.inGameHasFocus)
 			rotation = 0;
-		EntityItem item = ((EntityItem)entity);
 		
-		ItemStack itemstack = item.getEntityItem();
+		IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.world, (EntityLivingBase)null);
+		
+        boolean is3D = ibakedmodel.isGui3d();
+		boolean applyEffects = item.getAge() > 0 && (is3D || mc.getRenderManager().options != null);
+		
         int i;
 
         if (itemstack != null && itemstack.getItem() != null)
@@ -94,15 +101,6 @@ public class ClientPhysic {
         RenderHelper.enableStandardItemLighting();
         GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.pushMatrix();
-        IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.world, (EntityLivingBase)null);
-        /*int j = 1;
-        try {
-			j = (int) ReflectionHelper.findMethod(RenderEntityItem.class, renderer, new String[]{"transformModelCount", "func_177077_a"}, EntityItem.class, double.class, double.class, double.class, float.class, IBakedModel.class).invoke(renderer, entity, x, y, z, partialTicks, ibakedmodel);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}*/
-        boolean flag1 = ibakedmodel.isGui3d();
-        boolean is3D = ibakedmodel.isGui3d();
         int j = getModelCount(itemstack);
         float f = 0.25F;
         float f1 = 0;//shouldBob() ? MathHelper.sin(((float)itemIn.getAge() + p_177077_8_) / 10.0F + itemIn.hoverStart) * 0.1F + 0.1F : 0;
@@ -120,7 +118,7 @@ public class ClientPhysic {
     	
     	
     	//Handle Rotations
-        if (item.getAge() > 0 && (is3D || mc.getRenderManager().options != null))
+        if (applyEffects)
         {
             //float f3 = (((float)item.getAge() + partialTicks) / 20.0F + item.hoverStart) * (180F / (float)Math.PI);
             //GlStateManager.rotate(f3, 0.0F, 1.0F, 0.0F);
@@ -206,7 +204,7 @@ public class ClientPhysic {
         boolean renderOutlines = ReflectionHelper.getPrivateValue(Render.class, renderer, "renderOutlines", "field_188301_f"/*, "field_178639_r"*/);
         
 
-        if (!flag1)
+        if (!is3D)
         {
             float f3 = -0.0F * (float)(j - 1) * 0.5F;
             float f4 = -0.0F * (float)(j - 1) * 0.5F;
@@ -227,7 +225,7 @@ public class ClientPhysic {
         //float f10 = 0.021875F;
         for (int k = 0; k < j; ++k)
         {
-            if (flag1)
+            if (is3D)
             {
                 GlStateManager.pushMatrix();
 
@@ -278,6 +276,7 @@ public class ClientPhysic {
         {
         	renderer.getRenderManager().renderEngine.getTexture(getEntityTexture()).restoreLastBlurMipmap();
         }
+        return true;
     }
 	
 	public static int getModelCount(ItemStack stack)
