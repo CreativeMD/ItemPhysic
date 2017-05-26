@@ -128,9 +128,9 @@ public class ClientPhysic {
         		if(!item.onGround)
         		{
         			double rotation = ClientPhysic.rotation*2;
-            		Fluid fluid = ServerPhysic.getFluid(item);
+            		Fluid fluid = CommonPhysic.getFluid(item);
             		if(fluid == null)
-            			fluid = ServerPhysic.getFluid(item, true);
+            			fluid = CommonPhysic.getFluid(item, true);
             		if(fluid != null)
             		{
             			rotation /= fluid.getDensity()/1000*10;
@@ -173,7 +173,7 @@ public class ClientPhysic {
 		            if(item.onGround)item.rotationPitch = 0;
 		            else {
 		            	double rotation = ClientPhysic.rotation*2;
-	            		Fluid fluid = ServerPhysic.getFluid(item);
+	            		Fluid fluid = CommonPhysic.getFluid(item);
 	            		if(fluid != null)
 	            		{
 	            			rotation /= fluid.getDensity()/1000*10;
