@@ -18,18 +18,18 @@ public class CommonPhysic {
 	
 	public static Fluid getFluid(EntityItem item, boolean below)
     {
-		if(item.world == null)
+		if(item.worldObj == null)
         	return null;
 		
         double d0 = item.posY + (double)item.getEyeHeight();
-        int i = MathHelper.floor(item.posX);
-        int j = MathHelper.floor((float)MathHelper.floor(d0));
+        int i = MathHelper.floor_double(item.posX);
+        int j = MathHelper.floor_double((float)MathHelper.floor_double(d0));
         if(below)
         	j--;
-        int k = MathHelper.floor(item.posZ);
+        int k = MathHelper.floor_double(item.posZ);
         BlockPos pos = new BlockPos(i, j, k);
         
-        Block block = item.world.getBlockState(pos).getBlock();
+        Block block = item.worldObj.getBlockState(pos).getBlock();
         
         Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
         if(fluid == null && block instanceof IFluidBlock)
@@ -43,7 +43,7 @@ public class CommonPhysic {
         double filled = 1.0f; //If it's not a liquid assume it's a solid block
         if (block instanceof IFluidBlock)
         {
-            filled = ((IFluidBlock)block).getFilledPercentage(item.world, pos);
+            filled = ((IFluidBlock)block).getFilledPercentage(item.worldObj, pos);
         }
 
         if (filled < 0)
