@@ -107,6 +107,7 @@ public class ItemDummyContainer extends DummyModContainer {
 			customThrow = config.get("Item", "customThrow", true).getBoolean();
 			fallSounds = config.getBoolean("fallSounds", "Item", true, "If a sound should be played if an entityitem falls on the ground");
 			showTooltip = config.getBoolean("showTooltip", "Item", true, "Show the tooltip of an item, if custom pickup is enabled");
+			enableIgniting = config.getBoolean("enableIgniting", "Item", true, "If igniting items will be enabled or not.");
 		}
 		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
 		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
@@ -132,5 +133,6 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static boolean oldRotation;
 	public static boolean fallSounds;
 	public static boolean showTooltip;
+	public static boolean enableIgniting;
 	
 }

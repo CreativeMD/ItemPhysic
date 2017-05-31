@@ -30,6 +30,8 @@ public class ItemPhysicBranch extends ConfigBranch{
 		registerElement("pickup", new BooleanSegment("custom pickup", false));
 		registerElement("throw", new BooleanSegment("custom throw", true));
 		
+		registerElement("igniting", new BooleanSegment("enable igniting", true));
+		
 		registerElement("swiming", new ConfigBranchSorting("Swimming Items", new ItemStack(Items.BOAT), ServerPhysic.swimmingItems));
 		registerElement("burning", new ConfigBranchSorting("Burning Items", new ItemStack(Items.FIRE_CHARGE), ServerPhysic.burningItems));
 		registerElement("undestroyable", new ConfigBranchSorting("Undestroyable Items", new ItemStack(Blocks.BEDROCK), ServerPhysic.undestroyableItems));
@@ -46,6 +48,7 @@ public class ItemPhysicBranch extends ConfigBranch{
 		ItemDummyContainer.despawnItem = (Integer) getValue("despawn");
 		ItemDummyContainer.customPickup = (Boolean) getValue("pickup");
 		ItemDummyContainer.customThrow = (Boolean) getValue("throw");
+		ItemDummyContainer.enableIgniting = (Boolean) getValue("igniting");
 	}
 
 	@Override
