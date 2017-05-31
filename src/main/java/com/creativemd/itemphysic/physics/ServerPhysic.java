@@ -126,7 +126,7 @@ public class ServerPhysic {
             	item.worldObj.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
         }
 		
-		if(!item.worldObj.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getEntityItem()))
+		if(ItemDummyContainer.enableIgniting && !item.worldObj.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getEntityItem()))
 		{
 			IBlockState state = item.worldObj.getBlockState(new BlockPos(item).down());
 			if(state.getMaterial().getCanBurn())
