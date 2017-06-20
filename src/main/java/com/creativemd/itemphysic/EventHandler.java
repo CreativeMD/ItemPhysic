@@ -15,6 +15,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -63,7 +64,7 @@ public class EventHandler {
 		float f1 = 3.0F;
 		double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 		Vec3d include = look.subtract(position);
-        List list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().addCoord(include.xCoord, include.yCoord, include.zCoord).expand((double)f1, (double)f1, (double)f1));
+        List list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().expand(include.x, include.y, include.z).expand((double)f1, (double)f1, (double)f1));
         //System.out.println("Found " + list.size() + " items in range!");
         //Vec3d vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);
 		double d1 = d0;
@@ -83,7 +84,7 @@ public class EventHandler {
             if(entity instanceof EntityItem)
             {
             	
-                AxisAlignedBB axisalignedbb = new AxisAlignedBB(entity.getEntityBoundingBox().minX, entity.getEntityBoundingBox().minY, entity.getEntityBoundingBox().minZ, entity.getEntityBoundingBox().maxX, entity.getEntityBoundingBox().maxY, entity.getEntityBoundingBox().maxZ).expandXyz((double) 0.2);
+                AxisAlignedBB axisalignedbb = new AxisAlignedBB(entity.getEntityBoundingBox().minX, entity.getEntityBoundingBox().minY, entity.getEntityBoundingBox().minZ, entity.getEntityBoundingBox().maxX, entity.getEntityBoundingBox().maxY, entity.getEntityBoundingBox().maxZ).grow(0.2);
                 RayTraceResult movingobjectposition = axisalignedbb.calculateIntercept(position, look);
                 
                 if(movingobjectposition != null)
@@ -92,7 +93,7 @@ public class EventHandler {
                 	movingobjectposition.entityHit = entity;
                 }
                 
-                if (axisalignedbb.isVecInside(position))
+                if (axisalignedbb.contains(position))
                 {
                     if (0.0D < d2 || d2 == 0.0D)
                     {
@@ -126,7 +127,7 @@ public class EventHandler {
 		Vec3d position = player.getPositionEyes(partialTicks);
 		double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 		Vec3d vec3d1 = player.getLook(partialTicks);
-        Vec3d look = position.addVector(vec3d1.xCoord * d0, vec3d1.yCoord * d0, vec3d1.zCoord * d0);
+        Vec3d look = position.addVector(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
         
         RayTraceResult result = getEntityItem(player, position, look);
         
@@ -156,17 +157,17 @@ public class EventHandler {
 			if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
 				distance = position.distanceTo(mc.objectMouseOver.hitVec);
 			else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-				distance = mc.objectMouseOver.entityHit.getDistance(position.xCoord, position.yCoord, position.zCoord);
+				distance = mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z);
 		RayTraceResult result = getEntityItem(distance, mc.player);
 		if(result != null)
 		{
 			EntityItem entity = (EntityItem) result.entityHit;
-			if(world.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
+			if(world.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z))
 			{
 				float partialTicks = mc.getRenderPartialTicks();
 				double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 				Vec3d vec3d1 = player.getLook(partialTicks);
-		        Vec3d look = position.addVector(vec3d1.xCoord * d0, vec3d1.yCoord * d0, vec3d1.zCoord * d0);
+		        Vec3d look = position.addVector(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
 		        if(event instanceof RightClickBlock)
 		        {
 		        	((RightClickBlock) event).setUseBlock(Result.DENY);
@@ -228,29 +229,29 @@ public class EventHandler {
 					if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
 						distance = position.distanceTo(mc.objectMouseOver.hitVec);
 					else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-						distance = mc.objectMouseOver.entityHit.getDistance(position.xCoord, position.yCoord, position.zCoord);
+						distance = mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z);
 				RayTraceResult result = getEntityItem(distance, mc.player);
 				if(result != null)
 				{
 					EntityItem entity = (EntityItem) result.entityHit;
-					if(entity != null && mc.inGameHasFocus && ItemDummyContainer.showTooltip && distance > mc.getRenderViewEntity().getDistance(result.hitVec.xCoord, result.hitVec.yCoord, result.hitVec.zCoord))
+					if(entity != null && mc.inGameHasFocus && ItemDummyContainer.showTooltip && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z))
 					{
 						int space = 15;
-						List list = new ArrayList();
+						List<String> list = new ArrayList<>();
 						try{
-							entity.getEntityItem().getItem().addInformation(entity.getEntityItem(), mc.player, list, true);
-							list.add(entity.getEntityItem().getDisplayName());
+							entity.getItem().getItem().addInformation(entity.getItem(), mc.player.world, list, ITooltipFlag.TooltipFlags.NORMAL);
+							list.add(entity.getItem().getDisplayName());
 						}catch(Exception e){
 							list = new ArrayList();
 							list.add("ERRORED");
 						}
 						
 						int width = 0;
-						int height = (mc.fontRendererObj.FONT_HEIGHT+space+1)*list.size();
+						int height = (mc.fontRenderer.FONT_HEIGHT+space+1)*list.size();
 						for(int i = 0; i < list.size(); i++)
 						{
 							String text = (String) list.get(i);
-							width = Math.max(width, mc.fontRendererObj.getStringWidth(text)+10);
+							width = Math.max(width, mc.fontRenderer.getStringWidth(text)+10);
 						}
 						
 						GL11.glEnable(GL11.GL_BLEND);
@@ -276,7 +277,7 @@ public class EventHandler {
 						for(int i = 0; i < list.size(); i++)
 						{
 							String text = (String) list.get(i);
-							mc.fontRendererObj.drawString(text, mc.displayWidth/4-mc.fontRendererObj.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(i+1)), 16579836);
+							mc.fontRenderer.drawString(text, mc.displayWidth/4-mc.fontRenderer.getStringWidth(text)/2, mc.displayHeight/4+((list.size()/2)*space-space*(i+1)), 16579836);
 						}
 						//renderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, ((EntityItem)move.entityHit).getEntityItem(), 10, 10);
 						//GL11.glEnable(GL11.GL_BLEND);

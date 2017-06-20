@@ -1,39 +1,25 @@
 package com.creativemd.itemphysic.physics;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 import com.creativemd.itemphysic.ItemDummyContainer;
 
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.RenderItem;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderEntityItem;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.renderer.tileentity.RenderItemFrame;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemCloth;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -64,7 +50,7 @@ public class ClientPhysic {
 	public static boolean doRender(RenderEntityItem renderer, Entity entity, double x, double y, double z, float entityYaw, float partialTicks)
 	{
 		EntityItem item = (EntityItem) entity;
-		ItemStack itemstack = item.getEntityItem();
+		ItemStack itemstack = item.getItem();
 		
 		if(item.getAge() == 0)
 			return false;

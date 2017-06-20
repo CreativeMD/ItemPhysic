@@ -1,22 +1,14 @@
 package com.creativemd.itemphysic.physics;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Ref;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import com.creativemd.creativecore.common.utils.sorting.SortingList;
 import com.creativemd.creativecore.common.utils.stack.InfoFuel;
 import com.creativemd.creativecore.common.utils.stack.InfoName;
 import com.creativemd.itemphysic.ItemDummyContainer;
-import com.creativemd.itemphysic.ItemTransformer;
 import com.google.common.base.Optional;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -25,29 +17,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatList;
-import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
-import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
-import net.minecraftforge.oredict.OreDictionary;
 
 public class ServerPhysic {
 	
@@ -93,7 +71,7 @@ public class ServerPhysic {
 	//replace with if (!this.func_189652_ae()) { this.motionY -= 0.03999999910593033D; } 
 	public static void updatePre(EntityItem item)
 	{
-		ItemStack stack = item.getEntityItem();
+		ItemStack stack = item.getItem();
 		float f = 0.98F;
         fluid = CommonPhysic.getFluid(item);
         if(fluid == null)
@@ -119,14 +97,14 @@ public class ServerPhysic {
 	//replace with: if (this.worldObj.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA) { this.motionY = 0.20000000298023224D; this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F); }
 	public static void updateBurn(EntityItem item)
 	{	
-		if (item.world.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && burningItems.canPass(item.getEntityItem()))
+		if (item.world.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && burningItems.canPass(item.getItem()))
         {
     		item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
             for(int i = 0; i < 100; i++)
             	item.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat()*0.1)-0.05, 0.2*rand.nextDouble(), (rand.nextFloat()*0.1)-0.05);
         }
 		
-		if(ItemDummyContainer.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getEntityItem()))
+		if(ItemDummyContainer.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getItem()))
 		{
 			IBlockState state = item.world.getBlockState(new BlockPos(item).down());
 			if(state.getMaterial().getCanBurn())
@@ -187,60 +165,21 @@ public class ServerPhysic {
         {
             if (!ItemDummyContainer.customPickup && item.cannotPickup())
             	return;
-            ItemStack itemstack = item.getEntityItem();
+            ItemStack itemstack = item.getItem();
             int i = itemstack.getCount();
 
             int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player, itemstack);
             if (hook < 0) return;
-
+            
             if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - getAge(item) <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
             {
-                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.LOG))
-                {
-                	player.addStat(AchievementList.MINE_WOOD);
-                }
-
-                if (itemstack.getItem() == Item.getItemFromBlock(Blocks.LOG2))
-                {
-                	player.addStat(AchievementList.MINE_WOOD);
-                }
-
-                if (itemstack.getItem() == Items.LEATHER)
-                {
-                	player.addStat(AchievementList.KILL_COW);
-                }
-
-                if (itemstack.getItem() == Items.DIAMOND)
-                {
-                	player.addStat(AchievementList.DIAMONDS);
-                }
-
-                if (itemstack.getItem() == Items.BLAZE_ROD)
-                {
-                	player.addStat(AchievementList.BLAZE_ROD);
-                }
-
-                if (itemstack.getItem() == Items.DIAMOND && item.getThrower() != null)
-                {
-                    EntityPlayer entityplayer = item.world.getPlayerEntityByName(item.getThrower());
-
-                    if (entityplayer != null && entityplayer != player)
-                    {
-                        entityplayer.addStat(AchievementList.DIAMONDS_TO_YOU);
-                    }
-                }
-
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item);
-                if (!item.isSilent())
-                {
-                	item.world.playSound((EntityPlayer)null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((rand.nextFloat() - rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                }
-
                 player.onItemPickup(item, i);
 
                 if (itemstack.isEmpty())
                 {
                     item.setDead();
+                    itemstack.setCount(i);
                 }
 
                 player.addStat(StatList.getObjectsPickedUpStats(itemstack.getItem()), i);
@@ -264,13 +203,13 @@ public class ServerPhysic {
         {
             return false;
         }
-        else if (!item.getEntityItem().isEmpty() && undestroyableItems.canPass(item.getEntityItem()))
+        else if (!item.getItem().isEmpty() && undestroyableItems.canPass(item.getItem()))
         {
             return false;
         }
         else
         {
-        	if((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !burningItems.canPass(item.getEntityItem()))return false;
+        	if((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !burningItems.canPass(item.getItem()))return false;
         	if(source == DamageSource.CACTUS)return false;
         	
         	try {
@@ -304,6 +243,6 @@ public class ServerPhysic {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-        return burningItems.canPass(item.getEntityItem());
+        return burningItems.canPass(item.getItem());
 	}
 }
