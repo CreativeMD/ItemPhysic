@@ -313,6 +313,8 @@ public class EventHandler {
 	@SideOnly(Side.CLIENT)
 	public void gameTick(ClientTickEvent event)
 	{
+		if(mc == null)
+			mc = Minecraft.getMinecraft();
 		if(event.phase == Phase.END)
 		{
 			if(mc.player != null && mc.player.getHeldItemMainhand() != null)
