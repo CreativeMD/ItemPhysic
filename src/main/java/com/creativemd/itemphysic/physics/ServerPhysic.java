@@ -1,6 +1,7 @@
 package com.creativemd.itemphysic.physics;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Random;
 
 import com.creativemd.creativecore.common.utils.sorting.SortingList;
@@ -163,7 +164,7 @@ public class ServerPhysic {
             ItemStack itemstack = item.getItem();
             int i = itemstack.getCount();
 
-            int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player, itemstack);
+            int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player);
             if (hook < 0) return;
             
             if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
