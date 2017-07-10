@@ -50,6 +50,7 @@ public class EventHandler {
 	@SubscribeEvent
 	public void onToos(ItemTossEvent event)
 	{
+		//System.out.println("Increase motion " + event.getEntityItem() + " Droppower=" + Droppower);
 		if(!ItemTransformer.isLite)
 		{
 			event.getEntityItem().motionX *= Droppower;

@@ -137,11 +137,6 @@ public class ServerPhysic {
 		
 	}
 	
-	public static int getAge(EntityItem item)
-	{
-		return (Integer) ReflectionHelper.getPrivateValue(EntityItem.class, item, "age", "field_70292_b");
-	}
-	
 	public static void updateFallState(EntityItem item, double y, boolean onGroundIn, IBlockState state, BlockPos pos)
     {
         if (onGroundIn && item.fallDistance > 0.0F)
@@ -171,7 +166,7 @@ public class ServerPhysic {
             int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player, itemstack);
             if (hook < 0) return;
             
-            if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - getAge(item) <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
+            if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
             {
                 net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item);
                 player.onItemPickup(item, i);
@@ -213,13 +208,13 @@ public class ServerPhysic {
         	if(source == DamageSource.CACTUS)return false;
         	
         	try {
-				ReflectionHelper.findMethod(Entity.class, item, new String[]{"setBeenAttacked", "func_70018_K"}).invoke(item);
+        		setBeenAttacked.invoke(item);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
         	//item.setBeenAttacked();
         	try {
-	        	Field health = ReflectionHelper.findField(EntityItem.class, "health", "field_70291_e");
+	        	
 	        	health.setInt(item, (int)((float)health.getInt(item) - amount));
 	        	
 	            if (health.getInt(item) <= 0)
@@ -234,11 +229,16 @@ public class ServerPhysic {
         }
     }
 	
+	private static Method setBeenAttacked = ReflectionHelper.findMethod(Entity.class, "setBeenAttacked", "func_70018_K");
+	private static Field health = ReflectionHelper.findField(EntityItem.class, "health", "field_70291_e");
+	private static Field fire = ReflectionHelper.findField(Entity.class, "fire", "field_190534_ay");
+	private static Method getFlag = ReflectionHelper.findMethod(Entity.class, "getFlag", "func_70083_f", int.class);
+	
 	public static boolean isItemBurning(EntityItem item)
 	{
 		boolean flag = item.world != null && item.world.isRemote;
 		try{
-	        if(!(!item.isImmuneToFire() && ((Integer) ReflectionHelper.getPrivateValue(Entity.class, item, "fire", "field_190534_ay") > 0 || flag && (Boolean)ReflectionHelper.findMethod(Entity.class, item, new String[]{"getFlag", "func_70083_f"}, int.class).invoke(item, 0))))
+	        if(!(!item.isImmuneToFire() && ((Integer) fire.getInt(item) > 0 || flag && (Boolean) getFlag.invoke(item, 0))))
 	        	return false;
 		}catch(Exception e){
 			e.printStackTrace();

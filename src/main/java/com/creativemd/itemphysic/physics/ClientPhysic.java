@@ -1,5 +1,8 @@
 package com.creativemd.itemphysic.physics;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
@@ -39,6 +42,10 @@ public class ClientPhysic {
 	{
 		return TextureMap.LOCATION_BLOCKS_TEXTURE;
 	}
+	
+	private static Field renderOutlines = ReflectionHelper.findField(Render.class, "renderOutlines", "field_188301_f");
+	
+	private static Method getTeamColor = ReflectionHelper.findMethod(Render.class, "getTeamColor", "func_188298_c", Entity.class);
 	
 	@SideOnly(Side.CLIENT)
 	public static void setPositionAndRotationDirect(EntityItem item, double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
@@ -187,7 +194,13 @@ public class ClientPhysic {
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         //int j = renderer.transformModelCount(entity, x, y, z, partialTicks, ibakedmodel);
         
-        boolean renderOutlines = ReflectionHelper.getPrivateValue(Render.class, renderer, "renderOutlines", "field_188301_f"/*, "field_178639_r"*/);
+        boolean renderOutlines = false;
+        
+        try {
+			renderOutlines = ClientPhysic.renderOutlines.getBoolean(renderer);
+		} catch (IllegalArgumentException | IllegalAccessException e1) {
+			e1.printStackTrace();
+		}
         
 
         if (!is3D)
@@ -202,7 +215,7 @@ public class ClientPhysic {
         {
             GlStateManager.enableColorMaterial();
             try {
-				GlStateManager.enableOutlineMode((Integer) ReflectionHelper.findMethod(RenderEntityItem.class, renderer, new String[]{"getTeamColor", "func_188298_c"}, Entity.class).invoke(entity));
+				GlStateManager.enableOutlineMode((Integer) getTeamColor.invoke(entity));
 			} catch (Exception e){
 				e.printStackTrace();
 			}
