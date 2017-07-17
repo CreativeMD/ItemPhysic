@@ -56,6 +56,7 @@ public class EventHandler {
 			event.getEntityItem().motionX *= Droppower;
 			event.getEntityItem().motionY *= Droppower;
 			event.getEntityItem().motionZ *= Droppower;
+			Droppower = 1;
 		}
 	}
 	
@@ -300,13 +301,14 @@ public class EventHandler {
 					mc.player.sendStatusMessage(new TextComponentString(text), true);
 					//mc.fontRendererObj.drawString(text, mc.displayWidth/4-mc.fontRendererObj.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
 				}
-			}else{
-				if(mc.gameSettings.keyBindDrop.isPressed())
+			}/*else{
+				while(mc.gameSettings.keyBindDrop.isPressed())
 				{
 					CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
 				    mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
+				    System.out.println("Drop");
 				}
-			}
+			}*/
 		}
 	}
 	
@@ -331,7 +333,10 @@ public class EventHandler {
 							power = 1;
 						if(power > 6)
 							power = 6;
-						PacketHandler.sendPacketToServer(new DropPacket(power, GuiScreen.isCtrlKeyDown()));
+						if(ItemDummyContainer.customThrow)
+							PacketHandler.sendPacketToServer(new DropPacket(power));
+						CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
+					    mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
 					}
 					power = 0;
 				}
