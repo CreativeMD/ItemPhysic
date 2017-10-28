@@ -96,12 +96,12 @@ public class ServerPhysic {
 	{
 		ItemStack stack = item.getEntityItem();
 		float f = 0.98F;
-        fluid = CommonPhysic.getFluid(item);
-        if(fluid == null)
+        fluid.set(CommonPhysic.getFluid(item));
+        if(fluid.get() == null)
         {
         	item.motionY -= 0.04D;
         }else{
-        	double density = (double)fluid.getDensity()/1000D;
+        	double density = (double)fluid.get().getDensity()/1000D;
         	double speed = - 1/density * 0.01;
         	if(swimmingItems.canPass(stack))
             	speed = 0.05;
@@ -135,13 +135,13 @@ public class ServerPhysic {
 		}
 	}
 	
-	public static Fluid fluid;
+	public static ThreadLocal<Fluid> fluid = new ThreadLocal<>();
 	
 	//Remove this.motionY *= 0.9800000190734863D;
 	//Replace with: if (this.onGround){ this.motionY *= -0.5D; }
 	public static void updatePost(EntityItem item)
 	{
-		if(fluid == null)
+		if(fluid.get() == null)
         {
             item.motionY *= 0.98D;
             
@@ -150,8 +150,8 @@ public class ServerPhysic {
             	item.motionY *= -0.5D;
             }
         }else{
-        	item.motionX /= fluid.getDensity()/950D;
-        	item.motionZ /= fluid.getDensity()/950D;
+        	item.motionX /= fluid.get().getDensity()/950D;
+        	item.motionZ /= fluid.get().getDensity()/950D;
         }
 		
 		if(item.lifespan == 6000 && item.lifespan != ItemDummyContainer.despawnItem)
