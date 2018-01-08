@@ -108,7 +108,7 @@ public class ServerPhysic {
 		if(ItemDummyContainer.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getItem()))
 		{
 			IBlockState state = item.world.getBlockState(new BlockPos(item).down());
-			if(state.getMaterial().getCanBurn())
+			if(state.getMaterial().getCanBurn() && item.world.getBlockState(new BlockPos(item)).getMaterial().isReplaceable())
 				item.world.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
 		}
 	}
@@ -166,14 +166,16 @@ public class ServerPhysic {
 
             int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(item, player);
             if (hook < 0) return;
+            ItemStack clone = itemstack.copy();
             
-            if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack)))
+            if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack) || clone.getCount() > item.getItem().getCount()))
             {
-                net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item);
-                player.onItemPickup(item, i);
+            	clone.setCount(clone.getCount() - item.getItem().getCount());
+                net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item, clone);
 
                 if (itemstack.isEmpty())
                 {
+                	player.onItemPickup(item, i);
                     item.setDead();
                     itemstack.setCount(i);
                 }
