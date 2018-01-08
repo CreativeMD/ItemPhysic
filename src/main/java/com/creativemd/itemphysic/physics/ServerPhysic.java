@@ -130,7 +130,7 @@ public class ServerPhysic {
 		if(ItemDummyContainer.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getEntityItem()))
 		{
 			IBlockState state = item.world.getBlockState(new BlockPos(item).down());
-			if(state.getMaterial().getCanBurn())
+			if(state.getMaterial().getCanBurn() && item.world.getBlockState(new BlockPos(item)).getMaterial().isReplaceable())
 				item.world.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
 		}
 	}
@@ -236,6 +236,7 @@ public class ServerPhysic {
 
                 if (itemstack.isEmpty())
                 {
+                	player.onItemPickup(item, i);
                     item.setDead();
                 }
 
