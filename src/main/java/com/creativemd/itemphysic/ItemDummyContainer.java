@@ -110,6 +110,7 @@ public class ItemDummyContainer extends DummyModContainer {
 			enableIgniting = config.getBoolean("enableIgniting", "Item", true, "If igniting items will be enabled or not.");
 		}
 		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
+		vanillaRendering = config.get("Item", "vanillaRendering", false).getBoolean(false);
 		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
 		config.save();
 		
@@ -131,6 +132,7 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static boolean customPickup;
 	public static boolean customThrow;
 	public static boolean oldRotation;
+	public static boolean vanillaRendering;
 	public static boolean fallSounds;
 	public static boolean showTooltip;
 	public static boolean enableIgniting;
