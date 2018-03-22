@@ -59,7 +59,7 @@ public class ClientPhysic {
 		EntityItem item = (EntityItem) entity;
 		ItemStack itemstack = item.getItem();
 		
-		if(item.getAge() == 0)
+		if(item.getAge() == 0 || ItemDummyContainer.vanillaRendering)
 			return false;
 		
 		rotation = (double)(System.nanoTime()-tick)/2500000*ItemDummyContainer.rotateSpeed;
