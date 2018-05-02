@@ -105,9 +105,10 @@ public class ItemDummyContainer extends DummyModContainer {
 			despawnItem = config.get("Item", "despawn", 6000).getInt();
 			customPickup = config.get("Item", "customPickup", false).getBoolean();
 			customThrow = config.get("Item", "customThrow", true).getBoolean();
-			fallSounds = config.getBoolean("fallSounds", "Item", true, "If a sound should be played if an entityitem falls on the ground");
-			showTooltip = config.getBoolean("showTooltip", "Item", true, "Show the tooltip of an item, if custom pickup is enabled");
+			fallSounds = config.getBoolean("fallSounds", "Item", true, "If a sound should be played if an entityitem falls on the ground.");
+			showTooltip = config.getBoolean("showTooltip", "Item", true, "Show the tooltip of an item, if custom pickup is enabled.");
 			enableIgniting = config.getBoolean("enableIgniting", "Item", true, "If igniting items will be enabled or not.");
+			disableThrowHUD = config.getBoolean("disableThrowHUD", "Item", false, "Whether the throw power should be displayed or not.");
 		}
 		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
 		vanillaRendering = config.get("Item", "vanillaRendering", false).getBoolean(false);
@@ -136,5 +137,6 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static boolean fallSounds;
 	public static boolean showTooltip;
 	public static boolean enableIgniting;
+	public static boolean disableThrowHUD;
 	
 }

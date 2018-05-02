@@ -286,7 +286,7 @@ public class EventHandler {
 					}
 				}
 			}
-			if(ItemDummyContainer.customThrow)
+			if(ItemDummyContainer.customThrow && !ItemDummyContainer.disableThrowHUD)
 			{
 				if(power > 0)
 				{
