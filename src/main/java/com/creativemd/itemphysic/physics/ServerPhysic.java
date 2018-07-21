@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Random;
 
-import com.creativemd.creativecore.common.utils.sorting.SortingList;
 import com.creativemd.creativecore.common.utils.stack.InfoFuel;
 import com.creativemd.creativecore.common.utils.stack.InfoName;
+import com.creativemd.creativecore.common.utils.type.SortingList;
 import com.creativemd.itemphysic.ItemDummyContainer;
 import com.google.common.base.Optional;
 
@@ -211,7 +211,7 @@ public class ServerPhysic {
         	if(source == DamageSource.CACTUS)return false;
         	
         	try {
-        		setBeenAttacked.invoke(item);
+        		markVelocityChanged.invoke(item);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -232,7 +232,7 @@ public class ServerPhysic {
         }
     }
 	
-	private static Method setBeenAttacked = ReflectionHelper.findMethod(Entity.class, "setBeenAttacked", "func_70018_K");
+	private static Method markVelocityChanged = ReflectionHelper.findMethod(Entity.class, "markVelocityChanged", "func_70018_K");
 	private static Field health = ReflectionHelper.findField(EntityItem.class, "health", "field_70291_e");
 	private static Field fire = ReflectionHelper.findField(Entity.class, "fire", "field_190534_ay");
 	private static Method getFlag = ReflectionHelper.findMethod(Entity.class, "getFlag", "func_70083_f", int.class);
