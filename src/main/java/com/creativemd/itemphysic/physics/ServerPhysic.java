@@ -10,6 +10,8 @@ import com.creativemd.creativecore.common.utils.type.SortingList;
 import com.creativemd.itemphysic.ItemDummyContainer;
 import com.google.common.base.Optional;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -25,7 +27,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class ServerPhysic {
@@ -119,6 +124,29 @@ public class ServerPhysic {
 	//Replace with: if (this.onGround){ this.motionY *= -0.5D; }
 	public static void updatePost(EntityItem item)
 	{
+		if(swimmingItems.canPass(item.getItem()))
+		{
+			int i = MathHelper.floor(item.posX);
+	        int j = MathHelper.floor(item.posY);
+	        int k = MathHelper.floor(item.posZ);
+	        BlockPos pos = new BlockPos(i, j, k);
+	        
+	        IBlockState state = item.world.getBlockState(pos);
+	        Block block = state.getBlock();
+	        
+	        Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
+	        if(fluid == null && block instanceof IFluidBlock)
+	        	fluid = ((IFluidBlock)block).getFluid();
+	        else if (block instanceof BlockLiquid)
+	        	fluid = FluidRegistry.WATER;
+	        
+	        if(fluid != null)
+	        {
+	        	item.motionX /= fluid.getDensity()/950D*1.5;
+	        	item.motionZ /= fluid.getDensity()/950D*1.5;
+	        }
+		}
+		
 		if(fluid.get() == null)
         {
             item.motionY *= 0.98D;
