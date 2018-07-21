@@ -29,6 +29,7 @@ import net.minecraft.client.renderer.tileentity.RenderItemFrame;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemCloth;
@@ -120,7 +121,10 @@ public class ClientPhysic {
     	if(is3D)
     		GlStateManager.translate(0, -0.2, -0.08);
     	else
-    		GlStateManager.translate(0, 0, -0.04);
+    		if(entity.world.getBlockState(entity.getPosition()).getBlock() == Blocks.SNOW_LAYER)
+    			GlStateManager.translate(0, 0.0, -0.14);
+    		else
+    			GlStateManager.translate(0, 0, -0.04);
     	
     	
     	//Handle Rotations
