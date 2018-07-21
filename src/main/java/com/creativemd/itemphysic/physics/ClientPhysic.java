@@ -61,6 +61,8 @@ public class ClientPhysic {
 	
 	private static Method getTeamColor = ReflectionHelper.findMethod(Render.class, "getTeamColor", "func_188298_c", Entity.class);
 	
+	private static Field skipPhysicRenderer = ReflectionHelper.findField(EntityItem.class, "skipPhysicRenderer");
+	
 	@SideOnly(Side.CLIENT)
 	public static void setPositionAndRotationDirect(EntityItem item, double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport)
     {
@@ -73,8 +75,12 @@ public class ClientPhysic {
 		EntityItem item = (EntityItem) entity;
 		ItemStack itemstack = item.getEntityItem();
 		
-		if(item.getAge() == 0 || ItemDummyContainer.vanillaRendering)
-			return false;
+		try {
+			if(item.getAge() == 0 || ItemDummyContainer.vanillaRendering || skipPhysicRenderer.getBoolean(item))
+				return false;
+		} catch (IllegalArgumentException | IllegalAccessException e2) {
+			e2.printStackTrace();
+		}
 		
 		rotation = (double)(System.nanoTime()-tick)/2500000*ItemDummyContainer.rotateSpeed;
 		if(!mc.inGameHasFocus)

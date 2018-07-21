@@ -23,6 +23,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -98,6 +99,8 @@ public class ItemTransformer extends CreativeTransformer{
 			
 			@Override
 			public void transform(ClassNode node) {
+				
+				node.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "skipPhysicRenderer", "Z", null, false));
 				
 				String targetMethodDesc = "(DDDFFIZ)V";
 				String targetMethodName = TransformerNames.patchMethodName("setPositionAndRotationDirect", targetMethodDesc, patchClassName("net/minecraft/entity/Entity"));
