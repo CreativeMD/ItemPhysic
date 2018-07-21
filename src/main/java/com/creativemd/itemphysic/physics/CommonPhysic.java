@@ -1,8 +1,13 @@
 package com.creativemd.itemphysic.physics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fluids.Fluid;
@@ -29,7 +34,8 @@ public class CommonPhysic {
         int k = MathHelper.floor(item.posZ);
         BlockPos pos = new BlockPos(i, j, k);
         
-        Block block = item.world.getBlockState(pos).getBlock();
+        IBlockState state = item.world.getBlockState(pos);
+        Block block = state.getBlock();
         
         Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
         if(fluid == null && block instanceof IFluidBlock)
@@ -40,12 +46,15 @@ public class CommonPhysic {
         if(below)
         	return fluid;
         
+        if(fluid == null)
+        	return null;
+        
         double filled = 1.0f; //If it's not a liquid assume it's a solid block
         if (block instanceof IFluidBlock)
-        {
-            filled = ((IFluidBlock)block).getFilledPercentage(item.world, pos);
-        }
-
+        	filled = ((IFluidBlock)block).getFilledPercentage(item.world, pos);
+        else if(block instanceof BlockLiquid)
+        	filled = BlockLiquid.getBlockLiquidHeight(state, item.world, pos);
+        	
         if (filled < 0)
         {
             filled *= -1;

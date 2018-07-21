@@ -40,13 +40,9 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -141,6 +137,29 @@ public class ServerPhysic {
 	//Replace with: if (this.onGround){ this.motionY *= -0.5D; }
 	public static void updatePost(EntityItem item)
 	{
+		if(swimmingItems.canPass(item.getItem()))
+		{
+			int i = MathHelper.floor(item.posX);
+	        int j = MathHelper.floor(item.posY);
+	        int k = MathHelper.floor(item.posZ);
+	        BlockPos pos = new BlockPos(i, j, k);
+	        
+	        IBlockState state = item.world.getBlockState(pos);
+	        Block block = state.getBlock();
+	        
+	        Fluid fluid = FluidRegistry.lookupFluidForBlock(block);
+	        if(fluid == null && block instanceof IFluidBlock)
+	        	fluid = ((IFluidBlock)block).getFluid();
+	        else if (block instanceof BlockLiquid)
+	        	fluid = FluidRegistry.WATER;
+	        
+	        if(fluid != null)
+	        {
+	        	item.motionX /= fluid.getDensity()/950D*1.5;
+	        	item.motionZ /= fluid.getDensity()/950D*1.5;
+	        }
+		}
+		
 		if(fluid.get() == null)
         {
             item.motionY *= 0.98D;
