@@ -137,7 +137,7 @@ public class ServerPhysic {
 	//Replace with: if (this.onGround){ this.motionY *= -0.5D; }
 	public static void updatePost(EntityItem item)
 	{
-		if(swimmingItems.canPass(item.getItem()))
+		if(swimmingItems.canPass(item.getEntityItem()))
 		{
 			int i = MathHelper.floor(item.posX);
 	        int j = MathHelper.floor(item.posY);
