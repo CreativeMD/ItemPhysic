@@ -15,6 +15,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 
 import org.objectweb.asm.ClassReader;
@@ -158,12 +159,15 @@ public class ItemTransformer extends CreativeTransformer{
 					String updateDESC = patchDESC("(Lnet/minecraft/entity/item/EntityItem;)V");
 					
 					//Pre
-					ArrayList<AbstractInsnNode> nodes = getCallingNodes("updatePre", updateDESC);					
-					replaceLabel(m.instructions, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, patchDESC("net/minecraft/entity/item/EntityItem"), TransformerNames.patchMethodName("hasNoGravity", "()Z", patchClassName("net/minecraft/entity/Entity")), "()Z", false), nodes, 2, true);
+					MethodInsnNode methodNode = (MethodInsnNode) findNode(m.instructions, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, patchDESC("net/minecraft/entity/item/EntityItem"), TransformerNames.patchMethodName("hasNoGravity", "()Z", patchClassName("net/minecraft/entity/Entity")), "()Z", false));
+					methodNode.setOpcode(Opcodes.INVOKESTATIC);
+					methodNode.owner = "com/creativemd/itemphysic/physics/ServerPhysic";
+					methodNode.name = "updatePre";
+					methodNode.desc = patchDESC("(Lnet/minecraft/entity/item/EntityItem;)Z");
 					
 					//Burning
 					String materialClassName = patchClassName("net/minecraft/block/material/Material");
-					nodes = getCallingNodes("updateBurn", updateDESC);
+					ArrayList<AbstractInsnNode> nodes = getCallingNodes("updateBurn", updateDESC);
 					replaceLabel(m.instructions, new FieldInsnNode(Opcodes.GETSTATIC, materialClassName, TransformerNames.patchFieldName("LAVA", materialClassName), "L" + materialClassName + ";"), nodes, 5, true);
 					
 					//Post

@@ -74,30 +74,29 @@ public class ServerPhysic {
 	public static DataParameter<Optional<ItemStack>> ITEM = null;
 	
 	
-	//replace with if (!this.func_189652_ae()) { this.motionY -= 0.03999999910593033D; } 
-	public static void updatePre(EntityItem item)
+	//replace with if (!this.hasNoGravity())
+	public static boolean updatePre(EntityItem item)
 	{
 		ItemStack stack = item.getItem();
 		float f = 0.98F;
         fluid.set(CommonPhysic.getFluid(item));
         if(fluid.get() == null)
-        {
-        	item.motionY -= 0.04D;
-        }else{
-        	double density = (double)fluid.get().getDensity()/1000D;
-        	double speed = - 1/density * 0.01;
-        	if(swimmingItems.canPass(stack))
-            	speed = 0.05;
-        	
-        	double speedreduction = (speed-item.motionY)/2;
-        	double maxSpeedReduction = 0.05;
-        	if(speedreduction < -maxSpeedReduction)
-        		speedreduction = -maxSpeedReduction;
-        	if(speedreduction > maxSpeedReduction)
-        		speedreduction = maxSpeedReduction;
-        	item.motionY += speedreduction;
-        	f = (float) (1D/density/1.2);
-        }
+        	return item.hasNoGravity();
+        
+    	double density = (double)fluid.get().getDensity()/1000D;
+    	double speed = - 1/density * 0.01;
+    	if(swimmingItems.canPass(stack))
+        	speed = 0.05;
+    	
+    	double speedreduction = (speed-item.motionY)/2;
+    	double maxSpeedReduction = 0.05;
+    	if(speedreduction < -maxSpeedReduction)
+    		speedreduction = -maxSpeedReduction;
+    	if(speedreduction > maxSpeedReduction)
+    		speedreduction = maxSpeedReduction;
+    	item.motionY += speedreduction;
+    	f = (float) (1D/density/1.2);
+    	return true;
 	}
 	
 	//replace with: if (this.worldObj.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA) { this.motionY = 0.20000000298023224D; this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F); }
