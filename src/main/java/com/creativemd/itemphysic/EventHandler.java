@@ -3,6 +3,7 @@ package com.creativemd.itemphysic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.creativemd.creativecore.common.packet.PacketHandler;
@@ -146,12 +147,14 @@ public class EventHandler {
 	@Method(modid = "creativecore")
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
+		if(ItemPhysicClient.pickup.getKeyCode() != Keyboard.KEY_NONE)
+			return ;
 		if(event instanceof RightClickEmpty || event instanceof RightClickBlock || event instanceof EntityInteract)
 			onPlayerInteract(event, event.getWorld(), event.getEntityPlayer());
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public void onPlayerInteractClient(PlayerInteractEvent event, World world, EntityPlayer player)
+	public boolean onPlayerInteractClient(World world, EntityPlayer player, boolean rightClick)
 	{
 		double distance = 100;
 		Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
@@ -170,18 +173,14 @@ public class EventHandler {
 				double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 				Vec3d vec3d1 = player.getLook(partialTicks);
 		        Vec3d look = position.addVector(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
-		        if(event instanceof RightClickBlock)
-		        {
-		        	((RightClickBlock) event).setUseBlock(Result.DENY);
-		        	((RightClickBlock) event).setUseItem(Result.DENY);
-		        	if(event.isCancelable())
-		        		event.setCanceled(true);
-		        }
+		        
 		        //System.out.println(result.entityHit.getUniqueID());
 		        
-				PacketHandler.sendPacketToServer(new PickupPacket(result.entityHit.getUniqueID()));
+				PacketHandler.sendPacketToServer(new PickupPacket(result.entityHit.getUniqueID(), rightClick));
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	@Method(modid = "creativecore")
@@ -191,7 +190,16 @@ public class EventHandler {
 		{
 			if(world.isRemote && ItemDummyContainer.customPickup)
 			{
-				onPlayerInteractClient(event, world, player);
+				if(onPlayerInteractClient(world, player, true))
+				{
+					if(event instanceof RightClickBlock)
+			        {
+			        	((RightClickBlock) event).setUseBlock(Result.DENY);
+			        	((RightClickBlock) event).setUseItem(Result.DENY);
+			        	if(event.isCancelable())
+			        		event.setCanceled(true);
+			        }
+				}
 			}
 			if(!player.world.isRemote)
 			{
@@ -235,6 +243,8 @@ public class EventHandler {
 				RayTraceResult result = getEntityItem(distance, mc.player);
 				if(result != null)
 				{
+					if(ItemPhysicClient.pickup.isKeyDown())
+						onPlayerInteractClient(mc.world, mc.player, false);
 					EntityItem entity = (EntityItem) result.entityHit;
 					if(entity != null && mc.inGameHasFocus && ItemDummyContainer.showTooltip && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z))
 					{

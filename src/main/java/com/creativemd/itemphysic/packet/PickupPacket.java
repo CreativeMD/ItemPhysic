@@ -17,41 +17,25 @@ import net.minecraft.world.WorldServer;
 
 public class PickupPacket extends CreativeCorePacket{
 	
-	/*public Vec3d look;
-	public Vec3d pos;*/
 	public UUID uuid;
+	public boolean rightClick;
 	
 	public PickupPacket()
 	{
 		
 	}
 	
-	public PickupPacket(UUID uuid)
+	public PickupPacket(UUID uuid, boolean rightClick)
 	{
 		this.uuid = uuid;
+		this.rightClick = rightClick;
 	}
-	
-	/*public PickupPacket(Vec3d pos, Vec3d look) {
-		this.look = look;
-		this.pos = pos;
-	}
-
-	@Override
-	public void writeBytes(ByteBuf buf) {
-		writeVec3(look, buf);
-		writeVec3(pos, buf);
-	}
-
-	@Override
-	public void readBytes(ByteBuf buf) {
-		look = readVec3(buf);
-		pos = readVec3(buf);
-	}*/
 	
 	@Override
 	public void writeBytes(ByteBuf buf) {
 		buf.writeLong(uuid.getLeastSignificantBits());
 		buf.writeLong(uuid.getMostSignificantBits());
+		buf.writeBoolean(rightClick);
 	}
 
 	@Override
@@ -59,6 +43,7 @@ public class PickupPacket extends CreativeCorePacket{
 		long least = buf.readLong();
 		long most = buf.readLong();
 		this.uuid = new UUID(most, least);
+		this.rightClick = buf.readBoolean();
 	}
 
 	@Override
@@ -68,14 +53,12 @@ public class PickupPacket extends CreativeCorePacket{
 
 	@Override
 	public void executeServer(EntityPlayer player) {
-		EventHandler.cancel = true;
-		//RayTraceResult result = EventHandler.getEntityItem(player, pos, look);
+		if(rightClick)
+			EventHandler.cancel = true;
+		
 		Entity item = ((WorldServer) player.world).getEntityFromUuid(uuid);
 		if(item != null && item instanceof EntityItem && !item.isDead)
-		{
 			ServerPhysic.processInitialInteract((EntityItem) item, player, player.getHeldItem(EnumHand.MAIN_HAND), EnumHand.MAIN_HAND);
-			//item.processInitialInteract(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND);
-		}
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.creativemd.itemphysic;
 
+import java.io.File;
 import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,11 +17,14 @@ import com.google.common.eventbus.Subscribe;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.client.FMLFileResourcePack;
+import net.minecraftforge.fml.client.FMLFolderResourcePack;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -69,14 +73,14 @@ public class ItemDummyContainer extends DummyModContainer {
 		if(!ItemTransformer.isLite)
 		{
 			MinecraftForge.EVENT_BUS.register(new EventHandler());
-			initFull();
+			initFull(evt);
 		}else{
 			MinecraftForge.EVENT_BUS.register(new EventHandlerLite());
 		}
 	}
 	
 	@Method(modid = "creativecore")
-	public static void initFull()
+	public static void initFull(FMLInitializationEvent evt)
 	{
 		CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
 		
@@ -90,6 +94,9 @@ public class ItemDummyContainer extends DummyModContainer {
 				ItemConfigSystem.loadConfig();
 			}
 		}catch(Exception e){}
+		
+		if(FMLCommonHandler.instance().getEffectiveSide().isClient())
+			ItemPhysicClient.init(evt);
 	}
 	
 	public static Configuration config;
