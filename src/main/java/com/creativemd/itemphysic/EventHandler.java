@@ -147,8 +147,6 @@ public class EventHandler {
 	@Method(modid = "creativecore")
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
-		if(ItemPhysicClient.pickup.getKeyCode() != Keyboard.KEY_NONE)
-			return ;
 		if(event instanceof RightClickEmpty || event instanceof RightClickBlock || event instanceof EntityInteract)
 			onPlayerInteract(event, event.getWorld(), event.getEntityPlayer());
 	}
@@ -190,6 +188,9 @@ public class EventHandler {
 		{
 			if(world.isRemote && ItemDummyContainer.customPickup)
 			{
+				if(ItemPhysicClient.pickup.getKeyCode() != Keyboard.KEY_NONE)
+					return ;
+				
 				if(onPlayerInteractClient(world, player, true))
 				{
 					if(event instanceof RightClickBlock)
