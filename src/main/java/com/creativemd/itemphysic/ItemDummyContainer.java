@@ -104,6 +104,7 @@ public class ItemDummyContainer extends DummyModContainer {
 		if (!ItemTransformer.isLite) {
 			despawnItem = config.get("Item", "despawn", 6000).getInt();
 			customPickup = config.get("Item", "customPickup", false).getBoolean();
+			pickupWhenSneaking = config.get("Item", "pickupWhenSneaking", true).getBoolean();
 			customThrow = config.get("Item", "customThrow", true).getBoolean();
 			fallSounds = config.getBoolean("fallSounds", "Item", true, "If a sound should be played if an entityitem falls on the ground.");
 			showTooltip = config.getBoolean("showTooltip", "Item", true, "Show the tooltip of an item, if custom pickup is enabled.");
@@ -130,6 +131,7 @@ public class ItemDummyContainer extends DummyModContainer {
 	
 	public static int despawnItem;
 	public static boolean customPickup;
+	public static boolean pickupWhenSneaking;
 	public static boolean customThrow;
 	public static boolean oldRotation;
 	public static boolean vanillaRendering;

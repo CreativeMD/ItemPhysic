@@ -141,7 +141,7 @@ public class ServerPhysic {
 	}
 	
 	public static boolean onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer) {
-		if (ItemDummyContainer.customPickup && !par1EntityPlayer.isSneaking())
+		if (ItemDummyContainer.customPickup && (!par1EntityPlayer.isSneaking() || !ItemDummyContainer.pickupWhenSneaking))
 			return true;
 		if (item.world.isRemote || item.cannotPickup())
 			return true;
@@ -149,7 +149,7 @@ public class ServerPhysic {
 	}
 	
 	public static void onCollideWithPlayer(EntityItem item, EntityPlayer player, boolean needsSneak) {
-		if (ItemDummyContainer.customPickup && needsSneak && !player.isSneaking())
+		if (ItemDummyContainer.customPickup && needsSneak && (!player.isSneaking() || !ItemDummyContainer.pickupWhenSneaking))
 			return;
 		if (!item.world.isRemote) {
 			if (!ItemDummyContainer.customPickup && item.cannotPickup())

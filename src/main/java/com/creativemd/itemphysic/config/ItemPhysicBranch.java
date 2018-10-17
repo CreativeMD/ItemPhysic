@@ -23,6 +23,7 @@ public class ItemPhysicBranch extends ConfigBranch {
 	public void createChildren() {
 		registerElement("despawn", new IntegerSegment("despawn time", 6000));
 		registerElement("pickup", new BooleanSegment("custom pickup", false));
+		registerElement("pickupWhenSneaking", new BooleanSegment("pickup when sneaking", true));
 		registerElement("throw", new BooleanSegment("custom throw", true));
 		
 		registerElement("igniting", new BooleanSegment("enable igniting", true));
@@ -42,6 +43,7 @@ public class ItemPhysicBranch extends ConfigBranch {
 	public void onRecieveFrom(Side side) {
 		ItemDummyContainer.despawnItem = (Integer) getValue("despawn");
 		ItemDummyContainer.customPickup = (Boolean) getValue("pickup");
+		ItemDummyContainer.pickupWhenSneaking = (Boolean) getValue("pickupWhenSneaking");
 		ItemDummyContainer.customThrow = (Boolean) getValue("throw");
 		ItemDummyContainer.enableIgniting = (Boolean) getValue("igniting");
 	}
