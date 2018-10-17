@@ -12,10 +12,8 @@ public class EventHandlerLite {
 	
 	@SubscribeEvent
 	@SideOnly(Side.CLIENT)
-	public void renderTick(RenderTickEvent event)
-	{
-		if(event.phase == Phase.END)
-		{
+	public void renderTick(RenderTickEvent event) {
+		if (event.phase == Phase.END) {
 			ClientPhysic.tick = System.nanoTime();
 		}
 	}

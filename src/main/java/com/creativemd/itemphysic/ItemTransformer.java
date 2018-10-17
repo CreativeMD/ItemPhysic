@@ -14,12 +14,7 @@ import static org.objectweb.asm.Opcodes.IRETURN;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -30,7 +25,6 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
-import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -40,14 +34,14 @@ import com.creativemd.creativecore.transformer.CreativeTransformer;
 import com.creativemd.creativecore.transformer.Transformer;
 import com.creativemd.creativecore.transformer.TransformerNames;
 
-public class ItemTransformer extends CreativeTransformer{
+public class ItemTransformer extends CreativeTransformer {
 	
 	public ItemTransformer() {
 		super("itemphysic");
 	}
-
+	
 	public static boolean isLite = false;
-
+	
 	@Override
 	protected void initTransformers() {
 		addTransformer(new Transformer("net.minecraft.client.renderer.entity.RenderEntityItem") {
@@ -119,7 +113,7 @@ public class ItemTransformer extends CreativeTransformer{
 				m.instructions.add(new VarInsnNode(FLOAD, 8));
 				m.instructions.add(new VarInsnNode(ILOAD, 9));
 				m.instructions.add(new VarInsnNode(ILOAD, 10));
-				m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic",  "setPositionAndRotationDirect", patchDESC("(Lnet/minecraft/entity/item/EntityItem;DDDFFIZ)V"), false));	
+				m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ClientPhysic", "setPositionAndRotationDirect", patchDESC("(Lnet/minecraft/entity/item/EntityItem;DDDFFIZ)V"), false));
 				
 				m.instructions.add(new InsnNode(RETURN));
 				LabelNode label2 = new LabelNode();
@@ -136,11 +130,10 @@ public class ItemTransformer extends CreativeTransformer{
 				node.methods.add(m);
 			}
 		});
-		if(!isLite)
-		{
+		if (!isLite) {
 			addTransformer(new Transformer("net.minecraft.entity.item.EntityItem") {
 				
-				public ArrayList<AbstractInsnNode> getCallingNodes(String methodName, String desc){
+				public ArrayList<AbstractInsnNode> getCallingNodes(String methodName, String desc) {
 					ArrayList<AbstractInsnNode> nodes = new ArrayList<>();
 					//nodes.add(new LabelNode());
 					nodes.add(new VarInsnNode(ALOAD, 0));
@@ -181,7 +174,7 @@ public class ItemTransformer extends CreativeTransformer{
 					LabelNode label = new LabelNode();
 					m.instructions.add(label);
 					m.instructions.add(new VarInsnNode(ALOAD, 0));
-					m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic",  "isItemBurning", patchDESC("(Lnet/minecraft/entity/item/EntityItem;)Z"), false));
+					m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "isItemBurning", patchDESC("(Lnet/minecraft/entity/item/EntityItem;)Z"), false));
 					m.instructions.add(new InsnNode(IRETURN));
 					LabelNode label2 = new LabelNode();
 					m.instructions.add(label2);
@@ -223,7 +216,6 @@ public class ItemTransformer extends CreativeTransformer{
 					
 					//processInitialInteract
 					String interactDESC = patchDESC("(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;)Z");
-
 					
 					m = new MethodNode(ACC_PUBLIC, TransformerNames.patchMethodName("processInitialInteract", interactDESC, patchClassName("net/minecraft/entity/Entity")), interactDESC, null, null);
 					label = new LabelNode();
@@ -256,7 +248,7 @@ public class ItemTransformer extends CreativeTransformer{
 					m.instructions.add(new VarInsnNode(ILOAD, 3));
 					m.instructions.add(new VarInsnNode(ALOAD, 4));
 					m.instructions.add(new VarInsnNode(ALOAD, 5));
-					m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "updateFallState", patchDESC( "(Lnet/minecraft/entity/item/EntityItem;DZLnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;)V"), false));
+					m.instructions.add(new MethodInsnNode(INVOKESTATIC, "com/creativemd/itemphysic/physics/ServerPhysic", "updateFallState", patchDESC("(Lnet/minecraft/entity/item/EntityItem;DZLnet/minecraft/block/state/IBlockState;Lnet/minecraft/util/math/BlockPos;)V"), false));
 					m.instructions.add(new LabelNode());
 					
 					m.instructions.add(new VarInsnNode(ALOAD, 0));

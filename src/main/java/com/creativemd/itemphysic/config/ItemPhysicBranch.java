@@ -1,9 +1,5 @@
 package com.creativemd.itemphysic.config;
 
-import org.apache.logging.log4j.core.jmx.Server;
-
-import com.creativemd.creativecore.client.avatar.Avatar;
-import com.creativemd.creativecore.client.avatar.AvatarItemStack;
 import com.creativemd.igcm.api.ConfigBranch;
 import com.creativemd.igcm.api.segments.BooleanSegment;
 import com.creativemd.igcm.api.segments.IntegerSegment;
@@ -16,14 +12,13 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class ItemPhysicBranch extends ConfigBranch{
-
+public class ItemPhysicBranch extends ConfigBranch {
+	
 	public ItemPhysicBranch(String name) {
 		super(name, new ItemStack(Items.FEATHER));
 	}
-
+	
 	@Override
 	public void createChildren() {
 		registerElement("despawn", new IntegerSegment("despawn time", 6000));
@@ -37,12 +32,12 @@ public class ItemPhysicBranch extends ConfigBranch{
 		registerElement("undestroyable", new ConfigBranchSorting("Undestroyable Items", new ItemStack(Blocks.BEDROCK), ServerPhysic.undestroyableItems));
 		registerElement("igniting", new ConfigBranchSorting("Igniting Items", new ItemStack(Blocks.TORCH), ServerPhysic.ignitingItems));
 	}
-
+	
 	@Override
 	public boolean requiresSynchronization() {
 		return true;
 	}
-
+	
 	@Override
 	public void onRecieveFrom(Side side) {
 		ItemDummyContainer.despawnItem = (Integer) getValue("despawn");
@@ -50,15 +45,15 @@ public class ItemPhysicBranch extends ConfigBranch{
 		ItemDummyContainer.customThrow = (Boolean) getValue("throw");
 		ItemDummyContainer.enableIgniting = (Boolean) getValue("igniting");
 	}
-
+	
 	@Override
 	public void loadExtra(NBTTagCompound nbt) {
 		
 	}
-
+	
 	@Override
 	public void saveExtra(NBTTagCompound nbt) {
 		
 	}
-
+	
 }

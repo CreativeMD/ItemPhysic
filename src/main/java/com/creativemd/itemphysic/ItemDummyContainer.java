@@ -1,6 +1,5 @@
 package com.creativemd.itemphysic;
 
-import java.io.File;
 import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,14 +16,11 @@ import com.google.common.eventbus.Subscribe;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.client.FMLFileResourcePack;
-import net.minecraftforge.fml.client.FMLFolderResourcePack;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.LoadController;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModMetadata;
-import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -40,7 +36,7 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static final String version = "1.4.0";
 	
 	public ItemDummyContainer() {
-
+		
 		super(new ModMetadata());
 		ModMetadata meta = getMetadata();
 		meta.modId = modid;
@@ -61,41 +57,39 @@ public class ItemDummyContainer extends DummyModContainer {
 		bus.register(this);
 		return true;
 	}
-
+	
 	@Subscribe
-	public void modConstruction(FMLConstructionEvent evt){
-
+	public void modConstruction(FMLConstructionEvent evt) {
+		
 	}
 	
 	@Subscribe
 	public void init(FMLInitializationEvent evt) {
 		
-		if(!ItemTransformer.isLite)
-		{
+		if (!ItemTransformer.isLite) {
 			MinecraftForge.EVENT_BUS.register(new EventHandler());
 			initFull(evt);
-		}else{
+		} else {
 			MinecraftForge.EVENT_BUS.register(new EventHandlerLite());
 		}
 	}
 	
 	@Method(modid = "creativecore")
-	public static void initFull(FMLInitializationEvent evt)
-	{
+	public static void initFull(FMLInitializationEvent evt) {
 		CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
 		
 		CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
 		
 		ServerPhysic.loadItemList();
 		
-		try{
-			if(!ItemTransformer.isLite && Loader.isModLoaded("igcm"))
-			{
+		try {
+			if (!ItemTransformer.isLite && Loader.isModLoaded("igcm")) {
 				ItemConfigSystem.loadConfig();
 			}
-		}catch(Exception e){}
+		} catch (Exception e) {
+		}
 		
-		if(FMLCommonHandler.instance().getEffectiveSide().isClient())
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			ItemPhysicClient.init(evt);
 	}
 	
@@ -107,8 +101,7 @@ public class ItemDummyContainer extends DummyModContainer {
 	public void preInit(FMLPreInitializationEvent evt) {
 		config = new Configuration(evt.getSuggestedConfigurationFile());
 		config.load();
-		if(!ItemTransformer.isLite)
-		{
+		if (!ItemTransformer.isLite) {
 			despawnItem = config.get("Item", "despawn", 6000).getInt();
 			customPickup = config.get("Item", "customPickup", false).getBoolean();
 			customThrow = config.get("Item", "customThrow", true).getBoolean();
@@ -126,14 +119,13 @@ public class ItemDummyContainer extends DummyModContainer {
 	
 	@Subscribe
 	@SideOnly(Side.CLIENT)
-	public void onRender(RenderTickEvent evt)
-	{
+	public void onRender(RenderTickEvent evt) {
 		ClientPhysic.tick = System.nanoTime();
 	}
 	
 	@Subscribe
 	public void postInit(FMLPostInitializationEvent evt) {
-
+		
 	}
 	
 	public static int despawnItem;
