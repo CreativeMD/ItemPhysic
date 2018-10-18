@@ -69,34 +69,31 @@ public class ClientPhysic {
 		if (!mc.inGameHasFocus)
 			rotation = 0;
 		
+		GlStateManager.enableRescaleNormal();
 		IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.world, (EntityLivingBase) null);
 		
 		boolean is3D = ibakedmodel.isGui3d();
 		boolean applyEffects = item.getAge() > 0 && (is3D || mc.getRenderManager().options != null);
 		
-		int i;
+		int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
+		random.setSeed((long) i);
+		boolean flag = false;
 		
-		if (itemstack != null && itemstack.getItem() != null) {
-			i = Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
-		} else {
-			i = 187;
+		ResourceLocation location = getEntityTexture();
+		if (location != null) {
+			renderer.bindTexture(location);
+			renderer.getRenderManager().renderEngine.getTexture(location).setBlurMipmap(false, false);
+			flag = true;
 		}
 		
-		random.setSeed((long) i);
-		boolean flag = true;
-		
-		renderer.bindTexture(getEntityTexture());
-		renderer.getRenderManager().renderEngine.getTexture(getEntityTexture()).setBlurMipmap(false, false);
-		
-		GlStateManager.enableRescaleNormal();
 		GlStateManager.alphaFunc(516, 0.1F);
 		GlStateManager.enableBlend();
 		RenderHelper.enableStandardItemLighting();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.pushMatrix();
 		int j = getModelCount(itemstack);
-		float f = 0.25F;
-		float f1 = 0;//shouldBob() ? MathHelper.sin(((float)itemIn.getAge() + p_177077_8_) / 10.0F + itemIn.hoverStart) * 0.1F + 0.1F : 0;
+		//float f = 0.25F;
+		//float f1 = 0;
 		float f2 = ibakedmodel.getItemCameraTransforms().getTransform(ItemCameraTransforms.TransformType.GROUND).scale.y;
 		
 		GlStateManager.translate((float) x, (float) y, (float) z);
@@ -113,8 +110,6 @@ public class ClientPhysic {
 		
 		//Handle Rotations
 		if (applyEffects) {
-			//float f3 = (((float)item.getAge() + partialTicks) / 20.0F + item.hoverStart) * (180F / (float)Math.PI);
-			//GlStateManager.rotate(f3, 0.0F, 1.0F, 0.0F);
 			
 			if (is3D) {
 				if (!item.onGround) {
@@ -163,24 +158,17 @@ public class ClientPhysic {
 					}
 				}
 				
-			} else {
-				
-				if (item != null && !Double.isNaN(item.posX) && !Double.isNaN(item.posY) && !Double.isNaN(item.posZ) && item.world != null) {
-					if (item.onGround)
-						item.rotationPitch = 0;
-					else {
-						double rotation = ClientPhysic.rotation * 2;
-						Fluid fluid = CommonPhysic.getFluid(item);
-						if (fluid != null) {
-							rotation /= fluid.getDensity() / 1000 * 10;
-						}
-						
-						item.rotationPitch += rotation;
-						
-						//if(item.isInsideOfMaterial(Material.water) | item.worldObj.getBlock((int)item.posX, (int)item.posY-1, (int)item.posZ).getMaterial().equals(Material.water) | item.worldObj.getBlock((int)item.posX, (int)item.posY, (int)item.posZ).getMaterial().equals(Material.water))
-						//item.rotationPitch += rotation/1600000*ItemDummyContainer.rotateSpeed;	
-						//else item.rotationPitch += rotation/20000*ItemDummyContainer.rotateSpeed;
+			} else if (item != null && !Double.isNaN(item.posX) && !Double.isNaN(item.posY) && !Double.isNaN(item.posZ) && item.world != null) {
+				if (item.onGround)
+					item.rotationPitch = 0;
+				else {
+					double rotation = ClientPhysic.rotation * 2;
+					Fluid fluid = CommonPhysic.getFluid(item);
+					if (fluid != null) {
+						rotation /= fluid.getDensity() / 1000 * 10;
 					}
+					
+					item.rotationPitch += rotation;
 				}
 			}
 			
@@ -193,8 +181,6 @@ public class ClientPhysic {
 		}
 		
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		//int j = renderer.transformModelCount(entity, x, y, z, partialTicks, ibakedmodel);
-		
 		boolean renderOutlines = false;
 		
 		try {
@@ -218,8 +204,7 @@ public class ClientPhysic {
 				e.printStackTrace();
 			}
 		}
-		//float f9 = 0.0625F;
-		//float f10 = 0.021875F;
+		
 		for (int k = 0; k < j; ++k) {
 			if (is3D) {
 				GlStateManager.pushMatrix();
@@ -230,23 +215,22 @@ public class ClientPhysic {
 					float f9 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
 					float f6 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
 					GlStateManager.translate(renderer.shouldSpreadItems() ? f7 : 0, renderer.shouldSpreadItems() ? f9 : 0, f6);
-					//GlStateManager.translate(0, 0,  0.0625F+0.021875F);
 				}
 				
-				ibakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND, false);
-				mc.getRenderItem().renderItem(itemstack, ibakedmodel);
+				IBakedModel transformedModel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND, false);
+				mc.getRenderItem().renderItem(itemstack, transformedModel);
 				GlStateManager.popMatrix();
 			} else {
 				GlStateManager.pushMatrix();
 				
-				if (k > 0) {
-					//float f8 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-					//float f10 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
-					//GlStateManager.translate(f8, f10, 0.0F);
-				}
+				/* if (k > 0) {
+				 * float f8 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+				 * float f10 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
+				 * GlStateManager.translate(f8, f10, 0.0F);
+				 * } */
 				
-				ibakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND, false);
-				mc.getRenderItem().renderItem(itemstack, ibakedmodel);
+				IBakedModel transformedModel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(ibakedmodel, ItemCameraTransforms.TransformType.GROUND, false);
+				mc.getRenderItem().renderItem(itemstack, transformedModel);
 				GlStateManager.popMatrix();
 				GlStateManager.translate(0.0F, 0.0F, 0.05375F);
 			}
@@ -263,7 +247,7 @@ public class ClientPhysic {
 		renderer.bindTexture(getEntityTexture());
 		
 		if (flag) {
-			renderer.getRenderManager().renderEngine.getTexture(getEntityTexture()).restoreLastBlurMipmap();
+			renderer.getRenderManager().renderEngine.getTexture(location).restoreLastBlurMipmap();
 		}
 		return true;
 	}
