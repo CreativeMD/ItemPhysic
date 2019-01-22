@@ -112,6 +112,7 @@ public class ItemDummyContainer extends DummyModContainer {
 			disableThrowHUD = config.getBoolean("disableThrowHUD", "Item", false, "Whether the throw power should be displayed or not.");
 			
 			maximumPickupRange = config.getFloat("pickupRange", "Item", 5, 0.1F, 100, "The distance at which the player can pickup an item (only if customPickup is enabled)");
+			pickupMinedImmediately = config.getBoolean("pickupMinedImmediately", "Item", false, "If the items dropped from a mined block should be added to the inventory directly.");
 		}
 		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
 		vanillaRendering = config.get("Item", "vanillaRendering", false).getBoolean(false);
@@ -142,5 +143,6 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static boolean enableIgniting;
 	public static boolean disableThrowHUD;
 	public static float maximumPickupRange;
+	public static boolean pickupMinedImmediately;
 	
 }

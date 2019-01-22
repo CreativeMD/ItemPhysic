@@ -1,6 +1,7 @@
 package com.creativemd.itemphysic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
@@ -17,8 +18,10 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -31,8 +34,10 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
+import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
 import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
@@ -113,6 +118,18 @@ public class EventHandler {
 	
 	public static boolean cancel = false;
 	
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	@Method(modid = "creativecore")
+	public void onDrop(HarvestDropsEvent event) {
+		if (ItemDummyContainer.pickupMinedImmediately && event.getHarvester() != null) {
+			for (Iterator<ItemStack> iterator = event.getDrops().iterator(); iterator.hasNext();) {
+				ItemStack stack = iterator.next();
+				if (event.getHarvester().addItemStackToInventory(stack))
+					iterator.remove();
+			}
+		}
+	}
+	
 	@SubscribeEvent
 	@Method(modid = "creativecore")
 	public void onPlayerInteract(PlayerInteractEvent event) {
@@ -122,7 +139,7 @@ public class EventHandler {
 	
 	@SideOnly(Side.CLIENT)
 	public boolean onPlayerInteractClient(World world, EntityPlayer player, boolean rightClick) {
-		double distance = Double.MAX_VALUE;
+		double distance = getReachDistance(player);
 		Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 		if (mc.objectMouseOver != null)
 			if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
@@ -134,6 +151,7 @@ public class EventHandler {
 		if (result != null) {
 			EntityItem entity = (EntityItem) result.entityHit;
 			if (world.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z)) {
+				player.swingArm(EnumHand.MAIN_HAND);
 				PacketHandler.sendPacketToServer(new PickupPacket(result.entityHit.getUniqueID(), rightClick));
 				return true;
 			}
@@ -181,7 +199,7 @@ public class EventHandler {
 		if (mc != null && mc.player != null && mc.inGameHasFocus) {
 			if (ItemDummyContainer.customPickup) {
 				
-				double distance = Double.MAX_VALUE;
+				double distance = getReachDistance(mc.player);
 				Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 				if (mc.objectMouseOver != null)
 					if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)

@@ -2,6 +2,7 @@ package com.creativemd.itemphysic.config;
 
 import com.creativemd.igcm.api.ConfigBranch;
 import com.creativemd.igcm.api.segments.BooleanSegment;
+import com.creativemd.igcm.api.segments.FloatSegment;
 import com.creativemd.igcm.api.segments.IntegerSegment;
 import com.creativemd.igcm.api.sorting.ConfigBranchSorting;
 import com.creativemd.itemphysic.ItemDummyContainer;
@@ -28,6 +29,9 @@ public class ItemPhysicBranch extends ConfigBranch {
 		
 		registerElement("igniting", new BooleanSegment("enable igniting", true));
 		
+		registerElement("maximumPickupRange", new FloatSegment("maximum pickup range", 5F, 0.1F, 100F));
+		registerElement("pickupMinedImmediately", new BooleanSegment("pickup mined immediately", false));
+		
 		registerElement("swiming", new ConfigBranchSorting("Swimming Items", new ItemStack(Items.BOAT), ServerPhysic.swimmingItems));
 		registerElement("burning", new ConfigBranchSorting("Burning Items", new ItemStack(Items.FIRE_CHARGE), ServerPhysic.burningItems));
 		registerElement("undestroyable", new ConfigBranchSorting("Undestroyable Items", new ItemStack(Blocks.BEDROCK), ServerPhysic.undestroyableItems));
@@ -46,6 +50,9 @@ public class ItemPhysicBranch extends ConfigBranch {
 		ItemDummyContainer.pickupWhenSneaking = (Boolean) getValue("pickupWhenSneaking");
 		ItemDummyContainer.customThrow = (Boolean) getValue("throw");
 		ItemDummyContainer.enableIgniting = (Boolean) getValue("igniting");
+		
+		ItemDummyContainer.maximumPickupRange = (Float) getValue("maximumPickupRange");
+		ItemDummyContainer.pickupMinedImmediately = (Boolean) getValue("pickupMinedImmediately");
 	}
 	
 	@Override

@@ -53,8 +53,10 @@ public class PickupPacket extends CreativeCorePacket {
 			EventHandler.cancel = true;
 		
 		Entity item = ((WorldServer) player.world).getEntityFromUuid(uuid);
-		if (item != null && item instanceof EntityItem && !item.isDead)
+		if (item != null && item instanceof EntityItem && !item.isDead) {
 			ServerPhysic.processInitialInteract((EntityItem) item, player, player.getHeldItem(EnumHand.MAIN_HAND), EnumHand.MAIN_HAND);
+			player.swingArm(EnumHand.MAIN_HAND);
+		}
 	}
 	
 }
