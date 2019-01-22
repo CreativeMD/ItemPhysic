@@ -110,6 +110,8 @@ public class ItemDummyContainer extends DummyModContainer {
 			showTooltip = config.getBoolean("showTooltip", "Item", true, "Show the tooltip of an item, if custom pickup is enabled.");
 			enableIgniting = config.getBoolean("enableIgniting", "Item", true, "If igniting items will be enabled or not.");
 			disableThrowHUD = config.getBoolean("disableThrowHUD", "Item", false, "Whether the throw power should be displayed or not.");
+			
+			maximumPickupRange = config.getFloat("pickupRange", "Item", 5, 0.1F, 100, "The distance at which the player can pickup an item (only if customPickup is enabled)");
 		}
 		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
 		vanillaRendering = config.get("Item", "vanillaRendering", false).getBoolean(false);
@@ -139,5 +141,6 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static boolean showTooltip;
 	public static boolean enableIgniting;
 	public static boolean disableThrowHUD;
+	public static float maximumPickupRange;
 	
 }

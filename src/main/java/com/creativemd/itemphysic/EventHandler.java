@@ -46,7 +46,6 @@ public class EventHandler {
 	
 	@SubscribeEvent
 	public void onToos(ItemTossEvent event) {
-		//System.out.println("Increase motion " + event.getEntityItem() + " Droppower=" + Droppower);
 		if (!ItemTransformer.isLite) {
 			event.getEntityItem().motionX *= Droppower;
 			event.getEntityItem().motionY *= Droppower;
@@ -56,14 +55,11 @@ public class EventHandler {
 	}
 	
 	@Method(modid = "creativecore")
-	public static RayTraceResult getEntityItem(EntityPlayer player, Vec3d position, Vec3d look) {
+	public static RayTraceResult getEntityItem(EntityPlayer player, Vec3d position, Vec3d look, double distance) {
 		float f1 = 3.0F;
-		double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 		Vec3d include = look.subtract(position);
 		List list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().expand(include.x, include.y, include.z).expand((double) f1, (double) f1, (double) f1));
-		//System.out.println("Found " + list.size() + " items in range!");
-		//Vec3d vec32 = vec3.addVector(vec31.xCoord * d0, vec31.yCoord * d0, vec31.zCoord * d0);
-		double d1 = d0;
+		double d1 = distance;
 		
 		if (player.getEntityWorld().isRemote) {
 			if (mc.objectMouseOver != null) {
@@ -96,32 +92,22 @@ public class EventHandler {
 		return null;
 	}
 	
+	public static double getReachDistance(EntityPlayer player) {
+		if (ItemDummyContainer.maximumPickupRange != 5)
+			return ItemDummyContainer.maximumPickupRange;
+		return player.capabilities.isCreativeMode ? 5 : 4.5F;
+	}
+	
 	@SideOnly(Side.CLIENT)
 	@Method(modid = "creativecore")
 	public static RayTraceResult getEntityItem(double distance, EntityPlayer player) {
-		//Minecraft mc = Minecraft.getMinecraft();
-		/* Vec3 vec31 = player.getLook(1.0F);
-		 * float f1 = 1.0F;
-		 * double reach = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
-		 * Entity entity = player.world.findNearestEntityWithinAABB(EntityItem.class, player.boundingBox.addCoord(vec31.xCoord * reach, vec31.yCoord * reach, vec31.zCoord * reach).expand((double)f1,
-		 * (double)f1, (double)f1), player);
-		 * if(entity instanceof EntityItem && player.getDistanceSqToEntity(entity) <= reach)
-		 * return (EntityItem) entity;
-		 * return null; */
 		
-		//Vec3d vec31 = player.getLook(1.0F);
 		float partialTicks = mc.getRenderPartialTicks();
 		Vec3d position = player.getPositionEyes(partialTicks);
-		double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
 		Vec3d vec3d1 = player.getLook(partialTicks);
-		Vec3d look = position.addVector(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
+		Vec3d look = position.addVector(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance);
 		
-		RayTraceResult result = getEntityItem(player, position, look);
-		
-		if (result != null && position.distanceTo(result.hitVec) < distance)
-			return result;
-		
-		return null;
+		return getEntityItem(player, position, look, distance);
 		
 	}
 	
@@ -136,24 +122,18 @@ public class EventHandler {
 	
 	@SideOnly(Side.CLIENT)
 	public boolean onPlayerInteractClient(World world, EntityPlayer player, boolean rightClick) {
-		double distance = 100;
+		double distance = Double.MAX_VALUE;
 		Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 		if (mc.objectMouseOver != null)
 			if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
 				distance = position.distanceTo(mc.objectMouseOver.hitVec);
 			else if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
 				distance = mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z);
+			
 		RayTraceResult result = getEntityItem(distance, mc.player);
 		if (result != null) {
 			EntityItem entity = (EntityItem) result.entityHit;
 			if (world.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z)) {
-				float partialTicks = mc.getRenderPartialTicks();
-				double d0 = player.capabilities.isCreativeMode ? 5.0F : 4.5F;
-				Vec3d vec3d1 = player.getLook(partialTicks);
-				Vec3d look = position.addVector(vec3d1.x * d0, vec3d1.y * d0, vec3d1.z * d0);
-				
-				//System.out.println(result.entityHit.getUniqueID());
-				
 				PacketHandler.sendPacketToServer(new PickupPacket(result.entityHit.getUniqueID(), rightClick));
 				return true;
 			}
@@ -178,7 +158,6 @@ public class EventHandler {
 				}
 			}
 			if (!player.world.isRemote) {
-				//entity.interactFirst(event.entityPlayer);	
 				if (cancel) {
 					cancel = false;
 					event.setCanceled(true);
@@ -192,25 +171,24 @@ public class EventHandler {
 	
 	@SideOnly(Side.CLIENT)
 	public static Minecraft mc;
-	//@SideOnly(Side.CLIENT)
-	//public static RenderItem renderer;
 	
 	@SideOnly(Side.CLIENT)
 	@Method(modid = "creativecore")
 	public void renderTickFull() {
 		if (mc == null)
 			mc = Minecraft.getMinecraft();
-		//if(renderer == null)
-		//renderer = (RenderItem) mc.getRenderManager().getEntityClassRenderObject(EntityItem.class);
+		
 		if (mc != null && mc.player != null && mc.inGameHasFocus) {
 			if (ItemDummyContainer.customPickup) {
-				double distance = 100;
+				
+				double distance = Double.MAX_VALUE;
 				Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 				if (mc.objectMouseOver != null)
 					if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
 						distance = position.distanceTo(mc.objectMouseOver.hitVec);
 					else if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
 						distance = mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z);
+					
 				RayTraceResult result = getEntityItem(distance, mc.player);
 				if (result != null) {
 					if (ItemPhysicClient.pickup.isKeyDown())
@@ -242,22 +220,15 @@ public class EventHandler {
 						GL11.glTranslated(mc.displayWidth / 4 - width / 2, mc.displayHeight / 4 - height / 2 - space / 2, 0);
 						double rgb = (Math.sin(Math.toRadians((double) System.nanoTime() / 10000000D)) + 1) * 0.2;
 						Vec3d color = new Vec3d(rgb, rgb, rgb);
-						//System.out.println(color.xCoord);
-						//RenderHelper2D.drawRect(0, 0, width, height, color, 0.3);
 						color = new Vec3d(0, 0, 0);
-						//RenderHelper2D.drawRect(1, 1, width-1, height-1, color, 0.1);
 						GL11.glPopMatrix();
 						
-						//OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-						//Gui.drawRect(0, 0, 100, 100, 100);
 						GL11.glEnable(GL11.GL_TEXTURE_2D);
 						GL11.glDisable(GL11.GL_BLEND);
 						for (int i = 0; i < list.size(); i++) {
 							String text = (String) list.get(i);
 							mc.fontRenderer.drawString(text, mc.displayWidth / 4 - mc.fontRenderer.getStringWidth(text) / 2, mc.displayHeight / 4 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
 						}
-						//renderer.renderItemIntoGUI(mc.fontRenderer, mc.renderEngine, ((EntityItem)move.entityHit).getEntityItem(), 10, 10);
-						//GL11.glEnable(GL11.GL_BLEND);
 						
 					}
 				}
@@ -272,16 +243,8 @@ public class EventHandler {
 						renderPower = 6;
 					String text = "Power: " + renderPower;
 					mc.player.sendStatusMessage(new TextComponentString(text), true);
-					//mc.fontRendererObj.drawString(text, mc.displayWidth/4-mc.fontRendererObj.getStringWidth(text)/2, mc.displayHeight/4+mc.displayHeight/8, 16579836);
 				}
-			} /* else{
-			   * while(mc.gameSettings.keyBindDrop.isPressed())
-			   * {
-			   * CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
-			   * mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
-			   * System.out.println("Drop");
-			   * }
-			   * } */
+			}
 		}
 	}
 	
