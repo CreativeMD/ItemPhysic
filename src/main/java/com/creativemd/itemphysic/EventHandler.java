@@ -3,6 +3,7 @@ package com.creativemd.itemphysic;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -18,10 +19,12 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
@@ -117,16 +120,23 @@ public class EventHandler {
 	}
 	
 	public static boolean cancel = false;
+	private final Random avRandomizer = new Random();
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	@Method(modid = "creativecore")
 	public void onDrop(HarvestDropsEvent event) {
 		if (ItemDummyContainer.pickupMinedImmediately && event.getHarvester() != null) {
+			boolean pickedUp = false;
 			for (Iterator<ItemStack> iterator = event.getDrops().iterator(); iterator.hasNext();) {
 				ItemStack stack = iterator.next();
-				if (event.getHarvester().addItemStackToInventory(stack))
+				if (event.getHarvester().addItemStackToInventory(stack)) {
 					iterator.remove();
+					pickedUp = true;
+				}
 			}
+			
+			if (pickedUp)
+				event.getWorld().playSound(event.getHarvester().posX, event.getHarvester().posY, event.getHarvester().posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (this.avRandomizer.nextFloat() - this.avRandomizer.nextFloat()) * 1.4F + 2.0F, false);
 		}
 	}
 	
