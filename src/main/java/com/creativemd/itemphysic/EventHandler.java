@@ -143,9 +143,9 @@ public class EventHandler {
 		Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 		if (mc.objectMouseOver != null)
 			if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-				distance = position.distanceTo(mc.objectMouseOver.hitVec);
+				distance = Math.min(distance, position.distanceTo(mc.objectMouseOver.hitVec));
 			else if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-				distance = mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z);
+				distance = Math.min(distance, mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z));
 			
 		RayTraceResult result = getEntityItem(distance, mc.player);
 		if (result != null) {
@@ -203,9 +203,9 @@ public class EventHandler {
 				Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
 				if (mc.objectMouseOver != null)
 					if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-						distance = position.distanceTo(mc.objectMouseOver.hitVec);
+						distance = Math.min(distance, position.distanceTo(mc.objectMouseOver.hitVec));
 					else if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-						distance = mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z);
+						distance = Math.min(distance, mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z));
 					
 				RayTraceResult result = getEntityItem(distance, mc.player);
 				if (result != null) {
