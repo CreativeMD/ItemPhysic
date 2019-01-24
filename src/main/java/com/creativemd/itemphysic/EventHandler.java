@@ -126,6 +126,10 @@ public class EventHandler {
 	@Method(modid = "creativecore")
 	public void onDrop(HarvestDropsEvent event) {
 		if (ItemDummyContainer.pickupMinedImmediately && event.getHarvester() != null) {
+			
+			if (ItemDummyContainer.respectRangeWhenMined && event.getPos().distanceSq(event.getHarvester().posX, event.getHarvester().posX, event.getHarvester().posX) > Math.pow(getReachDistance(event.getHarvester()), 2))
+				return;
+			
 			boolean pickedUp = false;
 			for (Iterator<ItemStack> iterator = event.getDrops().iterator(); iterator.hasNext();) {
 				ItemStack stack = iterator.next();
