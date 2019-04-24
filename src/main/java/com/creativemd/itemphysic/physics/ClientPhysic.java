@@ -73,7 +73,7 @@ public class ClientPhysic {
 		IBakedModel ibakedmodel = mc.getRenderItem().getItemModelWithOverrides(itemstack, entity.world, (EntityLivingBase) null);
 		
 		boolean is3D = ibakedmodel.isGui3d();
-		boolean applyEffects = item.getAge() > 0 && (is3D || mc.getRenderManager().options != null);
+		boolean applyEffects = item.getAge() != 0 && (is3D || mc.getRenderManager().options != null);
 		
 		int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
 		random.setSeed((long) i);
