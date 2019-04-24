@@ -127,7 +127,7 @@ public class EventHandler {
 	public void onDrop(HarvestDropsEvent event) {
 		if (ItemDummyContainer.pickupMinedImmediately && event.getHarvester() != null) {
 			
-			if (ItemDummyContainer.respectRangeWhenMined && event.getPos().distanceSq(event.getHarvester().posX, event.getHarvester().posX, event.getHarvester().posX) > Math.pow(getReachDistance(event.getHarvester()), 2))
+			if (ItemDummyContainer.respectRangeWhenMined && event.getPos().distanceSq(event.getHarvester().posX, event.getHarvester().posY, event.getHarvester().posZ) > Math.pow(getReachDistance(event.getHarvester()), 2))
 				return;
 			
 			boolean pickedUp = false;
