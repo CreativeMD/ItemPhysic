@@ -50,7 +50,7 @@ public class PickupPacket extends CreativeCorePacket {
 	@Override
 	public void executeServer(EntityPlayer player) {
 		if (rightClick)
-			EventHandler.cancel = true;
+			EventHandler.toCancel.add(player);
 		
 		Entity item = ((WorldServer) player.world).getEntityFromUuid(uuid);
 		if (item != null && item instanceof EntityItem && !item.isDead) {

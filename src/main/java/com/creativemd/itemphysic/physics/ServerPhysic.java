@@ -62,7 +62,7 @@ public class ServerPhysic {
 		if (fluid.get() == null)
 			return item.hasNoGravity();
 		
-		double density = (double) fluid.get().getDensity() / 1000D;
+		double density = fluid.get().getDensity() / 1000D;
 		double speed = -1 / density * 0.01;
 		if (swimmingItems.canPass(stack))
 			speed = 0.05;
@@ -204,7 +204,7 @@ public class ServerPhysic {
 			//item.setBeenAttacked();
 			try {
 				
-				health.setInt(item, (int) ((float) health.getInt(item) - amount));
+				health.setInt(item, (int) (health.getInt(item) - amount));
 				
 				if (health.getInt(item) <= 0) {
 					item.setDead();
@@ -225,7 +225,7 @@ public class ServerPhysic {
 	public static boolean isItemBurning(EntityItem item) {
 		boolean flag = item.world != null && item.world.isRemote;
 		try {
-			if (!(!item.isImmuneToFire() && ((Integer) fire.getInt(item) > 0 || flag && (Boolean) getFlag.invoke(item, 0))))
+			if (!(!item.isImmuneToFire() && (fire.getInt(item) > 0 || flag && (Boolean) getFlag.invoke(item, 0))))
 				return false;
 		} catch (Exception e) {
 			e.printStackTrace();
