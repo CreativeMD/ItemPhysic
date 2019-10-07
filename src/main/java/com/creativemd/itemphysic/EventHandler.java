@@ -12,6 +12,7 @@ import com.creativemd.creativecore.common.packet.PacketHandler;
 import com.creativemd.itemphysic.packet.DropPacket;
 import com.creativemd.itemphysic.packet.PickupPacket;
 import com.creativemd.itemphysic.physics.ClientPhysic;
+import com.creativemd.itemphysic.physics.ServerPhysic;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -32,6 +33,7 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
@@ -52,6 +54,18 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 public class EventHandler {
 	
 	public static int Droppower = 1;
+	
+	@SubscribeEvent
+	public void onDespawn(ItemExpireEvent event) {
+		if (ItemDummyContainer.despawnItem == -1)
+			try {
+				ServerPhysic.age.set(event.getEntityItem(), 1);
+				event.setCanceled(true);
+				event.setExtraLife(0);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+	}
 	
 	@SubscribeEvent
 	public void onToos(ItemTossEvent event) {
