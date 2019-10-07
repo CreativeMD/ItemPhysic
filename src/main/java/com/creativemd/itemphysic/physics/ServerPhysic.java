@@ -218,9 +218,9 @@ public class ServerPhysic {
 	}
 	
 	private static Method markVelocityChanged = ReflectionHelper.findMethod(Entity.class, "markVelocityChanged", "func_70018_K");
-	private static Field health = ReflectionHelper.findField(EntityItem.class, "health", "field_70291_e");
-	private static Field fire = ReflectionHelper.findField(Entity.class, "fire", "field_190534_ay");
-	public static Field age = ReflectionHelper.findField(Entity.class, "age", "field_70292_b");
+	private static Field health = ReflectionHelper.findField(EntityItem.class, new String[] { "health", "field_70291_e" });
+	private static Field fire = ReflectionHelper.findField(Entity.class, new String[] { "fire", "field_190534_ay" });
+	public static Field age = ReflectionHelper.findField(Entity.class, new String[] { "age", "field_70292_b" });
 	private static Method getFlag = ReflectionHelper.findMethod(Entity.class, "getFlag", "func_70083_f", int.class);
 	
 	public static boolean isItemBurning(EntityItem item) {

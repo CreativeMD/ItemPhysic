@@ -42,7 +42,7 @@ public class ClientPhysic {
 		return TextureMap.LOCATION_BLOCKS_TEXTURE;
 	}
 	
-	private static Field renderOutlines = ReflectionHelper.findField(Render.class, "renderOutlines", "field_188301_f");
+	private static Field renderOutlines = ReflectionHelper.findField(Render.class, new String[] { "renderOutlines", "field_188301_f" });
 	
 	private static Method getTeamColor = ReflectionHelper.findMethod(Render.class, "getTeamColor", "func_188298_c", Entity.class);
 	
@@ -76,7 +76,7 @@ public class ClientPhysic {
 		boolean applyEffects = item.getAge() != 0 && (is3D || mc.getRenderManager().options != null);
 		
 		int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getMetadata();
-		random.setSeed((long) i);
+		random.setSeed(i);
 		boolean flag = false;
 		
 		ResourceLocation location = getEntityTexture();
@@ -190,9 +190,9 @@ public class ClientPhysic {
 		}
 		
 		if (!is3D) {
-			float f3 = -0.0F * (float) (j - 1) * 0.5F;
-			float f4 = -0.0F * (float) (j - 1) * 0.5F;
-			float f5 = -0.09375F * (float) (j - 1) * 0.5F;
+			float f3 = -0.0F * (j - 1) * 0.5F;
+			float f4 = -0.0F * (j - 1) * 0.5F;
+			float f5 = -0.09375F * (j - 1) * 0.5F;
 			GlStateManager.translate(f3, f4, f5);
 		}
 		
