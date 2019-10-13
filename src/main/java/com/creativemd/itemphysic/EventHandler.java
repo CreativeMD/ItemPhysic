@@ -16,6 +16,7 @@ import com.creativemd.itemphysic.physics.ServerPhysic;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -271,18 +272,13 @@ public class EventHandler {
 						GL11.glDisable(GL11.GL_TEXTURE_2D);
 						GL11.glEnable(GL11.GL_ALPHA_TEST);
 						
-						GL11.glPushMatrix();
-						GL11.glTranslated(mc.displayWidth / 4 - width / 2, mc.displayHeight / 4 - height / 2 - space / 2, 0);
-						double rgb = (Math.sin(Math.toRadians(System.nanoTime() / 10000000D)) + 1) * 0.2;
-						Vec3d color = new Vec3d(rgb, rgb, rgb);
-						color = new Vec3d(0, 0, 0);
-						GL11.glPopMatrix();
+						ScaledResolution resolution = new ScaledResolution(mc);
 						
 						GL11.glEnable(GL11.GL_TEXTURE_2D);
 						GL11.glDisable(GL11.GL_BLEND);
 						for (int i = 0; i < list.size(); i++) {
 							String text = list.get(i);
-							mc.fontRenderer.drawString(text, mc.displayWidth / 4 - mc.fontRenderer.getStringWidth(text) / 2, mc.displayHeight / 4 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
+							mc.fontRenderer.drawString(text, resolution.getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, resolution.getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
 						}
 						
 					}
