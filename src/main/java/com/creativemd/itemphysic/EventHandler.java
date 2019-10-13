@@ -147,20 +147,23 @@ public class EventHandler {
 	public void onDrop(HarvestDropsEvent event) {
 		if (ItemDummyContainer.pickupMinedImmediately && event.getHarvester() != null) {
 			
-			if (ItemDummyContainer.respectRangeWhenMined && event.getPos().distanceSq(event.getHarvester().posX, event.getHarvester().posY, event.getHarvester().posZ) > Math.pow(getReachDistance(event.getHarvester()), 2))
+			EntityPlayer player = event.getHarvester();
+			World world = event.getWorld();
+			
+			if (ItemDummyContainer.respectRangeWhenMined && event.getPos().distanceSq(player.posX, player.posY, player.posZ) > Math.pow(getReachDistance(player), 2))
 				return;
 			
 			boolean pickedUp = false;
 			for (Iterator<ItemStack> iterator = event.getDrops().iterator(); iterator.hasNext();) {
 				ItemStack stack = iterator.next();
-				if (event.getHarvester().addItemStackToInventory(stack)) {
+				if (player.addItemStackToInventory(stack)) {
 					iterator.remove();
 					pickedUp = true;
 				}
 			}
 			
 			if (pickedUp)
-				event.getWorld().playSound(event.getHarvester().posX, event.getHarvester().posY, event.getHarvester().posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (this.avRandomizer.nextFloat() - this.avRandomizer.nextFloat()) * 1.4F + 2.0F, false);
+				world.playSound(null, player.posX, player.posY + 0.5, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((world.rand.nextFloat() - world.rand.nextFloat()) * 0.7F + 1.0F) * 2.0F);
 		}
 	}
 	
