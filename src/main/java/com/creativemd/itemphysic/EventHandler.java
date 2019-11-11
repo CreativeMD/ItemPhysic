@@ -204,7 +204,7 @@ public class EventHandler {
 				if (ItemPhysicClient.pickup.getKeyCode() != Keyboard.KEY_NONE)
 					return;
 				
-				if (onPlayerInteractClient(world, player, true)) {
+				if (onPlayerInteractClient(world, player, event instanceof RightClickBlock)) {
 					if (event instanceof RightClickBlock) {
 						((RightClickBlock) event).setUseBlock(Result.DENY);
 						((RightClickBlock) event).setUseItem(Result.DENY);
