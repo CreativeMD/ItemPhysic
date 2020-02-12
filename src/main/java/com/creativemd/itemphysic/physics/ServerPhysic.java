@@ -136,7 +136,7 @@ public class ServerPhysic {
 	}
 	
 	public static void updateFallState(EntityItem item, double y, boolean onGroundIn, IBlockState state, BlockPos pos) {
-		if (onGroundIn && item.fallDistance > 0.0F)
+		if (onGroundIn && item.fallDistance > 0.0F && ItemDummyContainer.fallSounds)
 			item.playSound(SoundEvents.BLOCK_CLOTH_FALL, Math.min(1, item.fallDistance / 10), (float) Math.random() * 1F + 1);
 	}
 	
