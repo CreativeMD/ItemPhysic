@@ -76,9 +76,9 @@ public class ItemDummyContainer extends DummyModContainer {
 	
 	@Method(modid = "creativecore")
 	public static void initFull(FMLInitializationEvent evt) {
-		CreativeCorePacket.registerPacket(DropPacket.class, "IPDrop");
+		CreativeCorePacket.registerPacket(DropPacket.class);
 		
-		CreativeCorePacket.registerPacket(PickupPacket.class, "IPPick");
+		CreativeCorePacket.registerPacket(PickupPacket.class);
 		
 		ServerPhysic.loadItemList();
 		
