@@ -4,9 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Random;
 
-import com.creativemd.creativecore.common.utils.stack.InfoFuel;
-import com.creativemd.creativecore.common.utils.stack.InfoName;
-import com.creativemd.creativecore.common.utils.type.SortingList;
 import com.creativemd.itemphysic.ItemDummyContainer;
 import com.google.common.base.Optional;
 
@@ -18,7 +15,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
@@ -37,21 +33,6 @@ public class ServerPhysic {
 	
 	public static Random rand = new Random();
 	
-	public static SortingList swimmingItems = new SortingList();
-	public static SortingList burningItems = new SortingList();
-	public static SortingList undestroyableItems = new SortingList();
-	public static SortingList ignitingItems = new SortingList();
-	
-	public static void loadItemList() {
-		swimmingItems.addSortingObjects(Material.WOOD, Material.CLOTH, Material.SPONGE, Material.PACKED_ICE, Material.ICE, Material.LEAVES, Material.PLANTS, Material.CARPET, Material.SNOW, Material.CACTUS, Material.CAKE, Material.VINE, Material.WEB, Blocks.SNOW, new InfoName("wooden"), Items.APPLE, Items.BOW, Items.BOWL, Items.ARROW, Items.APPLE, Items.STRING, Items.FEATHER, Items.WHEAT, Items.BREAD, Items.PAINTING, Items.SIGN, Items.ACACIA_BOAT, Items.ACACIA_DOOR, Items.DARK_OAK_BOAT, Items.DARK_OAK_DOOR, Items.BIRCH_BOAT, Items.BIRCH_DOOR, Items.JUNGLE_BOAT, Items.JUNGLE_DOOR, Items.BOAT, Items.OAK_DOOR, Items.SPRUCE_BOAT, Items.SPRUCE_DOOR, Items.SADDLE, Items.BONE, Items.SUGAR, Items.EGG, Items.FISHING_ROD, Items.DYE, Items.CAKE, Items.BED, Items.MELON, Items.SHEARS, Items.CARROT, Items.POTATO, Items.POISONOUS_POTATO, Items.BAKED_POTATO, Items.PUMPKIN_PIE, Items.ELYTRA, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT, Items.COOKED_RABBIT, Items.RABBIT_STEW, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.BEETROOT_SOUP, Items.SHIELD, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, Items.SNOWBALL);
-		
-		burningItems.addSortingObjects(Material.WOOD, Material.CLOTH, Material.SPONGE, Material.PACKED_ICE, Material.ICE, Material.LEAVES, Material.PLANTS, Material.CARPET, Material.SNOW, Material.CACTUS, Material.CAKE, Material.VINE, Material.WEB, Material.GRASS, Blocks.SNOW, new InfoName("axe"), new InfoName("wooden"), new InfoName("shovel"), new InfoName("hoe"), new InfoName("sword"), Items.APPLE, Items.BOW, Items.BOWL, Items.ARROW, Items.APPLE, Items.STRING, Items.FEATHER, Items.WHEAT, Items.BREAD, Items.LEATHER, Items.LEATHER_BOOTS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_LEGGINGS, Items.LEAD, Items.PAINTING, Items.SIGN, Items.ACACIA_BOAT, Items.ACACIA_DOOR, Items.DARK_OAK_BOAT, Items.DARK_OAK_DOOR, Items.BIRCH_BOAT, Items.BIRCH_DOOR, Items.JUNGLE_BOAT, Items.JUNGLE_DOOR, Items.BOAT, Items.OAK_DOOR, Items.SPRUCE_BOAT, Items.SPRUCE_DOOR, Items.SADDLE, Items.BONE, Items.SUGAR, Items.PAPER, Items.BOOK, Items.EGG, Items.FISHING_ROD, Items.DYE, Items.CAKE, Items.BED, Items.MELON, Items.SHEARS, Items.WRITABLE_BOOK, Items.WRITTEN_BOOK, Items.CARROT, Items.POTATO, Items.POISONOUS_POTATO, Items.BAKED_POTATO, Items.MAP, Items.PUMPKIN_PIE, Items.NAME_TAG, Items.ENCHANTED_BOOK, Items.ELYTRA, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT, Items.COOKED_RABBIT, Items.RABBIT_STEW, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.BEETROOT_SOUP, Items.SHIELD, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, new InfoFuel(), Items.SPIDER_EYE, Items.ROTTEN_FLESH, Items.SNOWBALL);
-		
-		undestroyableItems.addSortingObjects(Items.NETHER_STAR, Blocks.BEDROCK, Blocks.OBSIDIAN, Material.BARRIER);
-		
-		ignitingItems.addSortingObjects(Material.LAVA, Blocks.TORCH, Items.LAVA_BUCKET, Items.BLAZE_POWDER);
-	}
-	
 	public static DataParameter<Optional<ItemStack>> ITEM = null;
 	
 	//replace with if (!this.hasNoGravity())
@@ -64,7 +45,7 @@ public class ServerPhysic {
 		
 		double density = fluid.get().getDensity() / 1000D;
 		double speed = -1 / density * 0.01;
-		if (swimmingItems.canPass(stack))
+		if (ItemDummyContainer.CONFIG.general.swimmingItems.canPass(stack))
 			speed = 0.05;
 		
 		double speedreduction = (speed - item.motionY) / 2;
@@ -80,13 +61,13 @@ public class ServerPhysic {
 	
 	//replace with: if (this.worldObj.getBlockState(new BlockPos(this)).getMaterial() == Material.LAVA) { this.motionY = 0.20000000298023224D; this.motionX = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.motionZ = (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F); this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F); }
 	public static void updateBurn(EntityItem item) {
-		if (item.world.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && burningItems.canPass(item.getItem())) {
+		if (item.world.getBlockState(new BlockPos(item)).getMaterial() == Material.LAVA && ItemDummyContainer.CONFIG.general.burningItems.canPass(item.getItem())) {
 			item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
 			for (int i = 0; i < 100; i++)
 				item.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, item.posX, item.posY, item.posZ, (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
 		}
 		
-		if (ItemDummyContainer.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ignitingItems.canPass(item.getItem())) {
+		if (ItemDummyContainer.CONFIG.general.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ItemDummyContainer.CONFIG.general.ignitingItems.canPass(item.getItem())) {
 			IBlockState state = item.world.getBlockState(new BlockPos(item).down());
 			if (state.getMaterial().getCanBurn() && item.world.getBlockState(new BlockPos(item)).getMaterial().isReplaceable())
 				item.world.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
@@ -98,7 +79,7 @@ public class ServerPhysic {
 	//Remove this.motionY *= 0.9800000190734863D;
 	//Replace with: if (this.onGround){ this.motionY *= -0.5D; }
 	public static void updatePost(EntityItem item) {
-		if (swimmingItems.canPass(item.getItem())) {
+		if (ItemDummyContainer.CONFIG.general.swimmingItems.canPass(item.getItem())) {
 			int i = MathHelper.floor(item.posX);
 			int j = MathHelper.floor(item.posY);
 			int k = MathHelper.floor(item.posZ);
@@ -130,18 +111,18 @@ public class ServerPhysic {
 			item.motionZ /= fluid.get().getDensity() / 950D;
 		}
 		
-		if (ItemDummyContainer.despawnItem != -1 && item.lifespan == 6000 && item.lifespan != ItemDummyContainer.despawnItem)
-			item.lifespan = ItemDummyContainer.despawnItem;
+		if (ItemDummyContainer.CONFIG.general.despawnItem != -1 && item.lifespan == 6000 && item.lifespan != ItemDummyContainer.CONFIG.general.despawnItem)
+			item.lifespan = ItemDummyContainer.CONFIG.general.despawnItem;
 		
 	}
 	
 	public static void updateFallState(EntityItem item, double y, boolean onGroundIn, IBlockState state, BlockPos pos) {
-		if (onGroundIn && item.fallDistance > 0.0F && ItemDummyContainer.fallSounds)
+		if (onGroundIn && item.fallDistance > 0.0F && ItemDummyContainer.CONFIG.general.fallSounds)
 			item.playSound(SoundEvents.BLOCK_CLOTH_FALL, Math.min(1, item.fallDistance / 10), (float) Math.random() * 1F + 1);
 	}
 	
 	public static boolean onCollideWithPlayer(EntityItem item, EntityPlayer par1EntityPlayer) {
-		if (ItemDummyContainer.customPickup && (!par1EntityPlayer.isSneaking() || !ItemDummyContainer.pickupWhenSneaking))
+		if (ItemDummyContainer.CONFIG.pickup.customPickup && (!par1EntityPlayer.isSneaking() || !ItemDummyContainer.CONFIG.pickup.pickupWhenSneaking))
 			return true;
 		if (item.world.isRemote || item.cannotPickup())
 			return true;
@@ -149,10 +130,10 @@ public class ServerPhysic {
 	}
 	
 	public static void onCollideWithPlayer(EntityItem item, EntityPlayer player, boolean needsSneak) {
-		if (ItemDummyContainer.customPickup && needsSneak && (!player.isSneaking() || !ItemDummyContainer.pickupWhenSneaking))
+		if (ItemDummyContainer.CONFIG.pickup.customPickup && needsSneak && (!player.isSneaking() || !ItemDummyContainer.CONFIG.pickup.pickupWhenSneaking))
 			return;
 		if (!item.world.isRemote) {
-			if (!ItemDummyContainer.customPickup && item.cannotPickup())
+			if (!ItemDummyContainer.CONFIG.pickup.customPickup && item.cannotPickup())
 				return;
 			ItemStack itemstack = item.getItem();
 			int i = itemstack.getCount();
@@ -162,7 +143,7 @@ public class ServerPhysic {
 				return;
 			ItemStack clone = itemstack.copy();
 			
-			if ((!item.cannotPickup() || ItemDummyContainer.customPickup) && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack) || clone.getCount() > item.getItem().getCount())) {
+			if ((!item.cannotPickup() || ItemDummyContainer.CONFIG.pickup.customPickup) && (item.getOwner() == null || item.lifespan - item.getAge() <= 200 || item.getOwner().equals(player.getName())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack) || clone.getCount() > item.getItem().getCount())) {
 				clone.setCount(clone.getCount() - item.getItem().getCount());
 				net.minecraftforge.fml.common.FMLCommonHandler.instance().firePlayerItemPickupEvent(player, item, clone);
 				
@@ -178,7 +159,7 @@ public class ServerPhysic {
 	}
 	
 	public static boolean processInitialInteract(EntityItem item, EntityPlayer player, ItemStack stack, EnumHand hand) {
-		if (ItemDummyContainer.customPickup) {
+		if (ItemDummyContainer.CONFIG.pickup.customPickup) {
 			onCollideWithPlayer(item, player, false);
 			return true;
 		}
@@ -188,10 +169,10 @@ public class ServerPhysic {
 	public static boolean attackEntityFrom(EntityItem item, DamageSource source, float amount) {
 		if (item.isEntityInvulnerable(source)) {
 			return false;
-		} else if (!item.getItem().isEmpty() && undestroyableItems.canPass(item.getItem())) {
+		} else if (!item.getItem().isEmpty() && ItemDummyContainer.CONFIG.general.undestroyableItems.canPass(item.getItem())) {
 			return false;
 		} else {
-			if ((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !burningItems.canPass(item.getItem()))
+			if ((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !ItemDummyContainer.CONFIG.general.burningItems.canPass(item.getItem()))
 				return false;
 			if (source == DamageSource.CACTUS)
 				return false;
@@ -231,6 +212,6 @@ public class ServerPhysic {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return burningItems.canPass(item.getItem());
+		return ItemDummyContainer.CONFIG.general.burningItems.canPass(item.getItem());
 	}
 }

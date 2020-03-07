@@ -58,7 +58,7 @@ public class EventHandler {
 	
 	@SubscribeEvent
 	public void onDespawn(ItemExpireEvent event) {
-		if (ItemDummyContainer.despawnItem == -1)
+		if (ItemDummyContainer.CONFIG.general.despawnItem == -1)
 			try {
 				ServerPhysic.age.set(event.getEntityItem(), 1);
 				event.setCanceled(true);
@@ -117,8 +117,8 @@ public class EventHandler {
 	}
 	
 	public static double getReachDistance(EntityPlayer player) {
-		if (ItemDummyContainer.maximumPickupRange != 5)
-			return ItemDummyContainer.maximumPickupRange;
+		if (ItemDummyContainer.CONFIG.pickup.maximumPickupRange != 5)
+			return ItemDummyContainer.CONFIG.pickup.maximumPickupRange;
 		return player.capabilities.isCreativeMode ? 5 : 4.5F;
 	}
 	
@@ -146,12 +146,12 @@ public class EventHandler {
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	@Method(modid = "creativecore")
 	public void onDrop(HarvestDropsEvent event) {
-		if (ItemDummyContainer.pickupMinedImmediately && event.getHarvester() != null) {
+		if (ItemDummyContainer.CONFIG.pickup.pickupMinedImmediately && event.getHarvester() != null) {
 			
 			EntityPlayer player = event.getHarvester();
 			World world = event.getWorld();
 			
-			if (ItemDummyContainer.respectRangeWhenMined && event.getPos().distanceSq(player.posX, player.posY, player.posZ) > Math.pow(getReachDistance(player), 2))
+			if (ItemDummyContainer.CONFIG.pickup.respectRangeWhenMined && event.getPos().distanceSq(player.posX, player.posY, player.posZ) > Math.pow(getReachDistance(player), 2))
 				return;
 			
 			boolean pickedUp = false;
@@ -200,7 +200,7 @@ public class EventHandler {
 	@Method(modid = "creativecore")
 	public void onPlayerInteract(PlayerInteractEvent event, World world, EntityPlayer player) {
 		if (!ItemTransformer.isLite) {
-			if (world.isRemote && ItemDummyContainer.customPickup) {
+			if (world.isRemote && ItemDummyContainer.CONFIG.pickup.customPickup) {
 				if (ItemPhysicClient.pickup.getKeyCode() != Keyboard.KEY_NONE)
 					return;
 				
@@ -235,7 +235,7 @@ public class EventHandler {
 			mc = Minecraft.getMinecraft();
 		
 		if (mc != null && mc.player != null && mc.inGameHasFocus) {
-			if (ItemDummyContainer.customPickup) {
+			if (ItemDummyContainer.CONFIG.pickup.customPickup) {
 				
 				double distance = getReachDistance(mc.player);
 				Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
@@ -250,7 +250,7 @@ public class EventHandler {
 					if (ItemPhysicClient.pickup.isKeyDown())
 						onPlayerInteractClient(mc.world, mc.player, false);
 					EntityItem entity = (EntityItem) result.entityHit;
-					if (entity != null && mc.inGameHasFocus && ItemDummyContainer.showTooltip && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z)) {
+					if (entity != null && mc.inGameHasFocus && ItemDummyContainer.CONFIG_RENDERING.showPickupTooltip && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z)) {
 						int space = 15;
 						List<String> list = new ArrayList<>();
 						try {
@@ -284,7 +284,7 @@ public class EventHandler {
 					}
 				}
 			}
-			if (ItemDummyContainer.customThrow && !ItemDummyContainer.disableThrowHUD) {
+			if (ItemDummyContainer.CONFIG.general.customThrow && !ItemDummyContainer.CONFIG_RENDERING.disableThrowHUD) {
 				if (power > 0) {
 					int renderPower = power;
 					renderPower /= 6;
@@ -315,7 +315,7 @@ public class EventHandler {
 							power = 1;
 						if (power > 6)
 							power = 6;
-						if (ItemDummyContainer.customThrow)
+						if (ItemDummyContainer.CONFIG.general.customThrow)
 							PacketHandler.sendPacketToServer(new DropPacket(power));
 						CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
 						mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));

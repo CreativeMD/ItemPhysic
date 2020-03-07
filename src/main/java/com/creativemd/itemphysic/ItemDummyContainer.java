@@ -5,27 +5,25 @@ import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.creativemd.creativecore.common.config.holder.CreativeConfigRegistry;
+import com.creativemd.creativecore.common.config.sync.ConfigSynchronization;
 import com.creativemd.creativecore.common.packet.CreativeCorePacket;
-import com.creativemd.itemphysic.config.ItemConfigSystem;
+import com.creativemd.itemphysic.ItemPhysicConfig.Rendering;
 import com.creativemd.itemphysic.packet.DropPacket;
 import com.creativemd.itemphysic.packet.PickupPacket;
 import com.creativemd.itemphysic.physics.ClientPhysic;
-import com.creativemd.itemphysic.physics.ServerPhysic;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.LoadController;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.Optional.Method;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -35,8 +33,10 @@ public class ItemDummyContainer extends DummyModContainer {
 	public static final String modid = "itemphysic";
 	public static final String version = "1.4.0";
 	
+	public static ItemPhysicConfig CONFIG;
+	public static ItemPhysicConfig.Rendering CONFIG_RENDERING;
+	
 	public ItemDummyContainer() {
-		
 		super(new ModMetadata());
 		ModMetadata meta = getMetadata();
 		meta.modId = modid;
@@ -48,6 +48,11 @@ public class ItemDummyContainer extends DummyModContainer {
 		meta.url = "";
 		meta.screenshots = new String[0];
 		meta.logoFile = "";
+	}
+	
+	@Override
+	public String getGuiClassName() {
+		return "com.creativemd.itemphysic.ItemPhysicSettings";
 	}
 	
 	public static final Logger logger = LogManager.getLogger(modid);
@@ -65,61 +70,25 @@ public class ItemDummyContainer extends DummyModContainer {
 	
 	@Subscribe
 	public void init(FMLInitializationEvent evt) {
-		
 		if (!ItemTransformer.isLite) {
 			MinecraftForge.EVENT_BUS.register(new EventHandler());
+			CreativeConfigRegistry.ROOT.registerValue(modid, CONFIG = new ItemPhysicConfig());
+			CONFIG_RENDERING = CONFIG.rendering;
 			initFull(evt);
 		} else {
 			MinecraftForge.EVENT_BUS.register(new EventHandlerLite());
+			CreativeConfigRegistry.ROOT.registerValue(modid, CONFIG_RENDERING = new Rendering(), ConfigSynchronization.CLIENT, false);
 		}
 	}
 	
 	@Method(modid = "creativecore")
 	public static void initFull(FMLInitializationEvent evt) {
+		
 		CreativeCorePacket.registerPacket(DropPacket.class);
-		
 		CreativeCorePacket.registerPacket(PickupPacket.class);
-		
-		ServerPhysic.loadItemList();
-		
-		try {
-			if (!ItemTransformer.isLite && Loader.isModLoaded("igcm")) {
-				ItemConfigSystem.loadConfig();
-			}
-		} catch (Exception e) {
-		}
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			ItemPhysicClient.init(evt);
-	}
-	
-	public static Configuration config;
-	
-	public static float rotateSpeed = 1.0F;
-	
-	@Subscribe
-	public void preInit(FMLPreInitializationEvent evt) {
-		config = new Configuration(evt.getSuggestedConfigurationFile());
-		config.load();
-		if (!ItemTransformer.isLite) {
-			despawnItem = config.get("Item", "despawn", 6000).getInt();
-			customPickup = config.get("Item", "customPickup", false).getBoolean();
-			pickupWhenSneaking = config.get("Item", "pickupWhenSneaking", true).getBoolean();
-			customThrow = config.get("Item", "customThrow", true).getBoolean();
-			fallSounds = config.getBoolean("fallSounds", "Item", true, "If a sound should be played if an entityitem falls on the ground.");
-			showTooltip = config.getBoolean("showTooltip", "Item", true, "Show the tooltip of an item, if custom pickup is enabled.");
-			enableIgniting = config.getBoolean("enableIgniting", "Item", true, "If igniting items will be enabled or not.");
-			disableThrowHUD = config.getBoolean("disableThrowHUD", "Item", false, "Whether the throw power should be displayed or not.");
-			
-			maximumPickupRange = config.getFloat("pickupRange", "Item", 5, 0.1F, 100, "The distance at which the player can pickup an item (only if customPickup is enabled)");
-			pickupMinedImmediately = config.getBoolean("pickupMinedImmediately", "Item", false, "If the items dropped from a mined block should be added to the inventory directly.");
-			respectRangeWhenMined = config.getBoolean("respectRangeWhenMined", "Item", false, "If pickupMinedImmediately is enabled, the item will only be added if the block is within the range!");
-		}
-		oldRotation = config.get("Item", "oldRotation", false).getBoolean(false);
-		vanillaRendering = config.get("Item", "vanillaRendering", false).getBoolean(false);
-		rotateSpeed = config.getFloat("rotateSpeed", "Item", 1.0F, 0, 100, "");
-		config.save();
-		
 	}
 	
 	@Subscribe
@@ -132,19 +101,5 @@ public class ItemDummyContainer extends DummyModContainer {
 	public void postInit(FMLPostInitializationEvent evt) {
 		
 	}
-	
-	public static int despawnItem;
-	public static boolean customPickup;
-	public static boolean pickupWhenSneaking;
-	public static boolean customThrow;
-	public static boolean oldRotation;
-	public static boolean vanillaRendering;
-	public static boolean fallSounds;
-	public static boolean showTooltip;
-	public static boolean enableIgniting;
-	public static boolean disableThrowHUD;
-	public static float maximumPickupRange;
-	public static boolean pickupMinedImmediately;
-	public static boolean respectRangeWhenMined;
 	
 }

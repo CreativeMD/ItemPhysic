@@ -59,13 +59,13 @@ public class ClientPhysic {
 		ItemStack itemstack = item.getItem();
 		
 		try {
-			if (item.getAge() == 0 || ItemDummyContainer.vanillaRendering || skipPhysicRenderer.getBoolean(item))
+			if (item.getAge() == 0 || ItemDummyContainer.CONFIG_RENDERING.vanillaRendering || skipPhysicRenderer.getBoolean(item))
 				return false;
 		} catch (IllegalArgumentException | IllegalAccessException e2) {
 			e2.printStackTrace();
 		}
 		
-		rotation = (double) (System.nanoTime() - tick) / 2500000 * ItemDummyContainer.rotateSpeed;
+		rotation = (double) (System.nanoTime() - tick) / 2500000 * ItemDummyContainer.CONFIG_RENDERING.rotateSpeed;
 		if (!mc.inGameHasFocus)
 			rotation = 0;
 		
@@ -122,7 +122,7 @@ public class ClientPhysic {
 					}
 					
 					item.rotationPitch += rotation;
-				} else if (ItemDummyContainer.oldRotation) {
+				} else if (ItemDummyContainer.CONFIG_RENDERING.oldRotation) {
 					for (int side = 0; side < 4; side++) {
 						double rotation = side * 90;
 						double range = 5;
