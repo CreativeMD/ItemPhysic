@@ -83,34 +83,20 @@ public class EventHandler {
 		float f1 = 3.0F;
 		Vec3d include = look.subtract(position);
 		List list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getEntityBoundingBox().expand(include.x, include.y, include.z).expand(f1, f1, f1));
-		double d1 = distance;
-		
-		if (player.getEntityWorld().isRemote) {
-			if (mc.objectMouseOver != null) {
-				d1 = mc.objectMouseOver.hitVec.distanceTo(position);
-			}
-		}
-		
-		double d2 = d1;
 		for (int i = 0; i < list.size(); ++i) {
 			Entity entity = (Entity) list.get(i);
 			if (entity instanceof EntityItem) {
 				
-				AxisAlignedBB axisalignedbb = new AxisAlignedBB(entity.getEntityBoundingBox().minX, entity.getEntityBoundingBox().minY, entity.getEntityBoundingBox().minZ, entity.getEntityBoundingBox().maxX, entity.getEntityBoundingBox().maxY, entity.getEntityBoundingBox().maxZ).grow(0.2);
+				AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox().grow(0.2);
 				RayTraceResult movingobjectposition = axisalignedbb.calculateIntercept(position, look);
 				
 				if (movingobjectposition != null) {
 					movingobjectposition.typeOfHit = Type.ENTITY;
 					movingobjectposition.entityHit = entity;
-				}
-				
-				if (axisalignedbb.contains(position)) {
-					if (0.0D < d2 || d2 == 0.0D) {
-						return new RayTraceResult(entity);
-					}
-				} else if (movingobjectposition != null) {
 					return movingobjectposition;
-				}
+				} else if (axisalignedbb.contains(position))
+					return new RayTraceResult(entity);
+				
 			}
 		}
 		return null;
@@ -124,14 +110,22 @@ public class EventHandler {
 	
 	@SideOnly(Side.CLIENT)
 	@Method(modid = "creativecore")
-	public static RayTraceResult getEntityItem(double distance, EntityPlayer player) {
-		
+	public static RayTraceResult getEntityItem(EntityPlayer player) {
+		double distance = getReachDistance(mc.player);
 		float partialTicks = mc.getRenderPartialTicks();
 		Vec3d position = player.getPositionEyes(partialTicks);
 		Vec3d vec3d1 = player.getLook(partialTicks);
 		Vec3d look = position.addVector(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance);
 		
-		return getEntityItem(player, position, look, distance);
+		RayTraceResult other = mc.world.rayTraceBlocks(position, look, false, true, false);
+		
+		if (other != null)
+			if (other.typeOfHit == RayTraceResult.Type.BLOCK)
+				distance = Math.min(distance, position.distanceTo(other.hitVec));
+			else if (other.typeOfHit == RayTraceResult.Type.ENTITY)
+				distance = Math.min(distance, other.entityHit.getDistance(position.x, position.y, position.z));
+			
+		return getEntityItem(player, position, position.addVector(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance), distance);
 		
 	}
 	
@@ -177,18 +171,10 @@ public class EventHandler {
 	
 	@SideOnly(Side.CLIENT)
 	public boolean onPlayerInteractClient(World world, EntityPlayer player, boolean rightClick) {
-		double distance = getReachDistance(player);
-		Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
-		if (mc.objectMouseOver != null)
-			if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-				distance = Math.min(distance, position.distanceTo(mc.objectMouseOver.hitVec));
-			else if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-				distance = Math.min(distance, mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z));
-			
-		RayTraceResult result = getEntityItem(distance, mc.player);
+		RayTraceResult result = getEntityItem(mc.player);
 		if (result != null) {
 			EntityItem entity = (EntityItem) result.entityHit;
-			if (world.isRemote && entity != null && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z)) {
+			if (world.isRemote && entity != null) {
 				player.swingArm(EnumHand.MAIN_HAND);
 				PacketHandler.sendPacketToServer(new PickupPacket(result.entityHit.getUniqueID(), rightClick));
 				return true;
@@ -237,20 +223,12 @@ public class EventHandler {
 		if (mc != null && mc.player != null && mc.inGameHasFocus) {
 			if (ItemDummyContainer.CONFIG.pickup.customPickup) {
 				
-				double distance = getReachDistance(mc.player);
-				Vec3d position = mc.getRenderViewEntity().getPositionEyes(mc.getRenderPartialTicks());
-				if (mc.objectMouseOver != null)
-					if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-						distance = Math.min(distance, position.distanceTo(mc.objectMouseOver.hitVec));
-					else if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-						distance = Math.min(distance, mc.objectMouseOver.entityHit.getDistance(position.x, position.y, position.z));
-					
-				RayTraceResult result = getEntityItem(distance, mc.player);
+				RayTraceResult result = getEntityItem(mc.player);
 				if (result != null) {
 					if (ItemPhysicClient.pickup.isKeyDown())
 						onPlayerInteractClient(mc.world, mc.player, false);
 					EntityItem entity = (EntityItem) result.entityHit;
-					if (entity != null && mc.inGameHasFocus && ItemDummyContainer.CONFIG_RENDERING.showPickupTooltip && distance > mc.getRenderViewEntity().getDistance(result.hitVec.x, result.hitVec.y, result.hitVec.z)) {
+					if (entity != null && mc.inGameHasFocus && ItemDummyContainer.CONFIG_RENDERING.showPickupTooltip) {
 						int space = 15;
 						List<String> list = new ArrayList<>();
 						try {
