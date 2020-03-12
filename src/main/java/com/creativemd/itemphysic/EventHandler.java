@@ -306,21 +306,22 @@ public class EventHandler {
 			mc = Minecraft.getMinecraft();
 		if (event.phase == Phase.END) {
 			if (mc.player != null && mc.player.getHeldItemMainhand() != null) {
-				if (mc.gameSettings.keyBindDrop.isKeyDown())
-					power++;
-				else {
-					if (power > 0) {
-						power /= 6;
-						if (power < 1)
-							power = 1;
-						if (power > 6)
-							power = 6;
-						if (ItemDummyContainer.CONFIG.general.customThrow)
+				if (ItemDummyContainer.CONFIG.general.customThrow) {
+					if (mc.gameSettings.keyBindDrop.isKeyDown())
+						power++;
+					else {
+						if (power > 0) {
+							power /= 6;
+							if (power < 1)
+								power = 1;
+							if (power > 6)
+								power = 6;
 							PacketHandler.sendPacketToServer(new DropPacket(power));
-						CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
-						mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
+							CPacketPlayerDigging.Action action = GuiScreen.isCtrlKeyDown() ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
+							mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
+						}
+						power = 0;
 					}
-					power = 0;
 				}
 			}
 		}
@@ -331,9 +332,15 @@ public class EventHandler {
 	public void renderTick(RenderTickEvent event) {
 		if (event.phase == Phase.END) {
 			ClientPhysic.tick = System.nanoTime();
-			if (!ItemTransformer.isLite) {
+			if (!ItemTransformer.isLite)
 				renderTickFull();
-			}
+		}
+	}
+	
+	public static void dropItem(boolean dropAll) {
+		if (!ItemDummyContainer.CONFIG.general.customThrow) {
+			CPacketPlayerDigging.Action action = dropAll ? CPacketPlayerDigging.Action.DROP_ALL_ITEMS : CPacketPlayerDigging.Action.DROP_ITEM;
+			mc.player.connection.sendPacket(new CPacketPlayerDigging(action, BlockPos.ORIGIN, EnumFacing.DOWN));
 		}
 	}
 }

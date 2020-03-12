@@ -279,6 +279,10 @@ public class ItemTransformer extends CreativeTransformer {
 					String desc = patchDESC("(Z)Lnet/minecraft/entity/item/EntityItem;");
 					MethodNode m = findMethod(node, TransformerNames.patchMethodName("dropItem", desc, patchClassName("net/minecraft/entity/player/EntityPlayer")), desc);
 					m.instructions.clear();
+					m.instructions.add(new LabelNode());
+					m.instructions.add(new VarInsnNode(Opcodes.ILOAD, 1));
+					m.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/creativemd/itemphysic/EventHandler", "dropItem", "(Z)V", false));
+					m.instructions.add(new LabelNode());
 					m.instructions.add(new InsnNode(ACONST_NULL));
 					m.instructions.add(new InsnNode(ARETURN));
 				}
