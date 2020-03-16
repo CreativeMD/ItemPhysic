@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.creativemd.creativecore.common.packet.PacketHandler;
 import com.creativemd.itemphysic.packet.DropPacket;
@@ -17,6 +16,7 @@ import com.creativemd.itemphysic.physics.ServerPhysic;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -246,14 +246,11 @@ public class EventHandler {
 							width = Math.max(width, mc.fontRenderer.getStringWidth(text) + 10);
 						}
 						
-						GL11.glEnable(GL11.GL_BLEND);
-						GL11.glDisable(GL11.GL_TEXTURE_2D);
-						GL11.glEnable(GL11.GL_ALPHA_TEST);
-						
 						ScaledResolution resolution = new ScaledResolution(mc);
 						
-						GL11.glEnable(GL11.GL_TEXTURE_2D);
-						GL11.glDisable(GL11.GL_BLEND);
+						GlStateManager.disableBlend();
+						GlStateManager.enableAlpha();
+						GlStateManager.enableTexture2D();
 						for (int i = 0; i < list.size(); i++) {
 							String text = list.get(i);
 							mc.fontRenderer.drawString(text, resolution.getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, resolution.getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
