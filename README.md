@@ -2,7 +2,6 @@
 
 ## Requirements
 - [CreativeCore](https://github.com/CreativeMD/CreativeCore)
-- [IGCM](https://github.com/CreativeMD/IGCM) (optional)
 
 ## Mod support?
 * [Swimming items](https://github.com/CreativeMD/ItemPhysic/blob/1.11/src/main/java/com/creativemd/itemphysic/physics/ServerPhysic.java#L63)
