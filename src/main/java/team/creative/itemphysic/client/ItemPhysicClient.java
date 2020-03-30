@@ -56,6 +56,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
+import team.creative.itemphysic.common.packet.DropPacket;
 import team.creative.itemphysic.common.packet.PickupPacket;
 
 @OnlyIn(value = Dist.CLIENT)
@@ -78,6 +79,8 @@ public class ItemPhysicClient {
 	public static void renderTick(RenderTickEvent event) {
 		if (event.phase == Phase.END)
 			lastTickTime = System.nanoTime();
+		
+		renderTickFull();
 	}
 	
 	public static boolean renderItem(ItemEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, net.minecraft.client.renderer.ItemRenderer itemRenderer, Random random) {
@@ -92,7 +95,7 @@ public class ItemPhysicClient {
 		boolean flag = ibakedmodel.isGui3d();
 		int j = getModelCount(itemstack);
 		
-		float rotateBy = (System.nanoTime() - lastTickTime) / 800000000000000F;
+		float rotateBy = (System.nanoTime() - lastTickTime) / 200000000F;
 		if (mc.isGamePaused())
 			rotateBy = 0;
 		
@@ -203,7 +206,7 @@ public class ItemPhysicClient {
 		World world = event.getWorld();
 		if (event instanceof RightClickEmpty || event instanceof RightClickBlock || event instanceof EntityInteract) {
 			if (world.isRemote && ItemPhysic.CONFIG.pickup.customPickup) {
-				if (ItemPhysicClient.pickup.getKey().equals(InputMappings.INPUT_INVALID))
+				if (!ItemPhysicClient.pickup.getKey().equals(InputMappings.INPUT_INVALID))
 					return;
 				
 				if (onPlayerInteractClient(world, event.getPlayer(), event instanceof RightClickBlock)) {
@@ -268,7 +271,7 @@ public class ItemPhysicClient {
 						
 						int width = 0;
 						for (int i = 0; i < list.size(); i++) {
-							String text = list.get(i).toString();
+							String text = list.get(i).getString();
 							width = Math.max(width, mc.fontRenderer.getStringWidth(text) + 10);
 						}
 						
@@ -276,7 +279,7 @@ public class ItemPhysicClient {
 						RenderSystem.enableAlphaTest();
 						RenderSystem.enableTexture();
 						for (int i = 0; i < list.size(); i++) {
-							String text = list.get(i).toString();
+							String text = list.get(i).getString();
 							mc.fontRenderer.drawString(text, mc.getMainWindow().getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, mc.getMainWindow().getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
 						}
 						
@@ -318,6 +321,7 @@ public class ItemPhysicClient {
 							
 							boolean dropAll = Screen.hasControlDown();
 							
+							ItemPhysic.NETWORK.sendToServer(new DropPacket(throwingPower));
 							CPlayerDiggingPacket.Action cplayerdiggingpacket$action = dropAll ? CPlayerDiggingPacket.Action.DROP_ALL_ITEMS : CPlayerDiggingPacket.Action.DROP_ITEM;
 							mc.player.connection.sendPacket(new CPlayerDiggingPacket(cplayerdiggingpacket$action, BlockPos.ZERO, Direction.DOWN));
 							if (mc.player.inventory.decrStackSize(mc.player.inventory.currentItem, dropAll && !mc.player.inventory.getCurrentItem().isEmpty() ? mc.player.inventory.getCurrentItem().getCount() : 1) != ItemStack.EMPTY)
@@ -330,23 +334,8 @@ public class ItemPhysicClient {
 		}
 	}
 	
-	public static boolean drop(boolean dropAll) {
-		if (dropItem(dropAll))
-			return true;
-		
-		mc.player.swingingHand = Hand.MAIN_HAND;
-		return false;
-	}
-	
 	public static boolean dropItem(boolean dropAll) {
-		if (!ItemPhysic.CONFIG.general.customThrow) {
-			CPlayerDiggingPacket.Action cplayerdiggingpacket$action = dropAll ? CPlayerDiggingPacket.Action.DROP_ALL_ITEMS : CPlayerDiggingPacket.Action.DROP_ITEM;
-			mc.player.connection.sendPacket(new CPlayerDiggingPacket(cplayerdiggingpacket$action, BlockPos.ZERO, Direction.DOWN));
-			if (mc.player.inventory.decrStackSize(mc.player.inventory.currentItem, dropAll && !mc.player.inventory.getCurrentItem().isEmpty() ? mc.player.inventory.getCurrentItem().getCount() : 1) != ItemStack.EMPTY)
-				mc.player.swingArm(Hand.MAIN_HAND);
-			return true;
-		}
-		return false;
+		return ItemPhysic.CONFIG.general.customThrow;
 	}
 	
 }
