@@ -76,12 +76,13 @@ public class ItemPhysicServer {
 	 *      this.setMotion(this.getMotion().add(0.0D, -0.04D, 0.0D));
 	 * }
 	 */
-	public static boolean updatePre(ItemEntity item) {
+	public static void updatePre(ItemEntity item) {
 		ItemStack stack = item.getItem();
 		fluid.set(CommonPhysic.getFluid(item));
 		if (fluid.get() == null) {
 			if (!item.hasNoGravity())
 				item.setMotion(item.getMotion().add(0.0D, -0.04D, 0.0D));
+			return;
 		}
 		
 		double density = fluid.get().getAttributes().getDensity() / 1000D;
@@ -96,7 +97,6 @@ public class ItemPhysicServer {
 		if (speedreduction > maxSpeedReduction)
 			speedreduction = maxSpeedReduction;
 		item.setMotion(item.getMotion().add(0, speedreduction, 0));
-		return true;
 	}
 	
 	/*
@@ -107,22 +107,29 @@ public class ItemPhysicServer {
 	 * }
 	 */
 	public static void updateBurn(ItemEntity item) {
-		if (item.world.getFluidState(new BlockPos(item)).isTagged(FluidTags.LAVA) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
-			try {
-				Random rand = (Random) ItemPhysicServer.rand.get(item);
-				item.setMotion((rand.nextFloat() - rand.nextFloat()) * 0.2F, 0.2F, (rand.nextFloat() - rand.nextFloat()) * 0.2F);
+		try {
+			Random rand = (Random) ItemPhysicServer.rand.get(item);
+			if (item.world.getFluidState(new BlockPos(item)).isTagged(FluidTags.LAVA) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
 				item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+				item.remove();
 				for (int i = 0; i < 100; i++)
 					item.world.addParticle(ParticleTypes.SMOKE, item.getPosX(), item.getPosY(), item.getPosZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
 			}
-		}
-		
-		if (ItemPhysic.CONFIG.general.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ItemPhysic.CONFIG.general.ignitingItems.canPass(item.getItem())) {
-			BlockState state = item.world.getBlockState(new BlockPos(item).down());
-			if (state.getMaterial().isFlammable() && item.world.getBlockState(new BlockPos(item)).getMaterial().isReplaceable())
-				item.world.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
+			
+			if (item.isBurning() && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
+				item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+				item.remove();
+				for (int i = 0; i < 100; i++)
+					item.world.addParticle(ParticleTypes.SMOKE, item.getPosX(), item.getPosY(), item.getPosZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
+			}
+			
+			if (ItemPhysic.CONFIG.general.enableIgniting && !item.world.isRemote && item.onGround && Math.random() <= 0.1 && ItemPhysic.CONFIG.general.ignitingItems.canPass(item.getItem())) {
+				BlockState state = item.world.getBlockState(new BlockPos(item).down());
+				if (state.getMaterial().isFlammable() && item.world.getBlockState(new BlockPos(item)).getMaterial().isReplaceable())
+					item.world.setBlockState(new BlockPos(item), Blocks.FIRE.getDefaultState());
+			}
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -131,8 +138,9 @@ public class ItemPhysicServer {
 	//Remove this.setMotion(this.getMotion().mul((double)f, 0.98D, (double)f));
 	//Replace with: if (this.onGround) { this.setMotion(this.getMotion().mul(1.0D, -0.5D, 1.0D)); }
 	public static void update(ItemEntity item, float f) {
-		if (ItemPhysic.CONFIG.general.swimmingItems.canPass(item.getItem()) && fluid.get() != null)
-			item.setMotion(item.getMotion().mul(1 / (fluid.get().getAttributes().getDensity() / 950D * 1.5), 1, 1 / (fluid.get().getAttributes().getDensity() / 950D * 1.5)));
+		
+		//if (ItemPhysic.CONFIG.general.swimmingItems.canPass(item.getItem()) && fluid.get() != null)
+		//item.setMotion(item.getMotion().mul(1 / (fluid.get().getAttributes().getDensity() / 950D * 1.5), 1, 1 / (fluid.get().getAttributes().getDensity() / 950D * 1.5)));
 		
 		if (fluid.get() == null) {
 			item.setMotion(item.getMotion().mul(f, 0.98D, f));
@@ -140,7 +148,7 @@ public class ItemPhysicServer {
 			if (item.onGround)
 				item.setMotion(item.getMotion().mul(1.0D, -0.5D, 1.0D));
 		} else
-			item.setMotion(item.getMotion().mul(1 / (fluid.get().getAttributes().getDensity() / 950D), 1, 1 / (fluid.get().getAttributes().getDensity() / 950D)));
+			item.setMotion(item.getMotion().mul(1 / (fluid.get().getAttributes().getDensity() / 900D), 1, 1 / (fluid.get().getAttributes().getDensity() / 900D)));
 		
 		if (ItemPhysic.CONFIG.general.despawnItem != -1 && item.lifespan == 6000 && item.lifespan != ItemPhysic.CONFIG.general.despawnItem)
 			item.lifespan = ItemPhysic.CONFIG.general.despawnItem;
@@ -149,7 +157,7 @@ public class ItemPhysicServer {
 	
 	public static void updateFallState(ItemEntity item, double y, boolean onGroundIn, BlockState state, BlockPos pos) {
 		if (onGroundIn && item.fallDistance > 0.0F && ItemPhysic.CONFIG.general.fallSounds)
-			item.playSound(SoundEvents.BLOCK_WOOD_FALL, Math.min(1, item.fallDistance / 10), (float) Math.random() * 1F + 1);
+			item.playSound(SoundEvents.BLOCK_WOOL_FALL, Math.min(1, item.fallDistance / 10), (float) Math.random() * 1F + 1);
 	}
 	
 	public static boolean onCollideWithPlayer(ItemEntity item, PlayerEntity par1EntityPlayer) {
