@@ -23,7 +23,7 @@ public class ItemPhysic {
 	
 	public static final Logger LOGGER = LogManager.getLogger(ItemPhysic.MODID);
 	public static final String MODID = "itemphysic";
-	public static CreativeNetwork NETWORK;
+	public static final CreativeNetwork NETWORK = new CreativeNetwork("1.0", LOGGER, new ResourceLocation(ItemPhysic.MODID, "main"));
 	public static ItemPhysicConfig CONFIG;
 	
 	public ItemPhysic() {
@@ -37,7 +37,6 @@ public class ItemPhysic {
 	}
 	
 	private void init(final FMLCommonSetupEvent event) {
-		NETWORK = new CreativeNetwork("1.0", LOGGER, new ResourceLocation(ItemPhysic.MODID, "main"));
 		NETWORK.registerType(DropPacket.class);
 		NETWORK.registerType(PickupPacket.class);
 		
