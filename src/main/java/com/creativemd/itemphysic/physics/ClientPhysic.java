@@ -103,7 +103,7 @@ public class ClientPhysic {
 		
 		if (is3D)
 			GlStateManager.translate(0, -0.2, -0.08);
-		else if (entity.world.getBlockState(entity.getPosition()).getBlock() == Blocks.SNOW_LAYER)
+		else if (entity.world.getBlockState(entity.getPosition()).getBlock() == Blocks.SNOW_LAYER || entity.world.getBlockState(entity.getPosition().down()).getBlock() == Blocks.SOUL_SAND)
 			GlStateManager.translate(0, 0.0, -0.14);
 		else
 			GlStateManager.translate(0, 0, -0.04);
