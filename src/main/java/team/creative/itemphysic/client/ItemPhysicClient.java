@@ -133,7 +133,7 @@ public class ItemPhysicClient {
 			
 			if (flag)
 				matrixStackIn.translate(0, -0.2, -0.08);
-			else if (entityIn.world.getBlockState(entityIn.getPosition()).getBlock() == Blocks.SNOW)
+			else if (entityIn.world.getBlockState(entityIn.getPosition()).getBlock() == Blocks.SNOW || entityIn.world.getBlockState(entityIn.getPosition().down()).getBlock() == Blocks.SOUL_SAND)
 				matrixStackIn.translate(0, 0.0, -0.14);
 			else
 				matrixStackIn.translate(0, 0, -0.04);
