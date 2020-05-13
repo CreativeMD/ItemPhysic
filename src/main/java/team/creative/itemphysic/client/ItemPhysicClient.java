@@ -39,6 +39,7 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -295,8 +296,7 @@ public class ItemPhysicClient {
 						renderPower = 1;
 					if (renderPower > 6)
 						renderPower = 6;
-					String text = "Power: " + renderPower;
-					mc.player.sendStatusMessage(new StringTextComponent(text), true);
+					mc.player.sendStatusMessage(new TranslationTextComponent("item.throw", renderPower), true);
 				}
 			}
 		}
