@@ -48,6 +48,8 @@ public class ClientPhysic {
 	
 	private static Field skipPhysicRenderer = ReflectionHelper.findField(EntityItem.class, "skipPhysicRenderer");
 	
+	private static Field isInWeb = ReflectionHelper.findField(Entity.class, new String[] { "isInWeb", "field_70134_J" });
+	
 	@SideOnly(Side.CLIENT)
 	public static void setPositionAndRotationDirect(EntityItem item, double x, double y, double z, float yaw, float pitch, int posRotationIncrements, boolean teleport) {
 		item.setPosition(x, y, z);
@@ -120,6 +122,10 @@ public class ClientPhysic {
 					if (fluid != null) {
 						rotation /= fluid.getDensity() / 1000 * 10;
 					}
+					try {
+						if (isInWeb.getBoolean(item))
+							rotation /= 50;
+					} catch (IllegalArgumentException | IllegalAccessException e) {}
 					
 					item.rotationPitch += rotation;
 				} else if (ItemDummyContainer.CONFIG_RENDERING.oldRotation) {
