@@ -8,6 +8,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -99,6 +100,9 @@ public class ItemPhysicClient {
 		float rotateBy = (System.nanoTime() - lastTickTime) / 200000000F;
 		if (mc.isGamePaused())
 			rotateBy = 0;
+		
+		if (entityIn.world.isMaterialInBB(entityIn.getBoundingBox(), Material.WEB))
+			rotateBy /= 50;
 		
 		matrixStackIn.rotate(Vector3f.XP.rotation((float) Math.PI / 2));
 		matrixStackIn.rotate(Vector3f.ZP.rotation(entityIn.rotationYaw));
