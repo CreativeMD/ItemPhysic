@@ -235,7 +235,7 @@ public class ItemPhysicClient {
 		
 		RayTraceResult result = mc.world.rayTraceBlocks(new RayTraceContext(position, look, BlockMode.COLLIDER, FluidMode.NONE, player));
 		if (result != null)
-			distance = result.getHitVec().squareDistanceTo(position);
+			distance = Math.min(distance, result.getHitVec().squareDistanceTo(position));
 		
 		AxisAlignedBB axisalignedbb = player.getBoundingBox().expand(vec3d1.scale(distance)).grow(1.0D, 1.0D, 1.0D);
 		EntityRayTraceResult entityraytraceresult = ProjectileHelper.rayTraceEntities(player, position, look, axisalignedbb, (p_215312_0_) -> {
