@@ -1,5 +1,6 @@
 package team.creative.itemphysic.client;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,17 +9,16 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,7 +37,8 @@ import net.minecraft.util.math.RayTraceContext.BlockMode;
 import net.minecraft.util.math.RayTraceContext.FluidMode;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -55,6 +56,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpt
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
@@ -101,8 +103,9 @@ public class ItemPhysicClient {
 		if (mc.isGamePaused())
 			rotateBy = 0;
 		
-		if (entityIn.world.isMaterialInBB(entityIn.getBoundingBox(), Material.WEB))
-			rotateBy /= 50;
+		Vector3d motionMultiplier = getMotionMultiplier(entityIn);
+		if (motionMultiplier != null && motionMultiplier.lengthSquared() > 0)
+			rotateBy *= motionMultiplier.x * 0.2;
 		
 		matrixStackIn.rotate(Vector3f.XP.rotation((float) Math.PI / 2));
 		matrixStackIn.rotate(Vector3f.ZP.rotation(entityIn.rotationYaw));
@@ -112,7 +115,7 @@ public class ItemPhysicClient {
 		//Handle Rotations
 		if (applyEffects) {
 			if (flag) {
-				if (!entityIn.onGround) {
+				if (!entityIn.func_233570_aj_()) {
 					rotateBy *= 2;
 					Fluid fluid = CommonPhysic.getFluid(entityIn);
 					if (fluid == null)
@@ -123,7 +126,7 @@ public class ItemPhysicClient {
 					entityIn.rotationPitch += rotateBy;
 				}
 			} else if (entityIn != null && !Double.isNaN(entityIn.getPosX()) && !Double.isNaN(entityIn.getPosY()) && !Double.isNaN(entityIn.getPosZ()) && entityIn.world != null) {
-				if (entityIn.onGround) {
+				if (entityIn.func_233570_aj_()) {
 					if (!flag)
 						entityIn.rotationPitch = 0;
 				} else {
@@ -138,7 +141,7 @@ public class ItemPhysicClient {
 			
 			if (flag)
 				matrixStackIn.translate(0, -0.2, -0.08);
-			else if (entityIn.world.getBlockState(entityIn.getPosition()).getBlock() == Blocks.SNOW || entityIn.world.getBlockState(entityIn.getPosition().down()).getBlock() == Blocks.SOUL_SAND)
+			else if (entityIn.world.getBlockState(entityIn.func_233580_cy_()).getBlock() == Blocks.SNOW || entityIn.world.getBlockState(entityIn.func_233580_cy_().down()).getBlock() == Blocks.SOUL_SAND)
 				matrixStackIn.translate(0, 0.0, -0.14);
 			else
 				matrixStackIn.translate(0, 0, -0.04);
@@ -229,9 +232,9 @@ public class ItemPhysicClient {
 	public static RayTraceResult getEntityItem(PlayerEntity player) {
 		double distance = CommonPhysic.getReachDistance(player);
 		float partialTicks = mc.getRenderPartialTicks();
-		Vec3d position = player.getEyePosition(partialTicks);
-		Vec3d vec3d1 = player.getLook(partialTicks);
-		Vec3d look = position.add(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance);
+		Vector3d position = player.getEyePosition(partialTicks);
+		Vector3d vec3d1 = player.getLook(partialTicks);
+		Vector3d look = position.add(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance);
 		
 		RayTraceResult result = mc.world.rayTraceBlocks(new RayTraceContext(position, look, BlockMode.COLLIDER, FluidMode.NONE, player));
 		if (result != null)
@@ -242,7 +245,7 @@ public class ItemPhysicClient {
 			return !p_215312_0_.isSpectator() && p_215312_0_.canBeCollidedWith();
 		}, distance);
 		if (entityraytraceresult != null) {
-			Vec3d vec3d3 = entityraytraceresult.getHitVec();
+			Vector3d vec3d3 = entityraytraceresult.getHitVec();
 			double d2 = position.squareDistanceTo(vec3d3);
 			if (d2 < distance || result == null) {
 				result = entityraytraceresult;
@@ -285,7 +288,7 @@ public class ItemPhysicClient {
 						RenderSystem.enableTexture();
 						for (int i = 0; i < list.size(); i++) {
 							String text = list.get(i).getString();
-							mc.fontRenderer.drawString(text, mc.getMainWindow().getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, mc.getMainWindow().getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
+							mc.fontRenderer.func_238405_a_(new MatrixStack(), text, mc.getMainWindow().getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, mc.getMainWindow().getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
 						}
 						
 					}
@@ -323,7 +326,7 @@ public class ItemPhysicClient {
 							if (throwingPower > 6)
 								throwingPower = 6;
 							
-							boolean dropAll = Screen.hasControlDown();
+							boolean dropAll = Screen.func_231172_r_();
 							
 							ItemPhysic.NETWORK.sendToServer(new DropPacket(throwingPower));
 							CPlayerDiggingPacket.Action cplayerdiggingpacket$action = dropAll ? CPlayerDiggingPacket.Action.DROP_ALL_ITEMS : CPlayerDiggingPacket.Action.DROP_ITEM;
@@ -340,6 +343,18 @@ public class ItemPhysicClient {
 	
 	public static boolean dropItem(boolean dropAll) {
 		return ItemPhysic.CONFIG.general.customThrow;
+	}
+	
+	private static Field motionMultiplierField = null;
+	
+	public static Vector3d getMotionMultiplier(Entity entity) {
+		if (motionMultiplierField == null)
+			motionMultiplierField = ObfuscationReflectionHelper.findField(Entity.class, "field_213328_B");
+		try {
+			return (Vector3d) motionMultiplierField.get(entity);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			return null;
+		}
 	}
 	
 }
