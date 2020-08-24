@@ -88,10 +88,10 @@ public class ItemPhysicServer {
 		double density = fluid.get().getAttributes().getDensity() / 1000D;
 		double speed = -1 / density * 0.01;
 		if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack))
-			speed = 0.05;
+			speed = 0.1;
 		
 		double speedreduction = (speed - item.getMotion().y) / 2;
-		double maxSpeedReduction = 0.05;
+		double maxSpeedReduction = 0.1;
 		if (speedreduction < -maxSpeedReduction)
 			speedreduction = -maxSpeedReduction;
 		if (speedreduction > maxSpeedReduction)
