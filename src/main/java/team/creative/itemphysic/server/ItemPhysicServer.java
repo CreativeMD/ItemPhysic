@@ -3,7 +3,6 @@ package team.creative.itemphysic.server;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -21,11 +20,8 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -33,9 +29,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
-import net.minecraftforge.event.world.BlockEvent.HarvestDropsEvent;
 import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -263,30 +257,6 @@ public class ItemPhysicServer {
 	}
 	
 	public static List<PlayerEntity> toCancel = new ArrayList<>();
-	
-	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void onDrop(HarvestDropsEvent event) {
-		if (ItemPhysic.CONFIG.pickup.pickupMinedImmediately && event.getHarvester() != null) {
-			
-			PlayerEntity player = event.getHarvester();
-			IWorld world = event.getWorld();
-			
-			if (ItemPhysic.CONFIG.pickup.respectRangeWhenMined && event.getPos().distanceSq(player.getPosX(), player.getPosYEye(), player.getPosZ(), false) > Math.pow(CommonPhysic.getReachDistance(player), 2))
-				return;
-			
-			boolean pickedUp = false;
-			for (Iterator<ItemStack> iterator = event.getDrops().iterator(); iterator.hasNext();) {
-				ItemStack stack = iterator.next();
-				if (player.addItemStackToInventory(stack)) {
-					iterator.remove();
-					pickedUp = true;
-				}
-			}
-			
-			if (pickedUp)
-				((World) world).playSound(player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, (world.getRandom().nextFloat() - world.getRandom().nextFloat()) * 1.4F + 2.0F, false);
-		}
-	}
 	
 	@SubscribeEvent
 	public static void onPlayerInteract(PlayerInteractEvent event) {
