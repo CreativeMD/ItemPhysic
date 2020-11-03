@@ -13,4 +13,9 @@ public class InstantPickupSerializer extends GlobalLootModifierSerializer<Instan
 		return new InstantPickupLoot();
 	}
 	
+	@Override
+	public JsonObject write(InstantPickupLoot instance) {
+		return new JsonObject();
+	}
+	
 }

@@ -84,6 +84,8 @@ public class ItemPhysicServer {
 		if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack))
 			speed = 0.1;
 		
+		if (item.getMotion().y > 0 && speed < item.getMotion().y)
+			return;
 		double speedreduction = (speed - item.getMotion().y) / 2;
 		double maxSpeedReduction = 0.1;
 		if (speedreduction < -maxSpeedReduction)
