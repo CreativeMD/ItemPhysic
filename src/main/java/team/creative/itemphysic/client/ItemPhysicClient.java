@@ -115,7 +115,7 @@ public class ItemPhysicClient {
 		//Handle Rotations
 		if (applyEffects) {
 			if (flag) {
-				if (!entityIn.func_233570_aj_()) {
+				if (!entityIn.isOnGround()) {
 					rotateBy *= 2;
 					Fluid fluid = CommonPhysic.getFluid(entityIn);
 					if (fluid == null)
@@ -126,7 +126,7 @@ public class ItemPhysicClient {
 					entityIn.rotationPitch += rotateBy;
 				}
 			} else if (entityIn != null && !Double.isNaN(entityIn.getPosX()) && !Double.isNaN(entityIn.getPosY()) && !Double.isNaN(entityIn.getPosZ()) && entityIn.world != null) {
-				if (entityIn.func_233570_aj_()) {
+				if (entityIn.isOnGround()) {
 					if (!flag)
 						entityIn.rotationPitch = 0;
 				} else {
@@ -141,7 +141,7 @@ public class ItemPhysicClient {
 			
 			if (flag)
 				matrixStackIn.translate(0, -0.2, -0.08);
-			else if (entityIn.world.getBlockState(entityIn.func_233580_cy_()).getBlock() == Blocks.SNOW || entityIn.world.getBlockState(entityIn.func_233580_cy_().down()).getBlock() == Blocks.SOUL_SAND)
+			else if (entityIn.world.getBlockState(entityIn.getPosition()).getBlock() == Blocks.SNOW || entityIn.world.getBlockState(entityIn.getPosition().down()).getBlock() == Blocks.SOUL_SAND)
 				matrixStackIn.translate(0, 0.0, -0.14);
 			else
 				matrixStackIn.translate(0, 0, -0.04);
@@ -288,7 +288,7 @@ public class ItemPhysicClient {
 						RenderSystem.enableTexture();
 						for (int i = 0; i < list.size(); i++) {
 							String text = list.get(i).getString();
-							mc.fontRenderer.func_238405_a_(new MatrixStack(), text, mc.getMainWindow().getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, mc.getMainWindow().getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
+							mc.fontRenderer.drawStringWithShadow(new MatrixStack(), text, mc.getMainWindow().getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, mc.getMainWindow().getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
 						}
 						
 					}
@@ -326,7 +326,7 @@ public class ItemPhysicClient {
 							if (throwingPower > 6)
 								throwingPower = 6;
 							
-							boolean dropAll = Screen.func_231172_r_();
+							boolean dropAll = Screen.hasControlDown();
 							
 							ItemPhysic.NETWORK.sendToServer(new DropPacket(throwingPower));
 							CPlayerDiggingPacket.Action cplayerdiggingpacket$action = dropAll ? CPlayerDiggingPacket.Action.DROP_ALL_ITEMS : CPlayerDiggingPacket.Action.DROP_ITEM;

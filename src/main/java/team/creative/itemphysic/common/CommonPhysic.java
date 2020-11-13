@@ -26,7 +26,7 @@ public class CommonPhysic {
 			return null;
 		
 		double d0 = item.getPosY();
-		BlockPos pos = item.func_233580_cy_();
+		BlockPos pos = item.getPosition();
 		if (below)
 			pos = pos.down();
 		

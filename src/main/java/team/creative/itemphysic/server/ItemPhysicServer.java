@@ -105,7 +105,7 @@ public class ItemPhysicServer {
 	public static void updateBurn(ItemEntity item) {
 		try {
 			Random rand = (Random) ItemPhysicServer.rand.get(item);
-			if (item.world.getFluidState(item.func_233580_cy_()).isTagged(FluidTags.LAVA) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
+			if (item.world.getFluidState(item.getPosition()).isTagged(FluidTags.LAVA) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
 				item.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
 				item.remove();
 				for (int i = 0; i < 100; i++)
@@ -119,10 +119,10 @@ public class ItemPhysicServer {
 					item.world.addParticle(ParticleTypes.SMOKE, item.getPosX(), item.getPosY(), item.getPosZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
 			}
 			
-			if (ItemPhysic.CONFIG.general.enableIgniting && !item.world.isRemote && item.func_233570_aj_() && Math.random() <= 0.1 && ItemPhysic.CONFIG.general.ignitingItems.canPass(item.getItem())) {
-				BlockState state = item.world.getBlockState(item.func_233580_cy_().down());
-				if (state.getMaterial().isFlammable() && item.world.getBlockState(item.func_233580_cy_()).getMaterial().isReplaceable())
-					item.world.setBlockState(item.func_233580_cy_(), Blocks.FIRE.getDefaultState());
+			if (ItemPhysic.CONFIG.general.enableIgniting && !item.world.isRemote && item.isOnGround() && Math.random() <= 0.1 && ItemPhysic.CONFIG.general.ignitingItems.canPass(item.getItem())) {
+				BlockState state = item.world.getBlockState(item.getPosition().down());
+				if (state.getMaterial().isFlammable() && item.world.getBlockState(item.getPosition()).getMaterial().isReplaceable())
+					item.world.setBlockState(item.getPosition(), Blocks.FIRE.getDefaultState());
 			}
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
@@ -141,7 +141,7 @@ public class ItemPhysicServer {
 		if (fluid.get() == null) {
 			item.setMotion(item.getMotion().mul(f, 0.98D, f));
 			
-			if (item.func_233570_aj_())
+			if (item.isOnGround())
 				item.setMotion(item.getMotion().mul(1.0D, -0.5D, 1.0D));
 		} else
 			item.setMotion(item.getMotion().mul(1 / (fluid.get().getAttributes().getDensity() / 900D), 1, 1 / (fluid.get().getAttributes().getDensity() / 900D)));
@@ -245,7 +245,7 @@ public class ItemPhysicServer {
 	public static boolean isItemBurning(ItemEntity item) {
 		boolean flag = item.world != null && item.world.isRemote;
 		try {
-			if (!(!item.func_230279_az_() && (fire.getInt(item) > 0 || flag && (Boolean) getFlag.invoke(item, 0))))
+			if (!(!item.isImmuneToFire() && (fire.getInt(item) > 0 || flag && (Boolean) getFlag.invoke(item, 0))))
 				return false;
 		} catch (Exception e) {
 			e.printStackTrace();
