@@ -6,22 +6,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -93,6 +99,78 @@ public class ItemPhysicServer {
 		if (speedreduction > maxSpeedReduction)
 			speedreduction = maxSpeedReduction;
 		item.setMotion(item.getMotion().add(0, speedreduction, 0));
+	}
+	
+	private static Field eyesFluidLevel = ObfuscationReflectionHelper.findField(Entity.class, "field_233554_M_");
+	
+	public static boolean handleFluidAcceleration(ItemEntity item, ITag<Fluid> fluidTag, double p_210500_2_) {
+		double size = -0.001D;
+		if (fluidTag == FluidTags.WATER && ItemPhysic.CONFIG.general.swimmingItems.canPass(item.getItem()))
+			size = 0.3;
+		
+		AxisAlignedBB axisalignedbb = item.getBoundingBox().grow(size);
+		int i = MathHelper.floor(axisalignedbb.minX);
+		int j = MathHelper.ceil(axisalignedbb.maxX);
+		int k = MathHelper.floor(axisalignedbb.minY);
+		int l = MathHelper.ceil(axisalignedbb.maxY);
+		int i1 = MathHelper.floor(axisalignedbb.minZ);
+		int j1 = MathHelper.ceil(axisalignedbb.maxZ);
+		if (!item.world.isAreaLoaded(i, k, i1, j, l, j1)) {
+			return false;
+		} else {
+			double d0 = 0.0D;
+			boolean flag = item.isPushedByWater();
+			boolean flag1 = false;
+			Vector3d vector3d = Vector3d.ZERO;
+			int k1 = 0;
+			BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+			
+			for (int l1 = i; l1 < j; ++l1) {
+				for (int i2 = k; i2 < l; ++i2) {
+					for (int j2 = i1; j2 < j1; ++j2) {
+						blockpos$mutable.setPos(l1, i2, j2);
+						FluidState fluidstate = item.world.getFluidState(blockpos$mutable);
+						if (fluidstate.isTagged(fluidTag)) {
+							double d1 = i2 + fluidstate.getActualHeight(item.world, blockpos$mutable);
+							if (d1 >= axisalignedbb.minY) {
+								flag1 = true;
+								d0 = Math.max(d1 - axisalignedbb.minY, d0);
+								if (flag) {
+									Vector3d vector3d1 = fluidstate.getFlow(item.world, blockpos$mutable);
+									if (d0 < 0.4D) {
+										vector3d1 = vector3d1.scale(d0);
+									}
+									
+									vector3d = vector3d.add(vector3d1);
+									++k1;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			if (vector3d.length() > 0.0D) {
+				if (k1 > 0)
+					vector3d = vector3d.scale(1.0D / k1);
+				
+				Vector3d vector3d2 = item.getMotion();
+				vector3d = vector3d.scale(p_210500_2_ * 1.0D);
+				if (Math.abs(vector3d2.x) < 0.003D && Math.abs(vector3d2.z) < 0.003D && vector3d.length() < 0.0045D)
+					vector3d = vector3d.normalize().scale(0.0045D);
+				
+				item.setMotion(item.getMotion().add(vector3d));
+			}
+			
+			try {
+				Object2DoubleMap<ITag<Fluid>> map = (Object2DoubleMap<ITag<Fluid>>) eyesFluidLevel.get(item);
+				map.put(fluidTag, d0);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			
+			return flag1;
+		}
 	}
 	
 	/*

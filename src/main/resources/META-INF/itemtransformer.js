@@ -191,6 +191,25 @@ function initializeCoreMod() {
 				method.maxLocals = 1;
 				method.maxStack = 3;
 				
+				//Add handleFluidAcceleration
+				var method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("func_210500_b"), "(Lnet/minecraft/tags/ITag;D)Z", null, null);
+				var label = new LabelNode();	
+				method.instructions.add(label);
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+				method.instructions.add(new VarInsnNode(Opcodes.DLOAD, 2));
+				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "handleFluidAcceleration", "(Lnet/minecraft/entity/item/ItemEntity;Lnet/minecraft/tags/ITag;D)Z", asmapi.MethodType.STATIC));
+				var label2 = new LabelNode();
+				method.instructions.add(label2);
+				method.instructions.add(new InsnNode(Opcodes.IRETURN));
+				
+				method.maxStack = 6;
+				method.maxLocals = 4;
+				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/entity/item/ItemEntity;", null, label, label2, 0));
+				method.localVariables.add(new LocalVariableNode("tag", "Lnet/minecraft/tags/ITag;", null, label, label2, 1));
+				method.localVariables.add(new LocalVariableNode("var", "D", null, label, label2, 2));
+				node.methods.add(method);
+				
 				return node;
             }
         },
