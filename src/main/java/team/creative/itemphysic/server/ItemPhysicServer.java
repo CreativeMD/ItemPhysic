@@ -257,18 +257,20 @@ public class ItemPhysicServer {
 				return;
 			
 			ItemStack copy = itemstack.copy();
-			if ((!entity.cannotPickup() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwnerId() == null || entity.lifespan - entity.getAge() <= 200 || entity.getOwnerId().equals(player.getUniqueID())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack))) {
-				copy.setCount(copy.getCount() - entity.getItem().getCount());
-				net.minecraftforge.fml.hooks.BasicEventHooks.firePlayerItemPickupEvent(player, entity, copy);
-				player.onItemPickup(entity, i);
-				if (itemstack.isEmpty()) {
+			try {
+				if ((!entity.cannotPickup() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwnerId() == null || entity.lifespan - age.getInt(entity) <= 200 || entity.getOwnerId().equals(player.getUniqueID())) && (hook == 1 || i <= 0 || player.inventory.addItemStackToInventory(itemstack))) {
+					copy.setCount(copy.getCount() - entity.getItem().getCount());
+					net.minecraftforge.fml.hooks.BasicEventHooks.firePlayerItemPickupEvent(player, entity, copy);
 					player.onItemPickup(entity, i);
-					entity.remove();
-					itemstack.setCount(i);
+					if (itemstack.isEmpty()) {
+						player.onItemPickup(entity, i);
+						entity.remove();
+						itemstack.setCount(i);
+					}
+					
+					player.addStat(Stats.ITEM_PICKED_UP.get(item), i);
 				}
-				
-				player.addStat(Stats.ITEM_PICKED_UP.get(item), i);
-			}
+			} catch (IllegalArgumentException | IllegalAccessException e) {}
 			
 		}
 	}
