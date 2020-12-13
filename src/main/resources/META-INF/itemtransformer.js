@@ -121,6 +121,7 @@ function initializeCoreMod() {
             	var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
             	var VarInsnNode = Java.type('org.objectweb.asm.tree.VarInsnNode');
             	var MethodNode = Java.type('org.objectweb.asm.tree.MethodNode');
+            	var FieldNode = Java.type('org.objectweb.asm.tree.FieldNode');
             	var LocalVariableNode = Java.type('org.objectweb.asm.tree.LocalVariableNode');
             	var Opcodes = Java.type('org.objectweb.asm.Opcodes');
             	
@@ -209,6 +210,8 @@ function initializeCoreMod() {
 				method.localVariables.add(new LocalVariableNode("tag", "Lnet/minecraft/tags/ITag;", null, label, label2, 1));
 				method.localVariables.add(new LocalVariableNode("var", "D", null, label, label2, 2));
 				node.methods.add(method);
+				
+				node.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "skipPhysicRenderer", "Z", null, false));
 				
 				return node;
             }

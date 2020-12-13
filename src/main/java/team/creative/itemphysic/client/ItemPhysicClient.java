@@ -68,6 +68,7 @@ public class ItemPhysicClient {
 	
 	public static KeyBinding pickup = new KeyBinding("key.pickup.item", InputMappings.INPUT_INVALID.getKeyCode(), "key.categories.gameplay");
 	public static Minecraft mc;
+	private static final Field skipPhysicRenderer = ObfuscationReflectionHelper.findField(ItemEntity.class, "skipPhysicRenderer");
 	
 	public static void init(FMLClientSetupEvent event) {
 		ClientRegistry.registerKeyBinding(pickup);
@@ -88,8 +89,12 @@ public class ItemPhysicClient {
 	}
 	
 	public static boolean renderItem(ItemEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, net.minecraft.client.renderer.ItemRenderer itemRenderer, Random random) {
-		if (entityIn.getAge() == 0)
-			return false;
+		try {
+			if (entityIn.getAge() == 0 && skipPhysicRenderer.getBoolean(entityIn))
+				return false;
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 		
 		matrixStackIn.push();
 		ItemStack itemstack = entityIn.getItem();
