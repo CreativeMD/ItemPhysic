@@ -90,7 +90,7 @@ public class ItemPhysicClient {
 	
 	public static boolean renderItem(ItemEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, net.minecraft.client.renderer.ItemRenderer itemRenderer, Random random) {
 		try {
-			if (entityIn.getAge() == 0 && skipPhysicRenderer.getBoolean(entityIn))
+			if (entityIn.getAge() == 0 || skipPhysicRenderer.getBoolean(entityIn))
 				return false;
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
