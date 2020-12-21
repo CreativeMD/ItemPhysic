@@ -267,7 +267,10 @@ function initializeCoreMod() {
             	
             	// update pre
             	var pre = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_70090_H"), "()Z").getPrevious();
-            	var end = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_189652_ae"), "()Z").getPrevious().getPrevious().getPrevious();
+            	var end = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_189652_ae"), "()Z");
+            	for(var i = 0; i < 12; i++) {
+            		end = end.getNext();
+            	}
             	var current = pre;
             	while(current != end) {
             		var temp = current;

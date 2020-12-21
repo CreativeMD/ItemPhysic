@@ -219,7 +219,7 @@ public class ItemPhysicServer {
 		if (fluid.get() == null) {
 			item.setMotion(item.getMotion().mul(f, 0.98D, f));
 			
-			if (item.isOnGround())
+			if (item.isOnGround() && item.getMotion().y < 0.0D)
 				item.setMotion(item.getMotion().mul(1.0D, -0.5D, 1.0D));
 		} else
 			item.setMotion(item.getMotion().mul(1 / (fluid.get().getAttributes().getDensity() / 900D), 1, 1 / (fluid.get().getAttributes().getDensity() / 900D)));
