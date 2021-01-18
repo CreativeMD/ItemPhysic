@@ -90,7 +90,7 @@ public class ItemPhysicClient {
 	
 	public static boolean renderItem(ItemEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, net.minecraft.client.renderer.ItemRenderer itemRenderer, Random random) {
 		try {
-			if (entityIn.getAge() == 0 || skipPhysicRenderer.getBoolean(entityIn))
+			if (entityIn.getAge() == 0 || skipPhysicRenderer.getBoolean(entityIn) || ItemPhysic.CONFIG.rendering.vanillaRendering)
 				return false;
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
@@ -104,7 +104,7 @@ public class ItemPhysicClient {
 		boolean flag = ibakedmodel.isGui3d();
 		int j = getModelCount(itemstack);
 		
-		float rotateBy = (System.nanoTime() - lastTickTime) / 200000000F;
+		float rotateBy = (System.nanoTime() - lastTickTime) / 200000000F * ItemPhysic.CONFIG.rendering.rotateSpeed;
 		if (mc.isGamePaused())
 			rotateBy = 0;
 		
@@ -129,6 +129,40 @@ public class ItemPhysicClient {
 						rotateBy /= fluid.getAttributes().getDensity() / 1000 * 10;
 					
 					entityIn.rotationPitch += rotateBy;
+				} else if (ItemPhysic.CONFIG.rendering.oldRotation) {
+					for (int side = 0; side < 4; side++) {
+						double rotation = side * 90;
+						double range = 5;
+						if (entityIn.rotationPitch > rotation - range && entityIn.rotationPitch < rotation + range)
+							entityIn.rotationPitch = (float) rotation;
+					}
+					if (entityIn.rotationPitch != 0 && entityIn.rotationPitch != 90 && entityIn.rotationPitch != 180 && entityIn.rotationPitch != 270) {
+						double Abstand0 = Math.abs(entityIn.rotationPitch);
+						double Abstand90 = Math.abs(entityIn.rotationPitch - 90);
+						double Abstand180 = Math.abs(entityIn.rotationPitch - 180);
+						double Abstand270 = Math.abs(entityIn.rotationPitch - 270);
+						if (Abstand0 <= Abstand90 && Abstand0 <= Abstand180 && Abstand0 <= Abstand270)
+							if (entityIn.rotationPitch < 0)
+								entityIn.rotationPitch += rotateBy;
+							else
+								entityIn.rotationPitch -= rotateBy;
+						if (Abstand90 < Abstand0 && Abstand90 <= Abstand180 && Abstand90 <= Abstand270)
+							if (entityIn.rotationPitch - 90 < 0)
+								entityIn.rotationPitch += rotateBy;
+							else
+								entityIn.rotationPitch -= rotateBy;
+						if (Abstand180 < Abstand90 && Abstand180 < Abstand0 && Abstand180 <= Abstand270)
+							if (entityIn.rotationPitch - 180 < 0)
+								entityIn.rotationPitch += rotateBy;
+							else
+								entityIn.rotationPitch -= rotateBy;
+						if (Abstand270 < Abstand90 && Abstand270 < Abstand180 && Abstand270 < Abstand0)
+							if (entityIn.rotationPitch - 270 < 0)
+								entityIn.rotationPitch += rotateBy;
+							else
+								entityIn.rotationPitch -= rotateBy;
+							
+					}
 				}
 			} else if (entityIn != null && !Double.isNaN(entityIn.getPosX()) && !Double.isNaN(entityIn.getPosY()) && !Double.isNaN(entityIn.getPosZ()) && entityIn.world != null) {
 				if (entityIn.isOnGround()) {
