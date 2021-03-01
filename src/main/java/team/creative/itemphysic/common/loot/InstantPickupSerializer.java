@@ -7,15 +7,15 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 
 public class InstantPickupSerializer extends GlobalLootModifierSerializer<InstantPickupLoot> {
-	
-	@Override
-	public InstantPickupLoot read(ResourceLocation location, JsonObject object, ILootCondition[] ailootcondition) {
-		return new InstantPickupLoot();
-	}
-	
-	@Override
-	public JsonObject write(InstantPickupLoot instance) {
-		return new JsonObject();
-	}
-	
+    
+    @Override
+    public InstantPickupLoot read(ResourceLocation location, JsonObject object, ILootCondition[] ailootcondition) {
+        return new InstantPickupLoot();
+    }
+    
+    @Override
+    public JsonObject write(InstantPickupLoot instance) {
+        return new JsonObject();
+    }
+    
 }
