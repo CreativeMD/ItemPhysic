@@ -289,38 +289,25 @@ public class ItemPhysicServer {
     
     public static boolean attackEntityFrom(ItemEntity item, DamageSource source, float amount) {
         if (item.world.isRemote || item.isAlive())
-            return false; //Forge: Fixes MC-53850
+            return true; //Forge: Fixes MC-53850
             
         if (item.isInvulnerableTo(source))
-            return false;
+            return true;
         
         if (!item.getItem().isEmpty() && ItemPhysic.CONFIG.general.undestroyableItems.canPass(item.getItem()))
-            return false;
+            return true;
         
         if (!item.getItem().isEmpty() && item.getItem().getItem() == Items.NETHER_STAR && source.isExplosion())
-            return false;
+            return true;
         
         if ((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
-            return false;
+            return true;
         
         if (source == DamageSource.CACTUS)
-            return false;
-        
-        try {
-            markVelocityChanged.invoke(item);
-            health.setInt(item, (int) (health.getInt(item) - amount));
-            
-            if (health.getInt(item) <= 0)
-                item.remove();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
+            return true;
         return false;
     }
     
-    private static Method markVelocityChanged = ObfuscationReflectionHelper.findMethod(Entity.class, "func_70018_K");
-    private static Field health = ObfuscationReflectionHelper.findField(ItemEntity.class, "field_70291_e");
     private static Field fire = ObfuscationReflectionHelper.findField(Entity.class, "field_190534_ay");
     private static Field rand = ObfuscationReflectionHelper.findField(Entity.class, "field_70146_Z");
     private static Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "field_70292_b");

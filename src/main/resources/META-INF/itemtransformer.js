@@ -96,16 +96,34 @@ function initializeCoreMod() {
             	var InsnNode = Java.type('org.objectweb.asm.tree.InsnNode');
             	var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
             	var VarInsnNode = Java.type('org.objectweb.asm.tree.VarInsnNode');
+            	var JumpInsnNode = Java.type('org.objectweb.asm.tree.JumpInsnNode');
             	var Opcodes = Java.type('org.objectweb.asm.Opcodes');
             	
-            	method.instructions.clear();
+            	var mark = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_70018_K"), "()V");
             	
-            	method.instructions.add(new LabelNode());
-            	method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
-				method.instructions.add(new VarInsnNode(Opcodes.FLOAD, 2));
-				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "attackEntityFrom", "(Lnet/minecraft/entity/item/ItemEntity;Lnet/minecraft/util/DamageSource;F)Z", asmapi.MethodType.STATIC));
-				method.instructions.add(new InsnNode(Opcodes.IRETURN));
+            	var next = method.instructions.getFirst();
+            	while(next.getNext() != mark) {
+            		var before = next;
+            		next = next.getNext();
+            		method.instructions.remove(before);
+            	}
+            	
+            	var first = method.instructions.getFirst();
+            	var labelAfter = new LabelNode();
+            	
+            	method.instructions.insertBefore(first, new LabelNode());
+            	method.instructions.insertBefore(first, new VarInsnNode(Opcodes.ALOAD, 0));
+				method.instructions.insertBefore(first, new VarInsnNode(Opcodes.ALOAD, 1));
+				method.instructions.insertBefore(first, new VarInsnNode(Opcodes.FLOAD, 2));
+				method.instructions.insertBefore(first, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "attackEntityFrom", "(Lnet/minecraft/entity/item/ItemEntity;Lnet/minecraft/util/DamageSource;F)Z", asmapi.MethodType.STATIC));
+				
+				method.instructions.insertBefore(first, new JumpInsnNode(Opcodes.IFEQ, labelAfter));
+				
+				method.instructions.insertBefore(first, new InsnNode(Opcodes.ICONST_0));
+				method.instructions.insertBefore(first, new InsnNode(Opcodes.IRETURN));
+				
+            	method.instructions.insertBefore(first, labelAfter);
+            	
 				
 				return method;
             }

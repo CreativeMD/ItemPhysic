@@ -45,7 +45,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -88,12 +87,6 @@ public class ItemPhysicClient {
         
         if (event.phase == Phase.END && mc.currentScreen == null)
             renderTickFull();
-    }
-    
-    @SubscribeEvent
-    @OnlyIn(value = Dist.CLIENT)
-    public static void drawGui(GuiScreenEvent.DrawScreenEvent.Pre event) {
-        //renderTickFull();
     }
     
     public static boolean renderItem(ItemEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn, net.minecraft.client.renderer.ItemRenderer itemRenderer, Random random) {
