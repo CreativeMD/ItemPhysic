@@ -6,8 +6,6 @@ import org.apache.logging.log4j.Logger;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -17,7 +15,6 @@ import team.creative.creativecore.client.CreativeCoreClient;
 import team.creative.creativecore.common.config.holder.CreativeConfigRegistry;
 import team.creative.creativecore.common.network.CreativeNetwork;
 import team.creative.itemphysic.client.ItemPhysicClient;
-import team.creative.itemphysic.common.loot.InstantPickupSerializer;
 import team.creative.itemphysic.common.packet.DropPacket;
 import team.creative.itemphysic.common.packet.PickupPacket;
 import team.creative.itemphysic.server.ItemPhysicServer;
@@ -29,12 +26,10 @@ public class ItemPhysic {
     public static final String MODID = "itemphysic";
     public static final CreativeNetwork NETWORK = new CreativeNetwork("1.0", LOGGER, new ResourceLocation(ItemPhysic.MODID, "main"));
     public static ItemPhysicConfig CONFIG;
-    private InstantPickupSerializer lootSerializer;
     
     public ItemPhysic() {
         DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> FMLJavaModLoadingContext.get().getModEventBus().addListener(this::client));
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
-        FMLJavaModLoadingContext.get().getModEventBus().addGenericListener(GlobalLootModifierSerializer.class, this::register);
     }
     
     @OnlyIn(value = Dist.CLIENT)
@@ -50,11 +45,6 @@ public class ItemPhysic {
         CreativeConfigRegistry.ROOT.registerValue(MODID, CONFIG = new ItemPhysicConfig());
         
         ItemPhysicServer.init(event);
-    }
-    
-    public void register(RegistryEvent.Register<GlobalLootModifierSerializer<?>> event) {
-        lootSerializer = (InstantPickupSerializer) new InstantPickupSerializer().setRegistryName(new ResourceLocation(MODID, "instant"));
-        event.getRegistry().register(lootSerializer);
     }
     
 }

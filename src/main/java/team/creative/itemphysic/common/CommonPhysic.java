@@ -22,16 +22,16 @@ public class CommonPhysic {
     }
     
     public static Fluid getFluid(ItemEntity item, boolean below) {
-        if (item.world == null)
+        if (item.level == null)
             return null;
         
-        double d0 = item.getPosY();
-        BlockPos pos = item.getPosition();
+        double d0 = item.getY();
+        BlockPos pos = item.blockPosition();
         if (below)
-            pos = pos.down();
+            pos = pos.below();
         
-        FluidState state = item.world.getFluidState(pos);
-        Fluid fluid = state.getFluid();
+        FluidState state = item.level.getFluidState(pos);
+        Fluid fluid = state.getType();
         
         if (fluid == null || fluid.getFluid().getAttributes().getDensity() == 0)
             return null;
@@ -39,7 +39,7 @@ public class CommonPhysic {
         if (below)
             return fluid;
         
-        double filled = state.getHeight();
+        double filled = state.getHeight(item.level, pos);
         
         if (d0 - pos.getY() - 0.2 <= filled)
             return fluid;
@@ -56,12 +56,12 @@ public class CommonPhysic {
     public static RayTraceResult getEntityItem(PlayerEntity player, Vector3d position, Vector3d look, double distance) {
         float f1 = 3.0F;
         Vector3d include = look.subtract(position);
-        List list = player.world.getEntitiesWithinAABBExcludingEntity(player, player.getBoundingBox().expand(include.x, include.y, include.z).expand(f1, f1, f1));
+        List list = player.level.getEntities(player, player.getBoundingBox().expandTowards(include.x, include.y, include.z).expandTowards(f1, f1, f1));
         for (int i = 0; i < list.size(); ++i) {
             Entity entity = (Entity) list.get(i);
             if (entity instanceof ItemEntity) {
-                AxisAlignedBB axisalignedbb = entity.getBoundingBox().grow(0.2);
-                Optional<Vector3d> vec = axisalignedbb.rayTrace(position, look);
+                AxisAlignedBB axisalignedbb = entity.getBoundingBox().inflate(0.2);
+                Optional<Vector3d> vec = axisalignedbb.clip(position, look);
                 if (vec.isPresent())
                     return new EntityRayTraceResult(entity, vec.get());
                 else if (axisalignedbb.contains(position))

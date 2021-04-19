@@ -34,10 +34,10 @@ public class PickupPacket extends CreativePacket {
         if (rightClick)
             ItemPhysicServer.toCancel.add(player);
         
-        Entity item = ((ServerWorld) player.world).getEntityByUuid(uuid);
+        Entity item = ((ServerWorld) player.level).getEntity(uuid);
         if (item != null && item instanceof ItemEntity && item.isAlive()) {
             ItemPhysicServer.processInitialInteract((ItemEntity) item, player, Hand.MAIN_HAND);
-            player.swingArm(Hand.MAIN_HAND);
+            player.swing(Hand.MAIN_HAND);
         }
     }
     

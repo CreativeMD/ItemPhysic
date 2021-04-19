@@ -66,7 +66,7 @@ import team.creative.itemphysic.common.packet.PickupPacket;
 @OnlyIn(value = Dist.CLIENT)
 public class ItemPhysicClient {
     
-    public static KeyBinding pickup = new KeyBinding("key.pickup.item", InputMappings.INPUT_INVALID.getKeyCode(), "key.categories.gameplay");
+    public static KeyBinding pickup = new KeyBinding("key.pickup.item", InputMappings.UNKNOWN.getValue(), "key.categories.gameplay");
     public static Minecraft mc;
     private static final Field skipPhysicRenderer = ObfuscationReflectionHelper.findField(ItemEntity.class, "skipPhysicRenderer");
     
@@ -85,7 +85,7 @@ public class ItemPhysicClient {
         if (event.phase == Phase.END)
             lastTickTime = System.nanoTime();
         
-        if (event.phase == Phase.END && mc.currentScreen == null)
+        if (event.phase == Phase.END && mc.screen == null)
             renderTickFull();
     }
     
@@ -97,26 +97,26 @@ public class ItemPhysicClient {
             e.printStackTrace();
         }
         
-        matrixStackIn.push();
+        matrixStackIn.pushPose();
         ItemStack itemstack = entityIn.getItem();
-        int i = itemstack.isEmpty() ? 187 : Item.getIdFromItem(itemstack.getItem()) + itemstack.getDamage();
+        int i = itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue();
         random.setSeed(i);
-        IBakedModel ibakedmodel = itemRenderer.getItemModelWithOverrides(itemstack, entityIn.world, (LivingEntity) null);
+        IBakedModel ibakedmodel = itemRenderer.getModel(itemstack, entityIn.level, (LivingEntity) null);
         boolean flag = ibakedmodel.isGui3d();
         int j = getModelCount(itemstack);
         
         float rotateBy = (System.nanoTime() - lastTickTime) / 200000000F * ItemPhysic.CONFIG.rendering.rotateSpeed;
-        if (mc.isGamePaused())
+        if (mc.isPaused())
             rotateBy = 0;
         
         Vector3d motionMultiplier = getMotionMultiplier(entityIn);
-        if (motionMultiplier != null && motionMultiplier.lengthSquared() > 0)
+        if (motionMultiplier != null && motionMultiplier.lengthSqr() > 0)
             rotateBy *= motionMultiplier.x * 0.2;
         
-        matrixStackIn.rotate(Vector3f.XP.rotation((float) Math.PI / 2));
-        matrixStackIn.rotate(Vector3f.ZP.rotation(entityIn.rotationYaw));
+        matrixStackIn.mulPose(Vector3f.XP.rotation((float) Math.PI / 2));
+        matrixStackIn.mulPose(Vector3f.ZP.rotation(entityIn.yRot));
         
-        boolean applyEffects = entityIn.getAge() != 0 && (flag || mc.getRenderManager().options != null);
+        boolean applyEffects = entityIn.getAge() != 0 && (flag || mc.options != null);
         
         //Handle Rotations
         if (applyEffects) {
@@ -129,59 +129,59 @@ public class ItemPhysicClient {
                     if (fluid != null)
                         rotateBy /= fluid.getAttributes().getDensity() / 1000 * 10;
                     
-                    entityIn.rotationPitch += rotateBy;
+                    entityIn.xRot += rotateBy;
                 } else if (ItemPhysic.CONFIG.rendering.oldRotation) {
                     for (int side = 0; side < 4; side++) {
                         double rotation = side * 90;
                         double range = 5;
-                        if (entityIn.rotationPitch > rotation - range && entityIn.rotationPitch < rotation + range)
-                            entityIn.rotationPitch = (float) rotation;
+                        if (entityIn.xRot > rotation - range && entityIn.xRot < rotation + range)
+                            entityIn.xRot = (float) rotation;
                     }
-                    if (entityIn.rotationPitch != 0 && entityIn.rotationPitch != 90 && entityIn.rotationPitch != 180 && entityIn.rotationPitch != 270) {
-                        double Abstand0 = Math.abs(entityIn.rotationPitch);
-                        double Abstand90 = Math.abs(entityIn.rotationPitch - 90);
-                        double Abstand180 = Math.abs(entityIn.rotationPitch - 180);
-                        double Abstand270 = Math.abs(entityIn.rotationPitch - 270);
+                    if (entityIn.xRot != 0 && entityIn.xRot != 90 && entityIn.xRot != 180 && entityIn.xRot != 270) {
+                        double Abstand0 = Math.abs(entityIn.xRot);
+                        double Abstand90 = Math.abs(entityIn.xRot - 90);
+                        double Abstand180 = Math.abs(entityIn.xRot - 180);
+                        double Abstand270 = Math.abs(entityIn.xRot - 270);
                         if (Abstand0 <= Abstand90 && Abstand0 <= Abstand180 && Abstand0 <= Abstand270)
-                            if (entityIn.rotationPitch < 0)
-                                entityIn.rotationPitch += rotateBy;
+                            if (entityIn.xRot < 0)
+                                entityIn.xRot += rotateBy;
                             else
-                                entityIn.rotationPitch -= rotateBy;
+                                entityIn.xRot -= rotateBy;
                         if (Abstand90 < Abstand0 && Abstand90 <= Abstand180 && Abstand90 <= Abstand270)
-                            if (entityIn.rotationPitch - 90 < 0)
-                                entityIn.rotationPitch += rotateBy;
+                            if (entityIn.xRot - 90 < 0)
+                                entityIn.xRot += rotateBy;
                             else
-                                entityIn.rotationPitch -= rotateBy;
+                                entityIn.xRot -= rotateBy;
                         if (Abstand180 < Abstand90 && Abstand180 < Abstand0 && Abstand180 <= Abstand270)
-                            if (entityIn.rotationPitch - 180 < 0)
-                                entityIn.rotationPitch += rotateBy;
+                            if (entityIn.xRot - 180 < 0)
+                                entityIn.xRot += rotateBy;
                             else
-                                entityIn.rotationPitch -= rotateBy;
+                                entityIn.xRot -= rotateBy;
                         if (Abstand270 < Abstand90 && Abstand270 < Abstand180 && Abstand270 < Abstand0)
-                            if (entityIn.rotationPitch - 270 < 0)
-                                entityIn.rotationPitch += rotateBy;
+                            if (entityIn.xRot - 270 < 0)
+                                entityIn.xRot += rotateBy;
                             else
-                                entityIn.rotationPitch -= rotateBy;
+                                entityIn.xRot -= rotateBy;
                             
                     }
                 }
-            } else if (entityIn != null && !Double.isNaN(entityIn.getPosX()) && !Double.isNaN(entityIn.getPosY()) && !Double.isNaN(entityIn.getPosZ()) && entityIn.world != null) {
+            } else if (entityIn != null && !Double.isNaN(entityIn.getX()) && !Double.isNaN(entityIn.getY()) && !Double.isNaN(entityIn.getZ()) && entityIn.level != null) {
                 if (entityIn.isOnGround()) {
                     if (!flag)
-                        entityIn.rotationPitch = 0;
+                        entityIn.xRot = 0;
                 } else {
                     rotateBy *= 2;
                     Fluid fluid = CommonPhysic.getFluid(entityIn);
                     if (fluid != null)
                         rotateBy /= fluid.getAttributes().getDensity() / 1000 * 10;
                     
-                    entityIn.rotationPitch += rotateBy;
+                    entityIn.xRot += rotateBy;
                 }
             }
             
             if (flag)
                 matrixStackIn.translate(0, -0.2, -0.08);
-            else if (entityIn.world.getBlockState(entityIn.getPosition()).getBlock() == Blocks.SNOW || entityIn.world.getBlockState(entityIn.getPosition().down())
+            else if (entityIn.level.getBlockState(entityIn.blockPosition()).getBlock() == Blocks.SNOW || entityIn.level.getBlockState(entityIn.blockPosition().below())
                     .getBlock() == Blocks.SOUL_SAND)
                 matrixStackIn.translate(0, 0.0, -0.14);
             else
@@ -190,7 +190,7 @@ public class ItemPhysicClient {
             double height = 0.2;
             if (flag)
                 matrixStackIn.translate(0, height, 0);
-            matrixStackIn.rotate(Vector3f.YP.rotation(entityIn.rotationPitch));
+            matrixStackIn.mulPose(Vector3f.YP.rotation(entityIn.xRot));
             if (flag)
                 matrixStackIn.translate(0, -height, 0);
         }
@@ -203,7 +203,7 @@ public class ItemPhysicClient {
         }
         
         for (int k = 0; k < j; ++k) {
-            matrixStackIn.push();
+            matrixStackIn.pushPose();
             if (k > 0) {
                 if (flag) {
                     float f11 = (random.nextFloat() * 2.0F - 1.0F) * 0.15F;
@@ -213,13 +213,13 @@ public class ItemPhysicClient {
                 }
             }
             
-            itemRenderer.renderItem(itemstack, ItemCameraTransforms.TransformType.GROUND, false, matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY, ibakedmodel);
-            matrixStackIn.pop();
+            itemRenderer.render(itemstack, ItemCameraTransforms.TransformType.GROUND, false, matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY, ibakedmodel);
+            matrixStackIn.popPose();
             if (!flag)
                 matrixStackIn.translate(0.0, 0.0, 0.05375F);
         }
         
-        matrixStackIn.pop();
+        matrixStackIn.popPose();
         return true;
     }
     
@@ -241,9 +241,9 @@ public class ItemPhysicClient {
         RayTraceResult result = getEntityItem(mc.player);
         if (result != null && result.getType() == Type.ENTITY) {
             ItemEntity entity = (ItemEntity) ((EntityRayTraceResult) result).getEntity();
-            if (world.isRemote && entity != null) {
-                player.swingArm(Hand.MAIN_HAND);
-                ItemPhysic.NETWORK.sendToServer(new PickupPacket(entity.getUniqueID(), rightClick));
+            if (world.isClientSide && entity != null) {
+                player.swing(Hand.MAIN_HAND);
+                ItemPhysic.NETWORK.sendToServer(new PickupPacket(entity.getOwner(), rightClick));
                 return true;
             }
         }
@@ -254,8 +254,8 @@ public class ItemPhysicClient {
     public static void onPlayerInteract(PlayerInteractEvent event) {
         World world = event.getWorld();
         if (event instanceof RightClickEmpty || event instanceof RightClickBlock || event instanceof EntityInteract) {
-            if (world.isRemote && ItemPhysic.CONFIG.pickup.customPickup) {
-                if (!ItemPhysicClient.pickup.getKey().equals(InputMappings.INPUT_INVALID))
+            if (world.isClientSide && ItemPhysic.CONFIG.pickup.customPickup) {
+                if (!ItemPhysicClient.pickup.getKey().equals(InputMappings.UNKNOWN))
                     return;
                 
                 if (onPlayerInteractClient(world, event.getPlayer(), event instanceof RightClickBlock)) {
@@ -272,22 +272,22 @@ public class ItemPhysicClient {
     
     public static RayTraceResult getEntityItem(PlayerEntity player) {
         double distance = CommonPhysic.getReachDistance(player);
-        float partialTicks = mc.getRenderPartialTicks();
+        float partialTicks = mc.getFrameTime();
         Vector3d position = player.getEyePosition(partialTicks);
-        Vector3d vec3d1 = player.getLook(partialTicks);
+        Vector3d vec3d1 = player.getViewVector(partialTicks);
         Vector3d look = position.add(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance);
         
-        RayTraceResult result = mc.world.rayTraceBlocks(new RayTraceContext(position, look, BlockMode.COLLIDER, FluidMode.NONE, player));
+        RayTraceResult result = mc.level.clip(new RayTraceContext(position, look, BlockMode.COLLIDER, FluidMode.NONE, player));
         if (result != null)
-            distance = Math.min(distance, result.getHitVec().squareDistanceTo(position));
+            distance = Math.min(distance, result.getLocation().distanceToSqr(position));
         
-        AxisAlignedBB axisalignedbb = player.getBoundingBox().expand(vec3d1.scale(distance)).grow(1.0D, 1.0D, 1.0D);
-        EntityRayTraceResult entityraytraceresult = ProjectileHelper.rayTraceEntities(player, position, look, axisalignedbb, (p_215312_0_) -> {
+        AxisAlignedBB axisalignedbb = player.getBoundingBox().expandTowards(vec3d1.scale(distance)).inflate(1.0D, 1.0D, 1.0D);
+        EntityRayTraceResult entityraytraceresult = ProjectileHelper.getEntityHitResult(player, position, look, axisalignedbb, (p_215312_0_) -> {
             return !p_215312_0_.isSpectator() && p_215312_0_.canBeCollidedWith();
         }, distance);
         if (entityraytraceresult != null) {
-            Vector3d vec3d3 = entityraytraceresult.getHitVec();
-            double d2 = position.squareDistanceTo(vec3d3);
+            Vector3d vec3d3 = entityraytraceresult.getLocation();
+            double d2 = position.distanceToSqr(vec3d3);
             if (d2 < distance || result == null) {
                 result = entityraytraceresult;
                 distance = d2;
@@ -299,19 +299,19 @@ public class ItemPhysicClient {
     }
     
     public static void renderTickFull() {
-        if (mc != null && mc.player != null && !mc.isGamePaused()) {
+        if (mc != null && mc.player != null && !mc.isPaused()) {
             if (ItemPhysic.CONFIG.pickup.customPickup) {
                 
                 RayTraceResult result = getEntityItem(mc.player);
                 if (result != null && result.getType() == Type.ENTITY) {
-                    if (ItemPhysicClient.pickup.isKeyDown())
-                        onPlayerInteractClient(mc.world, mc.player, false);
+                    if (ItemPhysicClient.pickup.isDown())
+                        onPlayerInteractClient(mc.level, mc.player, false);
                     ItemEntity entity = (ItemEntity) ((EntityRayTraceResult) result).getEntity();
                     if (entity != null && ItemPhysic.CONFIG.rendering.showPickupTooltip) {
                         int space = 15;
                         List<ITextComponent> list = new ArrayList<>();
                         try {
-                            entity.getItem().getItem().addInformation(entity.getItem(), mc.player.world, list, ITooltipFlag.TooltipFlags.NORMAL);
+                            entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level, list, ITooltipFlag.TooltipFlags.NORMAL);
                             list.add(entity.getItem().getDisplayName());
                         } catch (Exception e) {
                             list = new ArrayList();
@@ -321,7 +321,7 @@ public class ItemPhysicClient {
                         int width = 0;
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            width = Math.max(width, mc.fontRenderer.getStringWidth(text) + 10);
+                            width = Math.max(width, mc.font.width(text) + 10);
                         }
                         
                         RenderSystem.disableBlend();
@@ -329,8 +329,8 @@ public class ItemPhysicClient {
                         RenderSystem.enableTexture();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            mc.fontRenderer.drawStringWithShadow(new MatrixStack(), text, mc.getMainWindow().getScaledWidth() / 2 - mc.fontRenderer.getStringWidth(text) / 2, mc
-                                    .getMainWindow().getScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
+                            mc.font.drawShadow(new MatrixStack(), text, mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow()
+                                    .getGuiScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
                         }
                         
                     }
@@ -345,7 +345,7 @@ public class ItemPhysicClient {
                         renderPower = 1;
                     if (renderPower > 6)
                         renderPower = 6;
-                    mc.player.sendStatusMessage(new TranslationTextComponent("item.throw", renderPower), true);
+                    mc.player.displayClientMessage(new TranslationTextComponent("item.throw", renderPower), true);
                 }
             }
         }
@@ -356,9 +356,9 @@ public class ItemPhysicClient {
     @SubscribeEvent
     public static void gameTick(ClientTickEvent event) {
         if (event.phase == Phase.END) {
-            if (mc.player != null && mc.player.getHeldItemMainhand() != null) {
+            if (mc.player != null && mc.player.getMainHandItem() != null) {
                 if (ItemPhysic.CONFIG.general.customThrow) {
-                    if (mc.gameSettings.keyBindDrop.isKeyDown())
+                    if (mc.options.keyDrop.isDown())
                         throwingPower++;
                     else {
                         if (throwingPower > 0) {
@@ -372,10 +372,10 @@ public class ItemPhysicClient {
                             
                             ItemPhysic.NETWORK.sendToServer(new DropPacket(throwingPower));
                             CPlayerDiggingPacket.Action cplayerdiggingpacket$action = dropAll ? CPlayerDiggingPacket.Action.DROP_ALL_ITEMS : CPlayerDiggingPacket.Action.DROP_ITEM;
-                            mc.player.connection.sendPacket(new CPlayerDiggingPacket(cplayerdiggingpacket$action, BlockPos.ZERO, Direction.DOWN));
-                            if (mc.player.inventory.decrStackSize(mc.player.inventory.currentItem, dropAll && !mc.player.inventory.getCurrentItem().isEmpty() ? mc.player.inventory
-                                    .getCurrentItem().getCount() : 1) != ItemStack.EMPTY)
-                                mc.player.swingArm(Hand.MAIN_HAND);
+                            mc.player.connection.send(new CPlayerDiggingPacket(cplayerdiggingpacket$action, BlockPos.ZERO, Direction.DOWN));
+                            if (mc.player.inventory.removeItem(mc.player.inventory.selected, dropAll && !mc.player.inventory.getSelected().isEmpty() ? mc.player.inventory
+                                    .getSelected().getCount() : 1) != ItemStack.EMPTY)
+                                mc.player.swing(Hand.MAIN_HAND);
                         }
                         throwingPower = 0;
                     }
