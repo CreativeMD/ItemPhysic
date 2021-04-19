@@ -29,7 +29,7 @@ public class ItemPhysicConfig {
         public boolean fallSounds = true;
         
         @CreativeConfig
-        public boolean enableIgniting = true;
+        public boolean enableIgniting = false;
         
         @CreativeConfig
         public SortingList swimmingItems = new SortingList();
