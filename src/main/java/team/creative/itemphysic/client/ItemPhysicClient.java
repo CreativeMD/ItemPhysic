@@ -243,7 +243,7 @@ public class ItemPhysicClient {
             ItemEntity entity = (ItemEntity) ((EntityRayTraceResult) result).getEntity();
             if (world.isClientSide && entity != null) {
                 player.swing(Hand.MAIN_HAND);
-                ItemPhysic.NETWORK.sendToServer(new PickupPacket(entity.getOwner(), rightClick));
+                ItemPhysic.NETWORK.sendToServer(new PickupPacket(entity.getUUID(), rightClick));
                 return true;
             }
         }
