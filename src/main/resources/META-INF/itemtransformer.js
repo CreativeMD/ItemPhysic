@@ -286,6 +286,7 @@ function initializeCoreMod() {
             	// update pre
             	var pre = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_70090_H"), "()Z").getPrevious();
             	var end = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_189652_ae"), "()Z");
+            	
             	for(var i = 0; i < 12; i++) {
             		end = end.getNext();
             	}
@@ -319,22 +320,19 @@ function initializeCoreMod() {
 				}
             	
             	// update            	
-            	var post = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/block/Block", asmapi.mapMethod("func_208618_m"), "()F");
+            	var post = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/block/BlockState", "getSlipperiness", "(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)F");
             	
             	asmapi.log("INFO", "find block call");
             	next = post;
 				while(!(next instanceof FrameNode)) {
 					next = next.getNext();
-				}
+				}				
 				
 				var local = next.getNext().getNext().getNext().getNext().var;
 				next = next.getNext();
 				
 				var fromIndex = method.instructions.indexOf(next);
-				var call = asmapi.findFirstMethodCallAfter(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_213317_d"), "(Lnet/minecraft/util/math/vector/Vector3d;)V", fromIndex).getNext();
-				
-				print("test: " + call);
-				
+				var call = asmapi.findFirstMethodCallAfter(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_213317_d"), "(Lnet/minecraft/util/math/vector/Vector3d;)V", fromIndex).getNext();		
 				
 				while (next !== call) {
 					next = next.getNext();
