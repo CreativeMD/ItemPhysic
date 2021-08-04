@@ -105,6 +105,18 @@ public class ItemPhysicServer {
         if (speedreduction > maxSpeedReduction)
             speedreduction = maxSpeedReduction;
         item.setDeltaMovement(item.getDeltaMovement().add(0, speedreduction, 0));
+        
+        try {
+            float f = item.getEyeHeight() - 0.11111111F;
+            if ((item.isInLava() && item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
+                Random rand = (Random) randField.get(item);
+                item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+                for (int i = 0; i < 100; i++)
+                    item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
+                            .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
+            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {}
+        
     }
     
     private static Field fluidHeightField = ObfuscationReflectionHelper.findField(Entity.class, "f_19799_");
@@ -278,20 +290,9 @@ public class ItemPhysicServer {
         
         if (!item.getItem().getItem().canBeHurtBy(source))
             return false;
-        if (source == DamageSource.LAVA || source == DamageSource.ON_FIRE || source == DamageSource.IN_FIRE)
-            if (ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
-                try {
-                    Random rand = (Random) randField.get(item);
-                    item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-                    item.kill();
-                    for (int i = 0; i < 100; i++)
-                        item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
-                                .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
-                } catch (IllegalArgumentException | IllegalAccessException e) {}
-                
-            } else
-                return false;
-            
+        if ((source == DamageSource.LAVA || source == DamageSource.ON_FIRE || source == DamageSource.IN_FIRE) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
+            return false;
+        
         if (source == DamageSource.CACTUS)
             return false;
         

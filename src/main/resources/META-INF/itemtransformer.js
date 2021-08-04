@@ -207,7 +207,7 @@ function initializeCoreMod() {
                 'type': 'METHOD',
 				'class': 'net.minecraft.world.entity.item.ItemEntity',
 				'methodName': 'm_6123_',
-				'methodDesc': '(Lnet/minecraft/entity/player/PlayerEntity;)V'
+				'methodDesc': '(Lnet/minecraft/world/entity/player/Player;)V'
             },
             'transformer': function(method) {
             	var asmapi = Java.type('net.minecraftforge.coremod.api.ASMAPI');
@@ -222,7 +222,7 @@ function initializeCoreMod() {
 				method.instructions.insertBefore(before, new LabelNode());
 				method.instructions.insertBefore(before, new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.insertBefore(before, new VarInsnNode(Opcodes.ALOAD, 1));
-				method.instructions.insertBefore(before, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "playerTouch", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/entity/player/PlayerEntity;)Z", asmapi.MethodType.STATIC));
+				method.instructions.insertBefore(before, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "playerTouch", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/entity/player/Player;)Z", asmapi.MethodType.STATIC));
 				
 				method.instructions.insertBefore(before, new JumpInsnNode(Opcodes.IFEQ, before));
 				
