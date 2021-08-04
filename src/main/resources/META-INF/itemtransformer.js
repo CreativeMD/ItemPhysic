@@ -6,7 +6,7 @@ function initializeCoreMod() {
                 'type': 'METHOD',
 				'class': 'net.minecraft.client.renderer.entity.ItemEntityRenderer',
 				'methodName': 'm_7392_',
-				'methodDesc': '(Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V'
+				'methodDesc': '(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V'
             },
             'transformer': function(method) {
 				var asmapi = Java.type('net.minecraftforge.coremod.api.ASMAPI');
@@ -30,11 +30,11 @@ function initializeCoreMod() {
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ILOAD, 6));
 				
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ALOAD, 0));
-				method.instructions.insertBefore(start, new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/ItemEntityRenderer", asmapi.mapField("f_115019_"), "Lnet/minecraft/client/renderer/ItemRenderer;"));
+				method.instructions.insertBefore(start, new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/ItemEntityRenderer", asmapi.mapField("f_115019_"), "Lnet/minecraft/client/renderer/entity/ItemRenderer;"));
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.insertBefore(start, new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/ItemEntityRenderer", asmapi.mapField("f_115020_"), "Ljava/util/Random;"));
 				
-				method.instructions.insertBefore(start, asmapi.buildMethodCall("team/creative/itemphysic/client/ItemPhysicClient", "renderItem", "(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/ItemRenderer;Ljava/util/Random;)Z", asmapi.MethodType.STATIC));
+				method.instructions.insertBefore(start, asmapi.buildMethodCall("team/creative/itemphysic/client/ItemPhysicClient", "render", "(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/ItemRenderer;Ljava/util/Random;)Z", asmapi.MethodType.STATIC));
 				
 				method.instructions.insertBefore(start, new JumpInsnNode(Opcodes.IFEQ, start));
 				
@@ -298,7 +298,7 @@ function initializeCoreMod() {
             	method.instructions.insertBefore(end, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updatePre", "(Lnet/minecraft/world/entity/item/ItemEntity;)V", asmapi.MethodType.STATIC));
             	
             	// update            	
-            	var post = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraftforge/common/extensions/IForgeBlockState", "m_49958_", "(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)F");
+            	var post = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/world/level/block/state/BlockState", "getFriction", "(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)F");
             	
             	asmapi.log("INFO", "find block call");
             	next = post;
