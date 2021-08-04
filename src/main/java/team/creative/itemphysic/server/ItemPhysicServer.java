@@ -1,33 +1,36 @@
 package team.creative.itemphysic.server;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particles.ParticleTypes;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.tags.Tag;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
@@ -37,8 +40,9 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBloc
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.fmllegacy.hooks.BasicEventHooks;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
 
@@ -70,11 +74,13 @@ public class ItemPhysicServer {
     
     /*
      * replace with
-     * if (this.areEyesInFluid(FluidTags.WATER)) {
-     *      this.applyFloatMotion();
-     * } else if (!this.hasNoGravity()) {
-     *      this.setMotion(this.getMotion().add(0.0D, -0.04D, 0.0D));
-     * }
+         if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > (double)f) {
+            this.setUnderwaterMovement();
+         } else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {
+            this.setUnderLavaMovement();
+         } else if (!this.isNoGravity()) {
+            this.setDeltaMovement(this.getDeltaMovement().add(0.0D, -0.04D, 0.0D));
+         }
      */
     public static void updatePre(ItemEntity item) {
         ItemStack stack = item.getItem();
@@ -101,47 +107,47 @@ public class ItemPhysicServer {
         item.setDeltaMovement(item.getDeltaMovement().add(0, speedreduction, 0));
     }
     
-    private static Field eyesFluidLevel = ObfuscationReflectionHelper.findField(Entity.class, "field_233554_M_");
+    private static Field fluidHeightField = ObfuscationReflectionHelper.findField(Entity.class, "f_19799_");
     
-    public static boolean handleFluidAcceleration(ItemEntity item, ITag<Fluid> fluidTag, double p_210500_2_) {
+    public static boolean updateFluidHeightAndDoFluidPushing(ItemEntity item, Tag<Fluid> fluidTag, double p_210500_2_) {
         double size = -0.001D;
         if (fluidTag == FluidTags.WATER && ItemPhysic.CONFIG.general.swimmingItems.canPass(item.getItem()))
             size = 0.3;
         
-        AxisAlignedBB axisalignedbb = item.getBoundingBox().inflate(size);
-        int i = MathHelper.floor(axisalignedbb.minX);
-        int j = MathHelper.ceil(axisalignedbb.maxX);
-        int k = MathHelper.floor(axisalignedbb.minY);
-        int l = MathHelper.ceil(axisalignedbb.maxY);
-        int i1 = MathHelper.floor(axisalignedbb.minZ);
-        int j1 = MathHelper.ceil(axisalignedbb.maxZ);
-        if (!item.level.hasChunksAt(i, k, i1, j, l, j1)) {
+        if (item.touchingUnloadedChunk()) {
             return false;
         } else {
+            AABB aabb = item.getBoundingBox().inflate(size);
+            int i = Mth.floor(aabb.minX);
+            int j = Mth.ceil(aabb.maxX);
+            int k = Mth.floor(aabb.minY);
+            int l = Mth.ceil(aabb.maxY);
+            int i1 = Mth.floor(aabb.minZ);
+            int j1 = Mth.ceil(aabb.maxZ);
             double d0 = 0.0D;
             boolean flag = item.isPushedByFluid();
             boolean flag1 = false;
-            Vector3d vector3d = Vector3d.ZERO;
+            Vec3 vec3 = Vec3.ZERO;
             int k1 = 0;
-            BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
             
             for (int l1 = i; l1 < j; ++l1) {
                 for (int i2 = k; i2 < l; ++i2) {
                     for (int j2 = i1; j2 < j1; ++j2) {
-                        blockpos$mutable.set(l1, i2, j2);
-                        FluidState fluidstate = item.level.getFluidState(blockpos$mutable);
+                        blockpos$mutableblockpos.set(l1, i2, j2);
+                        FluidState fluidstate = item.level.getFluidState(blockpos$mutableblockpos);
                         if (fluidstate.is(fluidTag)) {
-                            double d1 = i2 + fluidstate.getHeight(item.level, blockpos$mutable);
-                            if (d1 >= axisalignedbb.minY) {
+                            double d1 = i2 + fluidstate.getHeight(item.level, blockpos$mutableblockpos);
+                            if (d1 >= aabb.minY) {
                                 flag1 = true;
-                                d0 = Math.max(d1 - axisalignedbb.minY, d0);
+                                d0 = Math.max(d1 - aabb.minY, d0);
                                 if (flag) {
-                                    Vector3d vector3d1 = fluidstate.getFlow(item.level, blockpos$mutable);
+                                    Vec3 vec31 = fluidstate.getFlow(item.level, blockpos$mutableblockpos);
                                     if (d0 < 0.4D) {
-                                        vector3d1 = vector3d1.scale(d0);
+                                        vec31 = vec31.scale(d0);
                                     }
                                     
-                                    vector3d = vector3d.add(vector3d1);
+                                    vec3 = vec3.add(vec31);
                                     ++k1;
                                 }
                             }
@@ -150,20 +156,22 @@ public class ItemPhysicServer {
                 }
             }
             
-            if (vector3d.length() > 0.0D) {
+            if (vec3.length() > 0.0D) {
                 if (k1 > 0)
-                    vector3d = vector3d.scale(1.0D / k1);
+                    vec3 = vec3.scale(1.0D / k1);
                 
-                Vector3d vector3d2 = item.getDeltaMovement();
-                vector3d = vector3d.scale(p_210500_2_ * 1.0D);
-                if (Math.abs(vector3d2.x) < 0.003D && Math.abs(vector3d2.z) < 0.003D && vector3d.length() < 0.0045D)
-                    vector3d = vector3d.normalize().scale(0.0045D);
+                vec3 = vec3.normalize();
                 
-                item.setDeltaMovement(item.getDeltaMovement().add(vector3d));
+                Vec3 vec32 = item.getDeltaMovement();
+                vec3 = vec3.scale(p_210500_2_ * 1.0D);
+                if (Math.abs(vec32.x) < 0.003D && Math.abs(vec32.z) < 0.003D && vec3.length() < 0.0045D)
+                    vec3 = vec3.normalize().scale(0.0045D);
+                
+                item.setDeltaMovement(item.getDeltaMovement().add(vec3));
             }
             
             try {
-                Object2DoubleMap<ITag<Fluid>> map = (Object2DoubleMap<ITag<Fluid>>) eyesFluidLevel.get(item);
+                Object2DoubleMap<Tag<Fluid>> map = (Object2DoubleMap<Tag<Fluid>>) fluidHeightField.get(item);
                 map.put(fluidTag, d0);
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 e.printStackTrace();
@@ -173,41 +181,8 @@ public class ItemPhysicServer {
         }
     }
     
-    /*
-     * replace with
-     * if (this.world.getFluidState(new BlockPos(this)).isTagged(FluidTags.LAVA)) {
-     *    this.setMotion((double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F), (double)0.2F, (double)((this.rand.nextFloat() - this.rand.nextFloat()) * 0.2F));
-     *    this.playSound(SoundEvents.ENTITY_GENERIC_BURN, 0.4F, 2.0F + this.rand.nextFloat() * 0.4F);
-     * }
-     */
-    public static void updateBurn(ItemEntity item) {
-        try {
-            Random rand = (Random) ItemPhysicServer.rand.get(item);
-            if (item.level.getFluidState(item.blockPosition()).is(FluidTags.LAVA) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
-                item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-                item.remove();
-                for (int i = 0; i < 100; i++)
-                    item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
-                            .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
-            }
-            
-            if (item.isOnFire() && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
-                item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-                item.remove();
-                for (int i = 0; i < 100; i++)
-                    item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
-                            .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
-            }
-            
-            if (ItemPhysic.CONFIG.general.enableIgniting && !item.level.isClientSide && item.isOnGround() && Math.random() <= 0.1 && ItemPhysic.CONFIG.general.ignitingItems
-                    .canPass(item.getItem())) {
-                BlockState state = item.level.getBlockState(item.blockPosition().below());
-                if (state.getMaterial().isFlammable() && item.level.getBlockState(item.blockPosition()).getMaterial().isReplaceable())
-                    item.level.setBlockAndUpdate(item.blockPosition(), Blocks.FIRE.defaultBlockState());
-            }
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+    public static boolean fireImmune(ItemEntity item) {
+        return !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem());
     }
     
     public static final ThreadLocal<Fluid> fluid = new ThreadLocal<>();
@@ -233,20 +208,20 @@ public class ItemPhysicServer {
         
     }
     
-    public static void updateFallState(ItemEntity item, double y, boolean onGroundIn, BlockState state, BlockPos pos) {
+    public static void checkFallDamage(ItemEntity item, double y, boolean onGroundIn, BlockState state, BlockPos pos) {
         if (onGroundIn && item.fallDistance > 0.0F && ItemPhysic.CONFIG.general.fallSounds)
             item.playSound(SoundEvents.WOOL_FALL, Math.min(1, item.fallDistance / 10), (float) Math.random() * 1F + 1);
     }
     
-    public static boolean onCollideWithPlayer(ItemEntity item, PlayerEntity par1EntityPlayer) {
-        if (ItemPhysic.CONFIG.pickup.customPickup && (!par1EntityPlayer.isDiscrete()) || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking)
+    public static boolean playerTouch(ItemEntity item, Player player) {
+        if (ItemPhysic.CONFIG.pickup.customPickup && (!player.isDiscrete()) || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking)
             return true;
         if (item.level.isClientSide || item.hasPickUpDelay())
             return true;
         return false;
     }
     
-    public static void onCollideWithPlayer(ItemEntity entity, PlayerEntity player, boolean needsSneak) {
+    public static void playerTouch(ItemEntity entity, Player player, boolean needsSneak) {
         if (ItemPhysic.CONFIG.pickup.customPickup && needsSneak && (!player.isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking))
             return;
         if (!entity.level.isClientSide) {
@@ -263,74 +238,86 @@ public class ItemPhysicServer {
             ItemStack copy = itemstack.copy();
             try {
                 if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwner() == null || entity.lifespan - age.getInt(entity) <= 200 || entity
-                        .getOwner().equals(player.getUUID())) && (hook == 1 || i <= 0 || player.inventory.add(itemstack))) {
+                        .getOwner().equals(player.getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                     copy.setCount(copy.getCount() - entity.getItem().getCount());
-                    net.minecraftforge.fml.hooks.BasicEventHooks.firePlayerItemPickupEvent(player, entity, copy);
+                    BasicEventHooks.firePlayerItemPickupEvent(player, entity, copy);
                     player.take(entity, i);
                     if (itemstack.isEmpty()) {
-                        player.take(entity, i);
-                        entity.remove();
+                        entity.discard();
                         itemstack.setCount(i);
                     }
                     
                     player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
+                    player.onItemPickup(entity);
                 }
             } catch (IllegalArgumentException | IllegalAccessException e) {}
             
         }
     }
     
-    public static boolean processInitialInteract(ItemEntity item, PlayerEntity player, Hand hand) {
+    public static InteractionResult interact(ItemEntity item, Player player, InteractionHand hand) {
         if (ItemPhysic.CONFIG.pickup.customPickup) {
-            onCollideWithPlayer(item, player, false);
-            return true;
+            playerTouch(item, player, false);
+            return InteractionResult.CONSUME;
         }
-        return false;
+        return InteractionResult.PASS;
     }
     
-    public static boolean attackEntityFrom(ItemEntity item, DamageSource source, float amount) {
-        if (item.level.isClientSide || item.isAlive())
-            return true; //Forge: Fixes MC-53850
+    public static boolean hurt(ItemEntity item, DamageSource source, float amount) {
+        if (item.level.isClientSide || item.isRemoved())
+            return false; //Forge: Fixes MC-53850
             
         if (item.isInvulnerableTo(source))
-            return true;
+            return false;
         
         if (!item.getItem().isEmpty() && ItemPhysic.CONFIG.general.undestroyableItems.canPass(item.getItem()))
-            return true;
+            return false;
         
         if (!item.getItem().isEmpty() && item.getItem().getItem() == Items.NETHER_STAR && source.isExplosion())
-            return true;
+            return false;
         
-        if ((source == DamageSource.LAVA | source == DamageSource.ON_FIRE | source == DamageSource.IN_FIRE) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
-            return true;
-        
-        if (source == DamageSource.CACTUS)
-            return true;
-        return false;
-    }
-    
-    private static Field fire = ObfuscationReflectionHelper.findField(Entity.class, "field_190534_ay");
-    private static Field rand = ObfuscationReflectionHelper.findField(Entity.class, "field_70146_Z");
-    private static Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "field_70292_b");
-    private static Method getFlag = ObfuscationReflectionHelper.findMethod(Entity.class, "func_70083_f", int.class);
-    
-    public static boolean isItemBurning(ItemEntity item) {
-        boolean flag = item.level != null && item.level.isClientSide;
-        try {
-            if (!(!item.fireImmune() && (fire.getInt(item) > 0 || flag && (Boolean) getFlag.invoke(item, 0))))
+        if (!item.getItem().getItem().canBeHurtBy(source))
+            return false;
+        if (source == DamageSource.LAVA || source == DamageSource.ON_FIRE || source == DamageSource.IN_FIRE)
+            if (ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
+                try {
+                    Random rand = (Random) randField.get(item);
+                    item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+                    item.kill();
+                    for (int i = 0; i < 100; i++)
+                        item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
+                                .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
+                } catch (IllegalArgumentException | IllegalAccessException e) {}
+                
+            } else
                 return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem());
+            
+        if (source == DamageSource.CACTUS)
+            return false;
+        
+        try {
+            markHurtMethod.invoke(item);
+            healthField.setInt(item, (int) (healthField.getInt(item) - amount));
+            item.gameEvent(GameEvent.ENTITY_DAMAGED, source.getEntity());
+            if (healthField.getInt(item) <= 0) {
+                item.getItem().onDestroyed(item);
+                item.discard();
+            }
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}
+        return true;
     }
+    
+    private static Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
+    private static Field healthField = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31987_");
+    private static Field randField = ObfuscationReflectionHelper.findField(Entity.class, "f_19796_");
+    private static Method markHurtMethod = ObfuscationReflectionHelper.findMethod(Entity.class, "m_5834_");
     
     @SubscribeEvent
     public static void onUnload(WorldEvent.Unload event) {
         toCancel.removeIf((x) -> x.level == event.getWorld());
     }
     
-    public static List<PlayerEntity> toCancel = new ArrayList<>();
+    public static List<ServerPlayer> toCancel = new ArrayList<>();
     
     @SubscribeEvent
     public static void onPlayerInteract(PlayerInteractEvent event) {

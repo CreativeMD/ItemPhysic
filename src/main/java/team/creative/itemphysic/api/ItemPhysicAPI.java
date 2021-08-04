@@ -11,8 +11,6 @@ public class ItemPhysicAPI {
             ItemPhysic.CONFIG.general.burningItems.addSortingObjects(objects);
         else if (list.equalsIgnoreCase("undestroyableItems"))
             ItemPhysic.CONFIG.general.undestroyableItems.addSortingObjects(objects);
-        else if (list.equalsIgnoreCase("ignitingItems"))
-            ItemPhysic.CONFIG.general.ignitingItems.addSortingObjects(objects);
     }
     
 }

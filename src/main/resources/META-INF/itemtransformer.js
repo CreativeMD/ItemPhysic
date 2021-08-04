@@ -4,9 +4,9 @@ function initializeCoreMod() {
         'renderer': {
             'target': {
                 'type': 'METHOD',
-				'class': 'net.minecraft.client.renderer.entity.ItemRenderer',
-				'methodName': 'func_225623_a_',
-				'methodDesc': '(Lnet/minecraft/entity/item/ItemEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V'
+				'class': 'net.minecraft.client.renderer.entity.ItemEntityRenderer',
+				'methodName': 'm_7392_',
+				'methodDesc': '(Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V'
             },
             'transformer': function(method) {
 				var asmapi = Java.type('net.minecraftforge.coremod.api.ASMAPI');
@@ -17,7 +17,7 @@ function initializeCoreMod() {
 				var JumpInsnNode = Java.type('org.objectweb.asm.tree.JumpInsnNode');
 				var Opcodes = Java.type('org.objectweb.asm.Opcodes');
 				
-				var renderMethodname = asmapi.mapMethod("func_225623_a_");
+				var renderMethodname = asmapi.mapMethod("m_7392_");
 				
 				var start = method.instructions.getFirst();
 				
@@ -30,11 +30,11 @@ function initializeCoreMod() {
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ILOAD, 6));
 				
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ALOAD, 0));
-				method.instructions.insertBefore(start, new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/ItemRenderer", asmapi.mapField("field_177080_a"), "Lnet/minecraft/client/renderer/ItemRenderer;"));
+				method.instructions.insertBefore(start, new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/ItemEntityRenderer", asmapi.mapField("f_115019_"), "Lnet/minecraft/client/renderer/ItemRenderer;"));
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ALOAD, 0));
-				method.instructions.insertBefore(start, new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/ItemRenderer", asmapi.mapField("field_177079_e"), "Ljava/util/Random;"));
+				method.instructions.insertBefore(start, new FieldInsnNode(Opcodes.GETFIELD, "net/minecraft/client/renderer/entity/ItemEntityRenderer", asmapi.mapField("f_115020_"), "Ljava/util/Random;"));
 				
-				method.instructions.insertBefore(start, asmapi.buildMethodCall("team/creative/itemphysic/client/ItemPhysicClient", "renderItem", "(Lnet/minecraft/entity/item/ItemEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/client/renderer/ItemRenderer;Ljava/util/Random;)Z", asmapi.MethodType.STATIC));
+				method.instructions.insertBefore(start, asmapi.buildMethodCall("team/creative/itemphysic/client/ItemPhysicClient", "renderItem", "(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/renderer/entity/ItemRenderer;Ljava/util/Random;)Z", asmapi.MethodType.STATIC));
 				
 				method.instructions.insertBefore(start, new JumpInsnNode(Opcodes.IFEQ, start));
 				
@@ -46,7 +46,7 @@ function initializeCoreMod() {
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ALOAD, 4));
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ALOAD, 5));
 				method.instructions.insertBefore(start, new VarInsnNode(Opcodes.ILOAD, 6));
-				method.instructions.insertBefore(start, asmapi.buildMethodCall("net/minecraft/client/renderer/entity/EntityRenderer", renderMethodname, "(Lnet/minecraft/entity/Entity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V", asmapi.MethodType.SPECIAL));
+				method.instructions.insertBefore(start, asmapi.buildMethodCall("net/minecraft/client/renderer/entity/EntityRenderer", renderMethodname, "(Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", asmapi.MethodType.SPECIAL));
 				
 				method.instructions.insertBefore(start, new LabelNode());
 				method.instructions.insertBefore(start, new InsnNode(Opcodes.RETURN));
@@ -57,8 +57,8 @@ function initializeCoreMod() {
 		'dropItem': {
             'target': {
                 'type': 'METHOD',
-				'class': 'net.minecraft.client.entity.player.ClientPlayerEntity',
-				'methodName': 'func_225609_n_',
+				'class': 'net.minecraft.client.player.LocalPlayer',
+				'methodName': 'm_108700_',
 				'methodDesc': '(Z)Z'
             },
             'transformer': function(method) {
@@ -87,9 +87,9 @@ function initializeCoreMod() {
         'attack': {
             'target': {
                 'type': 'METHOD',
-				'class': 'net.minecraft.entity.item.ItemEntity',
-				'methodName': 'func_70097_a',
-				'methodDesc': '(Lnet/minecraft/util/DamageSource;F)Z'
+				'class': 'net.minecraft.world.entity.item.ItemEntity',
+				'methodName': 'm_6469_',
+				'methodDesc': '(Lnet/minecraft/world/damagesource/DamageSource;F)Z'
             },
             'transformer': function(method) {
             	var asmapi = Java.type('net.minecraftforge.coremod.api.ASMAPI');
@@ -99,30 +99,14 @@ function initializeCoreMod() {
             	var JumpInsnNode = Java.type('org.objectweb.asm.tree.JumpInsnNode');
             	var Opcodes = Java.type('org.objectweb.asm.Opcodes');
             	
-            	var mark = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_70018_K"), "()V");
+                method.instructions.clear();
             	
-            	var next = method.instructions.getFirst();
-            	while(next.getNext() != mark) {
-            		var before = next;
-            		next = next.getNext();
-            		method.instructions.remove(before);
-            	}
-            	
-            	var first = method.instructions.getFirst();
-            	var labelAfter = new LabelNode();
-            	
-            	method.instructions.insertBefore(first, new LabelNode());
-            	method.instructions.insertBefore(first, new VarInsnNode(Opcodes.ALOAD, 0));
-				method.instructions.insertBefore(first, new VarInsnNode(Opcodes.ALOAD, 1));
-				method.instructions.insertBefore(first, new VarInsnNode(Opcodes.FLOAD, 2));
-				method.instructions.insertBefore(first, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "attackEntityFrom", "(Lnet/minecraft/entity/item/ItemEntity;Lnet/minecraft/util/DamageSource;F)Z", asmapi.MethodType.STATIC));
-				
-				method.instructions.insertBefore(first, new JumpInsnNode(Opcodes.IFEQ, labelAfter));
-				
-				method.instructions.insertBefore(first, new InsnNode(Opcodes.ICONST_0));
-				method.instructions.insertBefore(first, new InsnNode(Opcodes.IRETURN));
-				
-            	method.instructions.insertBefore(first, labelAfter);
+            	method.instructions.add(new LabelNode());
+            	method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
+				method.instructions.add(new VarInsnNode(Opcodes.FLOAD, 2));
+				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "hurt", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/damagesource/DamageSource;F)Z", asmapi.MethodType.STATIC));
+				method.instructions.add(new InsnNode(Opcodes.IRETURN));
             	
 				
 				return method;
@@ -131,7 +115,7 @@ function initializeCoreMod() {
         'overrideMethod': {
             'target': {
                 'type': 'CLASS',
-				'name': 'net.minecraft.entity.item.ItemEntity'
+				'name': 'net.minecraft.world.entity.item.ItemEntity'
             },
             'transformer': function(node) {
             	var asmapi = Java.type('net.minecraftforge.coremod.api.ASMAPI');
@@ -143,28 +127,27 @@ function initializeCoreMod() {
             	var LocalVariableNode = Java.type('org.objectweb.asm.tree.LocalVariableNode');
             	var Opcodes = Java.type('org.objectweb.asm.Opcodes');
             	
-            	//processInitialInteract
-				var method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("func_184230_a"), "(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Z", null, null);
+            	//interact
+				var method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("m_6096_"), "(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;", null, null);
 				var label = new LabelNode();	
 				method.instructions.add(label);
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 2));
-				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "processInitialInteract", "(Lnet/minecraft/entity/item/ItemEntity;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Z", asmapi.MethodType.STATIC));
+				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "interact", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;", asmapi.MethodType.STATIC));
 				var label2 = new LabelNode();
 				method.instructions.add(label2);
-				method.instructions.add(new InsnNode(Opcodes.ICONST_1));
-				method.instructions.add(new InsnNode(Opcodes.IRETURN));
+				method.instructions.add(new InsnNode(Opcodes.ARETURN));
 				
 				method.maxStack = 6;
 				method.maxLocals = 4;
-				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/entity/item/ItemEntity;", null, label, label2, 0));
-				method.localVariables.add(new LocalVariableNode("player", "Lnet/minecraft/entity/player/PlayerEntity;", null, label, label2, 1));
-				method.localVariables.add(new LocalVariableNode("hand", "Lnet/minecraft/util/Hand;", null, label, label2, 2));
+				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/world/entity/item/ItemEntity;", null, label, label2, 0));
+				method.localVariables.add(new LocalVariableNode("player", "Lnet/minecraft/world/entity/player/Player;", null, label, label2, 1));
+				method.localVariables.add(new LocalVariableNode("hand", "Lnet/minecraft/world/InteractionHand;", null, label, label2, 2));
 				node.methods.add(method);
 				
-				//updateFallState
-				method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("func_184231_a"), "(DZLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V", null, null);
+				//checkFallDamage
+				method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("m_7840_"), "(DZLnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)V", null, null);
 				label = new LabelNode();
 				method.instructions.add(label);
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -172,7 +155,7 @@ function initializeCoreMod() {
 				method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 3));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 4));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 5));
-				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updateFallState", "(Lnet/minecraft/entity/item/ItemEntity;DZLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V", asmapi.MethodType.STATIC));
+				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "checkFallDamage", "(Lnet/minecraft/world/entity/item/ItemEntity;DZLnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)V", asmapi.MethodType.STATIC));
 				method.instructions.add(new LabelNode());
 				
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -180,7 +163,7 @@ function initializeCoreMod() {
 				method.instructions.add(new VarInsnNode(Opcodes.ILOAD, 3));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 4));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 5));
-				method.instructions.add(asmapi.buildMethodCall("net/minecraft/entity/Entity", asmapi.mapMethod("func_184231_a"), "(DZLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V", asmapi.MethodType.SPECIAL));
+				method.instructions.add(asmapi.buildMethodCall("net/minecraft/world/entity/Entity", asmapi.mapMethod("m_7840_"), "(DZLnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;)V", asmapi.MethodType.SPECIAL));
 				label2 = new LabelNode();
 				method.instructions.add(label2);
 				method.instructions.add(new InsnNode(Opcodes.RETURN));
@@ -188,44 +171,29 @@ function initializeCoreMod() {
 				method.maxLocals = 5;
 				method.maxStack = 6;
 				
-				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/entity/item/ItemEntity;", null, label, label2, 0));
+				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/world/entity/item/ItemEntity;", null, label, label2, 0));
 				method.localVariables.add(new LocalVariableNode("y", "D", null, label, label2, 1));
 				method.localVariables.add(new LocalVariableNode("onGroundIn", "Z", null, label, label2, 3));
-				method.localVariables.add(new LocalVariableNode("state", "Lnet/minecraft/block/BlockState;", null, label, label2, 4));
-				method.localVariables.add(new LocalVariableNode("pos", "Lnet/minecraft/util/math/BlockPos;", null, label, label2, 5));
+				method.localVariables.add(new LocalVariableNode("state", "Lnet/minecraft/world/level/block/state/BlockState;", null, label, label2, 4));
+				method.localVariables.add(new LocalVariableNode("pos", "Lnet/minecraft/core/BlockPos;", null, label, label2, 5));
 				node.methods.add(method);
 				
-				//Add Burning
-				method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("func_70027_ad"), "()Z", null, null);
-				var label = new LabelNode();
-				method.instructions.add(label);
-				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "isItemBurning", "(Lnet/minecraft/entity/item/ItemEntity;)Z", asmapi.MethodType.STATIC));
-				method.instructions.add(new InsnNode(Opcodes.IRETURN));
-				var label2 = new LabelNode();
-				method.instructions.add(label2);
-				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/entity/item/ItemEntity;", null, label, label2, 0));
-				node.methods.add(method);
-				
-				method.maxLocals = 1;
-				method.maxStack = 3;
-				
-				//Add handleFluidAcceleration
-				var method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("func_210500_b"), "(Lnet/minecraft/tags/ITag;D)Z", null, null);
+				//Add updateFluidHeightAndDoFluidPushing
+				var method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("m_19943_"), "(Lnet/minecraft/tags/Tag;D)Z", null, null);
 				var label = new LabelNode();	
 				method.instructions.add(label);
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
 				method.instructions.add(new VarInsnNode(Opcodes.DLOAD, 2));
-				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "handleFluidAcceleration", "(Lnet/minecraft/entity/item/ItemEntity;Lnet/minecraft/tags/ITag;D)Z", asmapi.MethodType.STATIC));
+				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updateFluidHeightAndDoFluidPushing", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/tags/Tag;D)Z", asmapi.MethodType.STATIC));
 				var label2 = new LabelNode();
 				method.instructions.add(label2);
 				method.instructions.add(new InsnNode(Opcodes.IRETURN));
 				
 				method.maxStack = 6;
 				method.maxLocals = 4;
-				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/entity/item/ItemEntity;", null, label, label2, 0));
-				method.localVariables.add(new LocalVariableNode("tag", "Lnet/minecraft/tags/ITag;", null, label, label2, 1));
+				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/world/entity/item/ItemEntity;", null, label, label2, 0));
+				method.localVariables.add(new LocalVariableNode("tag", "Lnet/minecraft/tags/Tag;", null, label, label2, 1));
 				method.localVariables.add(new LocalVariableNode("var", "D", null, label, label2, 2));
 				node.methods.add(method);
 				
@@ -237,8 +205,8 @@ function initializeCoreMod() {
         'collide': {
             'target': {
                 'type': 'METHOD',
-				'class': 'net.minecraft.entity.item.ItemEntity',
-				'methodName': 'func_70100_b_',
+				'class': 'net.minecraft.world.entity.item.ItemEntity',
+				'methodName': 'm_6123_',
 				'methodDesc': '(Lnet/minecraft/entity/player/PlayerEntity;)V'
             },
             'transformer': function(method) {
@@ -254,7 +222,7 @@ function initializeCoreMod() {
 				method.instructions.insertBefore(before, new LabelNode());
 				method.instructions.insertBefore(before, new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.insertBefore(before, new VarInsnNode(Opcodes.ALOAD, 1));
-				method.instructions.insertBefore(before, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "onCollideWithPlayer", "(Lnet/minecraft/entity/item/ItemEntity;Lnet/minecraft/entity/player/PlayerEntity;)Z", asmapi.MethodType.STATIC));
+				method.instructions.insertBefore(before, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "playerTouch", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/entity/player/PlayerEntity;)Z", asmapi.MethodType.STATIC));
 				
 				method.instructions.insertBefore(before, new JumpInsnNode(Opcodes.IFEQ, before));
 				
@@ -264,11 +232,41 @@ function initializeCoreMod() {
 				return method;
             }
         },
+        'fireImmune': {
+            'target': {
+                'type': 'METHOD',
+				'class': 'net.minecraft.world.entity.item.ItemEntity',
+				'methodName': 'm_5825_',
+				'methodDesc': '()Z'
+            },
+            'transformer': function(method) {
+            	var asmapi = Java.type('net.minecraftforge.coremod.api.ASMAPI');
+            	var InsnNode = Java.type('org.objectweb.asm.tree.InsnNode');
+            	var LabelNode = Java.type('org.objectweb.asm.tree.LabelNode');
+            	var VarInsnNode = Java.type('org.objectweb.asm.tree.VarInsnNode');
+            	var JumpInsnNode = Java.type('org.objectweb.asm.tree.JumpInsnNode');
+            	var Opcodes = Java.type('org.objectweb.asm.Opcodes');
+            	
+				var before = method.instructions.getFirst();
+				
+				method.instructions.insertBefore(before, new LabelNode());
+				method.instructions.insertBefore(before, new VarInsnNode(Opcodes.ALOAD, 0));
+				method.instructions.insertBefore(before, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "fireImmune", "(Lnet/minecraft/world/entity/item/ItemEntity;)Z", asmapi.MethodType.STATIC));
+				
+				method.instructions.insertBefore(before, new JumpInsnNode(Opcodes.IFEQ, before));
+				
+				method.instructions.insertBefore(before, new LabelNode());
+				method.instructions.insertBefore(before, new InsnNode(Opcodes.ICONST_1));
+				method.instructions.insertBefore(before, new InsnNode(Opcodes.IRETURN));
+				
+				return method;
+            }
+        },
         'tick': {
             'target': {
                 'type': 'METHOD',
-				'class': 'net.minecraft.entity.item.ItemEntity',
-				'methodName': 'func_70071_h_',
+				'class': 'net.minecraft.world.entity.item.ItemEntity',
+				'methodName': 'm_8119_',
 				'methodDesc': '()V'
             },
             'transformer': function(method) {
@@ -284,8 +282,8 @@ function initializeCoreMod() {
             	var Opcodes = Java.type('org.objectweb.asm.Opcodes');
             	
             	// update pre
-            	var pre = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_70090_H"), "()Z").getPrevious();
-            	var end = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_189652_ae"), "()Z");
+            	var pre = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/world/entity/item/ItemEntity", asmapi.mapMethod("m_20069_"), "()Z").getPrevious();
+            	var end = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/world/entity/item/ItemEntity", asmapi.mapMethod("m_20068_"), "()Z");
             	
             	for(var i = 0; i < 12; i++) {
             		end = end.getNext();
@@ -297,30 +295,10 @@ function initializeCoreMod() {
             		method.instructions.remove(temp);
             	}
             	method.instructions.insertBefore(end, new VarInsnNode(Opcodes.ALOAD, 0));
-            	method.instructions.insertBefore(end, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updatePre", "(Lnet/minecraft/entity/item/ItemEntity;)V", asmapi.MethodType.STATIC));
-				//method.instructions.insertBefore(end, new LabelNode());
-				//method.instructions.insertBefore(end, new FrameNode(Opcodes.F_SAME, 0, null, 0, null));*/
-				
-				// update burn
-				var burning = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/world/World", asmapi.mapMethod("func_204610_c"), "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/fluid/FluidState;");
-				
-				asmapi.log("INFO", "start");
-				for(var i = 0; i < 4; i++) {
-					method.instructions.remove(burning.getPrevious());
-				}
-				
-				method.instructions.insertBefore(burning, new VarInsnNode(Opcodes.ALOAD, 0));
-				method.instructions.insertBefore(burning, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updateBurn", "(Lnet/minecraft/entity/item/ItemEntity;)V", asmapi.MethodType.STATIC));
-				method.instructions.insertBefore(burning, new LabelNode());
-				
-				var next = burning;
-				while(!(next instanceof FrameNode)) {
-					next = next.getNext();
-					method.instructions.remove(next.getPrevious());
-				}
+            	method.instructions.insertBefore(end, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updatePre", "(Lnet/minecraft/world/entity/item/ItemEntity;)V", asmapi.MethodType.STATIC));
             	
             	// update            	
-            	var post = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraft/block/BlockState", "getSlipperiness", "(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)F");
+            	var post = asmapi.findFirstMethodCall(method, asmapi.MethodType.VIRTUAL, "net/minecraftforge/common/extensions/IForgeBlockState", "m_49958_", "(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)F");
             	
             	asmapi.log("INFO", "find block call");
             	next = post;
@@ -332,7 +310,7 @@ function initializeCoreMod() {
 				next = next.getNext();
 				
 				var fromIndex = method.instructions.indexOf(next);
-				var call = asmapi.findFirstMethodCallAfter(method, asmapi.MethodType.VIRTUAL, "net/minecraft/entity/item/ItemEntity", asmapi.mapMethod("func_213317_d"), "(Lnet/minecraft/util/math/vector/Vector3d;)V", fromIndex).getNext();		
+				var call = asmapi.findFirstMethodCallAfter(method, asmapi.MethodType.VIRTUAL, "net/minecraft/world/entity/item/ItemEntity", asmapi.mapMethod("m_20256_"), "(Lnet/minecraft/world/phys/Vec3;)V", fromIndex).getNext();		
 				
 				while (next !== call) {
 					next = next.getNext();
@@ -341,7 +319,7 @@ function initializeCoreMod() {
 				
 				method.instructions.insertBefore(next, new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.insertBefore(next, new VarInsnNode(Opcodes.FLOAD, local));
-				method.instructions.insertBefore(next, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "update", "(Lnet/minecraft/entity/item/ItemEntity;F)V", asmapi.MethodType.STATIC));
+				method.instructions.insertBefore(next, asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "update", "(Lnet/minecraft/world/entity/item/ItemEntity;F)V", asmapi.MethodType.STATIC));
 				
             	return method;
             }

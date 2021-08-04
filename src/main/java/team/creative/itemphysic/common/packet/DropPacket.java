@@ -1,6 +1,7 @@
 package team.creative.itemphysic.common.packet;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import team.creative.creativecore.common.network.CreativePacket;
@@ -20,12 +21,12 @@ public class DropPacket extends CreativePacket {
     
     @Override
     @OnlyIn(value = Dist.CLIENT)
-    public void executeClient(PlayerEntity player) {
+    public void executeClient(Player player) {
         
     }
     
     @Override
-    public void executeServer(PlayerEntity player) {
+    public void executeServer(ServerPlayer player) {
         ItemPhysicServer.tempDroppower = power;
     }
     

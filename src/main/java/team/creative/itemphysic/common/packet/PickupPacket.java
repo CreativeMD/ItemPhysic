@@ -2,11 +2,12 @@ package team.creative.itemphysic.common.packet;
 
 import java.util.UUID;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import team.creative.creativecore.common.network.CreativePacket;
 import team.creative.itemphysic.server.ItemPhysicServer;
 
@@ -25,19 +26,19 @@ public class PickupPacket extends CreativePacket {
     }
     
     @Override
-    public void executeClient(PlayerEntity player) {
+    public void executeClient(Player player) {
         
     }
     
     @Override
-    public void executeServer(PlayerEntity player) {
+    public void executeServer(ServerPlayer player) {
         if (rightClick)
             ItemPhysicServer.toCancel.add(player);
         
-        Entity item = ((ServerWorld) player.level).getEntity(uuid);
+        Entity item = ((ServerLevel) player.level).getEntity(uuid);
         if (item != null && item instanceof ItemEntity && item.isAlive()) {
-            ItemPhysicServer.processInitialInteract((ItemEntity) item, player, Hand.MAIN_HAND);
-            player.swing(Hand.MAIN_HAND);
+            ItemPhysicServer.interact((ItemEntity) item, player, InteractionHand.MAIN_HAND);
+            player.swing(InteractionHand.MAIN_HAND);
         }
     }
     
