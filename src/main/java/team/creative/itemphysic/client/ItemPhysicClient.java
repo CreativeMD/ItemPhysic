@@ -270,7 +270,7 @@ public class ItemPhysicClient {
     
     public static HitResult getEntityItem(Player player) {
         double distance = CommonPhysic.getReachDistance(player);
-        float partialTicks = mc.getFrameTime();
+        float partialTicks = mc.getDeltaFrameTime();
         Vec3 position = player.getEyePosition(partialTicks);
         Vec3 vec3d1 = player.getViewVector(partialTicks);
         Vec3 look = position.add(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance);

@@ -39,8 +39,8 @@ public class ItemPhysic {
     }
     
     private void init(final FMLCommonSetupEvent event) {
-        NETWORK.registerType(DropPacket.class);
-        NETWORK.registerType(PickupPacket.class);
+        NETWORK.registerType(DropPacket.class, DropPacket::new);
+        NETWORK.registerType(PickupPacket.class, PickupPacket::new);
         
         CreativeConfigRegistry.ROOT.registerValue(MODID, CONFIG = new ItemPhysicConfig());
         
