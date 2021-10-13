@@ -13,6 +13,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import team.creative.creativecore.common.util.mc.PlayerUtils;
 import team.creative.itemphysic.ItemPhysic;
 
 public class CommonPhysic {
@@ -49,8 +50,7 @@ public class CommonPhysic {
     public static double getReachDistance(Player player) {
         if (ItemPhysic.CONFIG.pickup.maximumPickupRange != 5)
             return ItemPhysic.CONFIG.pickup.maximumPickupRange;
-        float attrib = (float) player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue();
-        return player.isCreative() ? attrib : attrib - 0.5F;
+        return PlayerUtils.getReach(player);
     }
     
     public static HitResult getEntityItem(Player player, Vec3 position, Vec3 look, double distance) {
