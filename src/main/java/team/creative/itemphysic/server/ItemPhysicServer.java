@@ -32,6 +32,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.item.ItemExpireEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -42,7 +43,6 @@ import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.fmllegacy.hooks.BasicEventHooks;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
 
@@ -252,7 +252,7 @@ public class ItemPhysicServer {
                 if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwner() == null || entity.lifespan - age.getInt(entity) <= 200 || entity
                         .getOwner().equals(player.getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                     copy.setCount(copy.getCount() - entity.getItem().getCount());
-                    BasicEventHooks.firePlayerItemPickupEvent(player, entity, copy);
+                    ForgeEventFactory.firePlayerItemPickupEvent(player, entity, copy);
                     player.take(entity, i);
                     if (itemstack.isEmpty()) {
                         entity.discard();
