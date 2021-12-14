@@ -6,7 +6,7 @@ import net.minecraft.world.level.material.Material;
 import team.creative.creativecore.common.config.api.CreativeConfig;
 import team.creative.creativecore.common.config.sync.ConfigSynchronization;
 import team.creative.creativecore.common.util.ingredient.CreativeIngredientFuel;
-import team.creative.creativecore.common.util.type.SortingList;
+import team.creative.creativecore.common.util.type.list.SortingList;
 
 public class ItemPhysicConfig {
     
