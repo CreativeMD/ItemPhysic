@@ -6,15 +6,15 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -119,9 +119,9 @@ public class ItemPhysicServer {
         
     }
     
-    private static Field fluidHeightField = ObfuscationReflectionHelper.findField(Entity.class, "f_19799_");
+    private static Field fluidOnEyesField = ObfuscationReflectionHelper.findField(Entity.class, "f_19799_");
     
-    public static boolean updateFluidHeightAndDoFluidPushing(ItemEntity item, Tag<Fluid> fluidTag, double p_210500_2_) {
+    public static boolean updateFluidHeightAndDoFluidPushing(ItemEntity item, TagKey<Fluid> fluidTag, double p_210500_2_) {
         double size = -0.001D;
         if (fluidTag == FluidTags.WATER && ItemPhysic.CONFIG.general.swimmingItems.canPass(item.getItem()))
             size = 0.3;
@@ -183,8 +183,8 @@ public class ItemPhysicServer {
             }
             
             try {
-                Object2DoubleMap<Tag<Fluid>> map = (Object2DoubleMap<Tag<Fluid>>) fluidHeightField.get(item);
-                map.put(fluidTag, d0);
+                Set<TagKey<Fluid>> map = (Set<TagKey<Fluid>>) fluidOnEyesField.get(item);
+                map.add(fluidTag);
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -301,7 +301,7 @@ public class ItemPhysicServer {
             healthField.setInt(item, (int) (healthField.getInt(item) - amount));
             item.gameEvent(GameEvent.ENTITY_DAMAGED, source.getEntity());
             if (healthField.getInt(item) <= 0) {
-                item.getItem().onDestroyed(item);
+                item.getItem().onDestroyed(item, source);
                 item.discard();
             }
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}

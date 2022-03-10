@@ -179,13 +179,13 @@ function initializeCoreMod() {
 				node.methods.add(method);
 				
 				//Add updateFluidHeightAndDoFluidPushing
-				var method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("m_19943_"), "(Lnet/minecraft/tags/Tag;D)Z", null, null);
+				var method = new MethodNode(Opcodes.ACC_PUBLIC, asmapi.mapMethod("m_19943_"), "(Lnet/minecraft/tags/TagKey;D)Z", null, null);
 				var label = new LabelNode();	
 				method.instructions.add(label);
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
 				method.instructions.add(new VarInsnNode(Opcodes.ALOAD, 1));
 				method.instructions.add(new VarInsnNode(Opcodes.DLOAD, 2));
-				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updateFluidHeightAndDoFluidPushing", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/tags/Tag;D)Z", asmapi.MethodType.STATIC));
+				method.instructions.add(asmapi.buildMethodCall("team/creative/itemphysic/server/ItemPhysicServer", "updateFluidHeightAndDoFluidPushing", "(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/tags/TagKey;D)Z", asmapi.MethodType.STATIC));
 				var label2 = new LabelNode();
 				method.instructions.add(label2);
 				method.instructions.add(new InsnNode(Opcodes.IRETURN));
@@ -193,7 +193,7 @@ function initializeCoreMod() {
 				method.maxStack = 6;
 				method.maxLocals = 4;
 				method.localVariables.add(new LocalVariableNode("this", "Lnet/minecraft/world/entity/item/ItemEntity;", null, label, label2, 0));
-				method.localVariables.add(new LocalVariableNode("tag", "Lnet/minecraft/tags/Tag;", null, label, label2, 1));
+				method.localVariables.add(new LocalVariableNode("tag", "Lnet/minecraft/tags/TagKey;", null, label, label2, 1));
 				method.localVariables.add(new LocalVariableNode("var", "D", null, label, label2, 2));
 				node.methods.add(method);
 				
