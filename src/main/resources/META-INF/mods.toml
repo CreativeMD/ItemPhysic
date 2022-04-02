@@ -6,7 +6,7 @@ license="GNU General Public License v3.0"
 
 [[mods]]
 	modId="itemphysic"
-	version="1.6.0"
+	version="${file.jarVersion}"
 	displayName="ItemPhysic"
 	displayURL="https://www.curseforge.com/minecraft/mc-mods/itemphysic"
 	authors=["CreativeMD"]
