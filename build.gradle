@@ -1,8 +1,16 @@
+allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+}
+
+
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net/' }
         maven { url = 'https://maven.parchmentmc.org' }
         maven { url = 'https://plugins.gradle.org/m2/' }
+		
         jcenter()
         mavenCentral()
     }
@@ -35,7 +43,7 @@ archivesBaseName = "itemphysic"
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: 'parchment', version: "2022.03.13-1.18.2"
+    mappings channel: 'official', version: "${project.property 'minecraft_version'}"
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
@@ -57,9 +65,9 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                creativecore {
-                    source project(':CreativeCore').sourceSets.main
-                }
+                //creativecore {
+                //    source project(':CreativeCore').sourceSets.main
+                //}
                 itemphysic {
                     source sourceSets.main
                 }
@@ -82,9 +90,9 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                creativecore {
-                    source project(':CreativeCore').sourceSets.main
-                }
+                //creativecore {
+                //    source project(':CreativeCore').sourceSets.main
+                //}
                 itemphysic {
                     source sourceSets.main
                 }
@@ -118,14 +126,16 @@ minecraft {
     }
 }
 
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    implementation fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}") {
-        transitive = false
-    }
+    //implementation fg.deobf("vazkii.patchouli:Patchouli:${patchouli_version}") {
+    //    transitive = false
+    //}
 	
-	implementation project(':CreativeCore')
+	implementation 'com.github.BrianPetkovsek:CreativeCore:1.19-SNAPSHOT'
+	//implementation project(':CreativeCore')
 }
 
 jar {

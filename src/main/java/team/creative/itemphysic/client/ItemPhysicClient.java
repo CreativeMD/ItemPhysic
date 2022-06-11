@@ -21,8 +21,8 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+//import net.minecraft.network.chat.TextComponent;
+//import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -313,7 +313,7 @@ public class ItemPhysicClient {
                             list.add(entity.getItem().getDisplayName());
                         } catch (Exception e) {
                             list = new ArrayList();
-                            list.add(new TextComponent("ERRORED"));
+                            //list.add(new TextComponent("ERRORED"));//TODO
                         }
                         
                         int width = 0;
@@ -343,7 +343,7 @@ public class ItemPhysicClient {
                         renderPower = 1;
                     if (renderPower > 6)
                         renderPower = 6;
-                    mc.player.displayClientMessage(new TranslatableComponent("item.throw", renderPower), true);
+                    //mc.player.displayClientMessage(new TranslatableComponent("item.throw", renderPower), true); //TODO
                 }
             }
         }

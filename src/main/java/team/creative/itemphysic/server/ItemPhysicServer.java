@@ -299,7 +299,7 @@ public class ItemPhysicServer {
         try {
             markHurtMethod.invoke(item);
             healthField.setInt(item, (int) (healthField.getInt(item) - amount));
-            item.gameEvent(GameEvent.ENTITY_DAMAGED, source.getEntity());
+            item.gameEvent(GameEvent.ENTITY_DAMAGE, source.getEntity());
             if (healthField.getInt(item) <= 0) {
                 item.getItem().onDestroyed(item, source);
                 item.discard();
