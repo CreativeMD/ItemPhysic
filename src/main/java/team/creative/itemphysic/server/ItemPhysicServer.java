@@ -1,12 +1,7 @@
 package team.creative.itemphysic.server;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -16,10 +11,10 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -42,28 +37,28 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpt
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
+import team.creative.itemphysic.common.ItemEntityPhysic;
+import team.creative.itemphysic.mixin.EntityAccessor;
 
 public class ItemPhysicServer {
+    
+    public static final ThreadLocal<Fluid> fluid = new ThreadLocal<>();
+    public static int tempDroppower = 1;
+    public static List<ServerPlayer> toCancel = new ArrayList<>();
     
     public static void init(FMLCommonSetupEvent event) {
         MinecraftForge.EVENT_BUS.register(ItemPhysicServer.class);
     }
     
-    public static int tempDroppower = 1;
-    
     @SubscribeEvent
     public static void onDespawn(ItemExpireEvent event) {
-        if (ItemPhysic.CONFIG.general.despawnItem == -1)
-            try {
-                age.set(event.getEntityItem(), 1);
-                event.setCanceled(true);
-                event.setExtraLife(0);
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
+        if (ItemPhysic.CONFIG.general.despawnItem == -1) {
+            ((ItemEntityPhysic) event.getEntityItem()).age(1);
+            event.setCanceled(true);
+            event.setExtraLife(0);
+        }
     }
     
     @SubscribeEvent
@@ -72,17 +67,7 @@ public class ItemPhysicServer {
         tempDroppower = 1;
     }
     
-    /*
-     * replace with
-         if (this.isInWater() && this.getFluidHeight(FluidTags.WATER) > (double)f) {
-            this.setUnderwaterMovement();
-         } else if (this.isInLava() && this.getFluidHeight(FluidTags.LAVA) > (double)f) {
-            this.setUnderLavaMovement();
-         } else if (!this.isNoGravity()) {
-            this.setDeltaMovement(this.getDeltaMovement().add(0.0D, -0.04D, 0.0D));
-         }
-     */
-    public static void updatePre(ItemEntity item) {
+    public static void updatePre(ItemEntity item, RandomSource rand) {
         ItemStack stack = item.getItem();
         fluid.set(CommonPhysic.getFluid(item));
         if (fluid.get() == null) {
@@ -106,20 +91,15 @@ public class ItemPhysicServer {
             speedreduction = maxSpeedReduction;
         item.setDeltaMovement(item.getDeltaMovement().add(0, speedreduction, 0));
         
-        try {
-            float f = item.getEyeHeight() - 0.11111111F;
-            if ((item.isInLava() && item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
-                Random rand = (Random) randField.get(item);
-                item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-                for (int i = 0; i < 100; i++)
-                    item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
-                            .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
-            }
-        } catch (IllegalArgumentException | IllegalAccessException e) {}
+        float f = item.getEyeHeight() - 0.11111111F;
+        if ((item.isInLava() && item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
+            item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
+            for (int i = 0; i < 100; i++)
+                item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
+                        .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
+        }
         
     }
-    
-    private static Field fluidOnEyesField = ObfuscationReflectionHelper.findField(Entity.class, "f_19799_");
     
     public static boolean updateFluidHeightAndDoFluidPushing(ItemEntity item, TagKey<Fluid> fluidTag, double p_210500_2_) {
         double size = -0.001D;
@@ -182,12 +162,7 @@ public class ItemPhysicServer {
                 item.setDeltaMovement(item.getDeltaMovement().add(vec3));
             }
             
-            try {
-                Set<TagKey<Fluid>> map = (Set<TagKey<Fluid>>) fluidOnEyesField.get(item);
-                map.add(fluidTag);
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
+            ((EntityAccessor) item).getFluidOnEyes().add(fluidTag);
             
             return flag1;
         }
@@ -197,15 +172,7 @@ public class ItemPhysicServer {
         return !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem());
     }
     
-    public static final ThreadLocal<Fluid> fluid = new ThreadLocal<>();
-    
-    //Remove this.setMotion(this.getMotion().mul((double)f, 0.98D, (double)f));
-    //Replace with: if (this.onGround) { this.setMotion(this.getMotion().mul(1.0D, -0.5D, 1.0D)); }
     public static void update(ItemEntity item, float f) {
-        
-        //if (ItemPhysic.CONFIG.general.swimmingItems.canPass(item.getItem()) && fluid.get() != null)
-        //item.setMotion(item.getMotion().mul(1 / (fluid.get().getAttributes().getDensity() / 950D * 1.5), 1, 1 / (fluid.get().getAttributes().getDensity() / 950D * 1.5)));
-        
         if (fluid.get() == null) {
             item.setDeltaMovement(item.getDeltaMovement().multiply(f, 0.98D, f));
             
@@ -248,21 +215,20 @@ public class ItemPhysicServer {
                 return;
             
             ItemStack copy = itemstack.copy();
-            try {
-                if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwner() == null || entity.lifespan - age.getInt(entity) <= 200 || entity
-                        .getOwner().equals(player.getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
-                    copy.setCount(copy.getCount() - entity.getItem().getCount());
-                    ForgeEventFactory.firePlayerItemPickupEvent(player, entity, copy);
-                    player.take(entity, i);
-                    if (itemstack.isEmpty()) {
-                        entity.discard();
-                        itemstack.setCount(i);
-                    }
-                    
-                    player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
-                    player.onItemPickup(entity);
+            if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity
+                    .getOwner() == null || entity.lifespan - ((ItemEntityPhysic) entity).age() <= 200 || entity.getOwner()
+                            .equals(player.getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
+                copy.setCount(copy.getCount() - entity.getItem().getCount());
+                ForgeEventFactory.firePlayerItemPickupEvent(player, entity, copy);
+                player.take(entity, i);
+                if (itemstack.isEmpty()) {
+                    entity.discard();
+                    itemstack.setCount(i);
                 }
-            } catch (IllegalArgumentException | IllegalAccessException e) {}
+                
+                player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
+                player.onItemPickup(entity);
+            }
             
         }
     }
@@ -296,29 +262,20 @@ public class ItemPhysicServer {
         if (source == DamageSource.CACTUS)
             return false;
         
-        try {
-            markHurtMethod.invoke(item);
-            healthField.setInt(item, (int) (healthField.getInt(item) - amount));
-            item.gameEvent(GameEvent.ENTITY_DAMAGED, source.getEntity());
-            if (healthField.getInt(item) <= 0) {
-                item.getItem().onDestroyed(item, source);
-                item.discard();
-            }
-        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {}
+        ((ItemEntityPhysic) item).hurted();
+        ((ItemEntityPhysic) item).health((int) (((ItemEntityPhysic) item).health() - amount));
+        item.gameEvent(GameEvent.ENTITY_DAMAGE, source.getEntity());
+        if (((ItemEntityPhysic) item).health() <= 0) {
+            item.getItem().onDestroyed(item, source);
+            item.discard();
+        }
         return true;
     }
-    
-    private static Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
-    private static Field healthField = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31987_");
-    private static Field randField = ObfuscationReflectionHelper.findField(Entity.class, "f_19796_");
-    private static Method markHurtMethod = ObfuscationReflectionHelper.findMethod(Entity.class, "m_5834_");
     
     @SubscribeEvent
     public static void onUnload(WorldEvent.Unload event) {
         toCancel.removeIf((x) -> x.level == event.getWorld());
     }
-    
-    public static List<ServerPlayer> toCancel = new ArrayList<>();
     
     @SubscribeEvent
     public static void onPlayerInteract(PlayerInteractEvent event) {

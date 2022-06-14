@@ -1,0 +1,17 @@
+{
+    "required": true,
+    "package": "team.creative.itemphysic.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "refmap": "itemphysic.mixin.refmap.json",
+    "server": [
+    ],
+    "mixins": [
+        "ItemEntityMixin"
+    ],
+    "client": [
+        "EntityAccessor",
+        "ItemEntityRendererMixin",
+        "LocalPlayerMixin"
+    ],
+    "minVersion": "0.8"
+}
