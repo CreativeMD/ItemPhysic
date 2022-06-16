@@ -23,7 +23,7 @@ minecraft {
 
             mods {
                 creativecore {
-                    source project(':CreativeCore').sourceSets.main
+                    source project(':CreativeLoaderForge').sourceSets.main
                 }
                 itemphysic {
                     source sourceSets.main
@@ -39,7 +39,7 @@ minecraft {
 
             mods {
                 creativecore {
-                    source project(':CreativeCore').sourceSets.main
+                    source project(':CreativeLoaderForge').sourceSets.main
                 }
                 itemphysic {
                     source sourceSets.main
