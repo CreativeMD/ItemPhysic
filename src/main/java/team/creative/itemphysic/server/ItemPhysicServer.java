@@ -1,11 +1,7 @@
 package team.creative.itemphysic.server;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
@@ -26,17 +22,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.item.ItemExpireEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import team.creative.creativecore.CreativeCore;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
 import team.creative.itemphysic.common.ItemEntityPhysic;
@@ -46,25 +32,14 @@ public class ItemPhysicServer {
     
     public static final ThreadLocal<Fluid> fluid = new ThreadLocal<>();
     public static int tempDroppower = 1;
-    public static List<ServerPlayer> toCancel = new ArrayList<>();
     
-    public static void init(FMLCommonSetupEvent event) {
-        MinecraftForge.EVENT_BUS.register(ItemPhysicServer.class);
-    }
+    public static void init() {}
     
-    @SubscribeEvent
-    public static void onDespawn(ItemExpireEvent event) {
-        if (ItemPhysic.CONFIG.general.despawnItem == -1) {
-            ((ItemEntityPhysic) event.getEntityItem()).age(1);
-            event.setCanceled(true);
-            event.setExtraLife(0);
+    public static void drop(ItemEntity item) {
+        if (ItemPhysic.CONFIG.general.customThrow) {
+            item.setDeltaMovement(item.getDeltaMovement().scale(ItemPhysicServer.tempDroppower));
+            ItemPhysicServer.tempDroppower = 1;
         }
-    }
-    
-    @SubscribeEvent
-    public static void onToos(ItemTossEvent event) {
-        event.getEntityItem().setDeltaMovement(event.getEntityItem().getDeltaMovement().scale(tempDroppower));
-        tempDroppower = 1;
     }
     
     public static void updatePre(ItemEntity item, RandomSource rand) {
@@ -76,7 +51,7 @@ public class ItemPhysicServer {
             return;
         }
         
-        double density = fluid.get().getAttributes().getDensity() / 1000D;
+        double density = CommonPhysic.getViscosity(fluid.get(), item.level);
         double speed = -1 / density * 0.01;
         if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack))
             speed = 0.1;
@@ -172,19 +147,26 @@ public class ItemPhysicServer {
         return !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem());
     }
     
-    public static void update(ItemEntity item, float f) {
+    public static void update(ItemEntity item) {
+        float f = 0.98F;
+        if (item.isOnGround())
+            f = item.level.getBlockState(new BlockPos(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
+        
         if (fluid.get() == null) {
             item.setDeltaMovement(item.getDeltaMovement().multiply(f, 0.98D, f));
             
             if (item.isOnGround() && item.getDeltaMovement().y < 0.0D)
                 item.setDeltaMovement(item.getDeltaMovement().multiply(1.0D, -0.5D, 1.0D));
-        } else
-            item.setDeltaMovement(item.getDeltaMovement()
-                    .multiply(1 / (fluid.get().getAttributes().getDensity() / 900D), 1, 1 / (fluid.get().getAttributes().getDensity() / 900D)));
+        } else {
+            float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level);
+            item.setDeltaMovement(item.getDeltaMovement().multiply(1 / viscosity, 1, 1 / viscosity));
+        }
         
-        if (ItemPhysic.CONFIG.general.despawnItem != -1 && item.lifespan == 6000 && item.lifespan != ItemPhysic.CONFIG.general.despawnItem)
-            item.lifespan = ItemPhysic.CONFIG.general.despawnItem;
+        //if (ItemPhysic.CONFIG.general.despawnItem != -1 && item.lifespan == 6000 && item.lifespan != ItemPhysic.CONFIG.general.despawnItem)
+        //item.lifespan = ItemPhysic.CONFIG.general.despawnItem;
         
+        //if (ItemPhysic.CONFIG.general.despawnItem == -1 && ((ItemEntityPhysic) item).age() >= item.lifespan)
+        //((ItemEntityPhysic) item).age(1);
     }
     
     public static void checkFallDamage(ItemEntity item, double y, boolean onGroundIn, BlockState state, BlockPos pos) {
@@ -210,16 +192,16 @@ public class ItemPhysicServer {
             Item item = itemstack.getItem();
             int i = itemstack.getCount();
             
-            int hook = net.minecraftforge.event.ForgeEventFactory.onItemPickup(entity, player);
+            int hook = CreativeCore.utils().onItemPickup(entity, player);
             if (hook < 0)
                 return;
             
             ItemStack copy = itemstack.copy();
             if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity
-                    .getOwner() == null || entity.lifespan - ((ItemEntityPhysic) entity).age() <= 200 || entity.getOwner()
+                    .getOwner() == null || CreativeCore.utils().getLifeSpan(entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity.getOwner()
                             .equals(player.getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                 copy.setCount(copy.getCount() - entity.getItem().getCount());
-                ForgeEventFactory.firePlayerItemPickupEvent(player, entity, copy);
+                CreativeCore.utils().firePlayerItemPickupEvent(player, entity, copy);
                 player.take(entity, i);
                 if (itemstack.isEmpty()) {
                     entity.discard();
@@ -266,25 +248,10 @@ public class ItemPhysicServer {
         ((ItemEntityPhysic) item).health((int) (((ItemEntityPhysic) item).health() - amount));
         item.gameEvent(GameEvent.ENTITY_DAMAGE, source.getEntity());
         if (((ItemEntityPhysic) item).health() <= 0) {
-            item.getItem().onDestroyed(item, source);
+            item.getItem().onDestroyed(item);
             item.discard();
         }
         return true;
     }
     
-    @SubscribeEvent
-    public static void onUnload(WorldEvent.Unload event) {
-        toCancel.removeIf((x) -> x.level == event.getWorld());
-    }
-    
-    @SubscribeEvent
-    public static void onPlayerInteract(PlayerInteractEvent event) {
-        if (event instanceof RightClickEmpty || event instanceof RightClickBlock || event instanceof EntityInteract)
-            if (!event.getPlayer().level.isClientSide) {
-                if (toCancel.contains(event.getPlayer())) {
-                    toCancel.remove(event.getPlayer());
-                    event.setCanceled(true);
-                }
-            }
-    }
 }

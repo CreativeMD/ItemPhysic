@@ -6,12 +6,14 @@
     "server": [
     ],
     "mixins": [
-        "ItemEntityMixin"
+        "ItemEntityMixin",
+        "PlayerMixin"
     ],
     "client": [
         "EntityAccessor",
         "ItemEntityRendererMixin",
-        "LocalPlayerMixin"
+        "LocalPlayerMixin",
+        "MinecraftMixin"
     ],
     "minVersion": "0.8"
 }

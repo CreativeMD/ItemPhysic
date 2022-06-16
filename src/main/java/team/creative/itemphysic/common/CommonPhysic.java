@@ -7,16 +7,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.common.util.mc.PlayerUtils;
 import team.creative.itemphysic.ItemPhysic;
 
 public class CommonPhysic {
+    
+    public static float getViscosity(Fluid fluid, Level level) {
+        if (fluid == null)
+            return 0;
+        return CreativeCore.loader().getFluidViscosityMultiplier(fluid, level);
+    }
     
     public static Fluid getFluid(ItemEntity item) {
         return getFluid(item, false);
@@ -34,7 +42,7 @@ public class CommonPhysic {
         FluidState state = item.level.getFluidState(pos);
         Fluid fluid = state.getType();
         
-        if (fluid == null || fluid.getAttributes().getDensity() == 0)
+        if (state.isEmpty() || fluid == null)
             return null;
         
         if (below)
