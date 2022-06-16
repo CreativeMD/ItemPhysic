@@ -27,6 +27,6 @@
         "fabricloader": ">=0.14.0",
         "fabric": "*",
         "minecraft": "1.19",
-        "creativecore": ">=2.6.5"
+        "creativecore": ">=2.7.0"
     }
 }
