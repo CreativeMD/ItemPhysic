@@ -161,12 +161,6 @@ public class ItemPhysicServer {
             float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level);
             item.setDeltaMovement(item.getDeltaMovement().multiply(1 / viscosity, 1, 1 / viscosity));
         }
-        
-        //if (ItemPhysic.CONFIG.general.despawnItem != -1 && item.lifespan == 6000 && item.lifespan != ItemPhysic.CONFIG.general.despawnItem)
-        //item.lifespan = ItemPhysic.CONFIG.general.despawnItem;
-        
-        //if (ItemPhysic.CONFIG.general.despawnItem == -1 && ((ItemEntityPhysic) item).age() >= item.lifespan)
-        //((ItemEntityPhysic) item).age(1);
     }
     
     public static void checkFallDamage(ItemEntity item, double y, boolean onGroundIn, BlockState state, BlockPos pos) {

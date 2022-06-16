@@ -20,9 +20,6 @@ public class ItemPhysicConfig {
     public static class General {
         
         @CreativeConfig
-        public int despawnItem = 6000;
-        
-        @CreativeConfig
         public boolean customThrow = true;
         
         @CreativeConfig
