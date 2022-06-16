@@ -20,10 +20,8 @@ public class DropPacket extends CreativePacket {
     }
     
     @Override
-    @OnlyIn(value = Dist.CLIENT)
-    public void executeClient(Player player) {
-        
-    }
+    @OnlyIn(Dist.CLIENT)
+    public void executeClient(Player player) {}
     
     @Override
     public void executeServer(ServerPlayer player) {

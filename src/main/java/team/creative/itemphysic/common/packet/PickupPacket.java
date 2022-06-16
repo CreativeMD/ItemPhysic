@@ -16,9 +16,7 @@ public class PickupPacket extends CreativePacket {
     public UUID uuid;
     public boolean rightClick;
     
-    public PickupPacket() {
-        
-    }
+    public PickupPacket() {}
     
     public PickupPacket(UUID uuid, boolean rightClick) {
         this.uuid = uuid;
@@ -26,15 +24,10 @@ public class PickupPacket extends CreativePacket {
     }
     
     @Override
-    public void executeClient(Player player) {
-        
-    }
+    public void executeClient(Player player) {}
     
     @Override
     public void executeServer(ServerPlayer player) {
-        if (rightClick)
-            ItemPhysicServer.toCancel.add(player);
-        
         Entity item = ((ServerLevel) player.level).getEntity(uuid);
         if (item != null && item instanceof ItemEntity && item.isAlive()) {
             ItemPhysicServer.interact((ItemEntity) item, player, InteractionHand.MAIN_HAND);

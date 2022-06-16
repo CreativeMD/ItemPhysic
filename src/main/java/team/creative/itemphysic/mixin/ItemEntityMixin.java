@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.TagKey;
@@ -71,10 +70,10 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
         this.health = health;
     }
     
-    @Override
-    @Overwrite
     /** @reason behavior will be overwritten
      * @author CreativeMD */
+    @Override
+    @Overwrite
     public boolean hurt(DamageSource source, float value) {
         return ItemPhysicServer.hurt((ItemEntity) (Object) this, source, value);
     }
@@ -95,51 +94,45 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
         return ItemPhysicServer.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
     }
     
-    @Inject(method = "Lnet/minecraft/world/entity/item/ItemEntity;playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true)
     public void playerTouchInject(Player player, CallbackInfo info) {
         if (ItemPhysicServer.playerTouch((ItemEntity) (Object) this, player))
             info.cancel();
     }
     
-    @Inject(method = "Lnet/minecraft/world/entity/item/ItemEntity;fireImmune()Z", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true)
     public void fireImmuneInject(CallbackInfoReturnable<Boolean> info) {
         if (ItemPhysicServer.fireImmune((ItemEntity) (Object) this))
             info.setReturnValue(true);
     }
     
-    @Inject(method = "Lnet/minecraft/world/entity/item/ItemEntity;tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInWater()Z"),
-            require = 1)
+    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInWater()Z"), require = 1)
     public void updatePre(CallbackInfo info) {
         ItemPhysicServer.updatePre((ItemEntity) (Object) this, random);
     }
     
-    @Redirect(method = "Lnet/minecraft/world/entity/item/ItemEntity;tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInWater()Z"),
-            require = 1)
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInWater()Z"), require = 1)
     public boolean isInWaterRedirect(ItemEntity entity) {
         return false;
     }
     
-    @Redirect(method = "Lnet/minecraft/world/entity/item/ItemEntity;tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInLava()Z"),
-            require = 1)
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInLava()Z"), require = 1)
     public boolean isInLavaRedirect(ItemEntity entity) {
         return false;
     }
     
-    @Redirect(method = "Lnet/minecraft/world/entity/item/ItemEntity;tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isNoGravity()Z"),
-            require = 1)
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isNoGravity()Z"), require = 1)
     public boolean isNoGravityRedirect(ItemEntity entity) {
         return true;
     }
     
-    @Inject(method = "Lnet/minecraft/world/entity/item/ItemEntity;tick()V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void update(CallbackInfo info, Vec3 vec3, float f, float f1) {
-        ItemPhysicServer.update((ItemEntity) (Object) this, f1);
+    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1))
+    public void update(CallbackInfo info) {
+        ItemPhysicServer.update((ItemEntity) (Object) this);
     }
     
-    @Redirect(method = "Lnet/minecraft/world/entity/item/ItemEntity;tick()V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"), require = 3)
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"),
+            require = 3)
     public void setDeltaMovementRedirect(ItemEntity entity, Vec3 vec) {}
     
 }

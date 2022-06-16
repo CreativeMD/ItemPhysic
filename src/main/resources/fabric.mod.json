@@ -1,0 +1,32 @@
+{
+    "schemaVersion": 1,
+    "id": "itemphysic",
+    "version": "${version}",
+    "name": "ItemPhysic (Fabric)",
+    "description": "",
+    "authors": [
+        "CreativeMD"
+    ],
+    "contact": {
+    },
+    "license": "GNU LGPL v3.0",
+    "icon": "itemphysic.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "team.creative.itemphysic.ItemPhysic"
+        ],
+        "client": [
+            "team.creative.itemphysic.ItemPhysic"
+        ]
+    },
+    "mixins": [
+        "itemphysic.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.14.0",
+        "fabric": "*",
+        "minecraft": "1.19",
+        "creativecore": ">=2.6.5"
+    }
+}
