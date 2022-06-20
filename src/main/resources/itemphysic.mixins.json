@@ -7,10 +7,10 @@
     ],
     "mixins": [
         "ItemEntityMixin",
-        "PlayerMixin"
+        "PlayerMixin",
+        "EntityAccessor"
     ],
     "client": [
-        "EntityAccessor",
         "ItemEntityRendererMixin",
         "LocalPlayerMixin",
         "MinecraftMixin"
