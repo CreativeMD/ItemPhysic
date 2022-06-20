@@ -61,10 +61,9 @@ public class CommonPhysic {
         return PlayerUtils.getReach(player);
     }
     
-    public static HitResult getEntityItem(Player player, Vec3 position, Vec3 look, double distance) {
-        float f1 = 3.0F;
+    public static HitResult getEntityItem(Player player, Vec3 position, Vec3 look) {
         Vec3 include = look.subtract(position);
-        List list = player.level.getEntities(player, player.getBoundingBox().expandTowards(include.x, include.y, include.z).expandTowards(f1, f1, f1));
+        List list = player.level.getEntities(player, player.getBoundingBox().expandTowards(include.x, include.y, include.z));
         for (int i = 0; i < list.size(); ++i) {
             Entity entity = (Entity) list.get(i);
             if (entity instanceof ItemEntity) {
@@ -74,7 +73,6 @@ public class CommonPhysic {
                     return new EntityHitResult(entity, vec.get());
                 else if (axisalignedbb.contains(position))
                     return new EntityHitResult(entity);
-                
             }
         }
         return null;

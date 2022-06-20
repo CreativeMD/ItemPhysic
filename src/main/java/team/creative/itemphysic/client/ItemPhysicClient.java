@@ -27,15 +27,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
@@ -328,31 +325,12 @@ public class ItemPhysicClient {
     public static HitResult getEntityItem(Player player) {
         
         double distance = CommonPhysic.getReachDistance(player);
-        if (mc.hitResult != null && mc.hitResult.getType() != Type.MISS)
-            distance = Math.sqrt(mc.hitResult.distanceTo(player));
         float partialTicks = mc.getDeltaFrameTime();
         Vec3 position = player.getEyePosition(partialTicks);
-        Vec3 vec3d1 = player.getViewVector(partialTicks);
-        Vec3 look = position.add(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance);
-        
-        HitResult result = mc.level.clip(new ClipContext(position, look, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
-        if (result != null)
-            distance = Math.min(distance, result.getLocation().distanceToSqr(position));
-        
-        AABB axisalignedbb = player.getBoundingBox().expandTowards(vec3d1.scale(distance)).inflate(1.0D, 1.0D, 1.0D);
-        EntityHitResult entityraytraceresult = ProjectileUtil.getEntityHitResult(player, position, look, axisalignedbb, (p_215312_0_) -> {
-            return !p_215312_0_.isSpectator() && p_215312_0_.canBeCollidedWith();
-        }, distance);
-        if (entityraytraceresult != null) {
-            Vec3 vec3d3 = entityraytraceresult.getLocation();
-            double d2 = position.distanceToSqr(vec3d3);
-            if (d2 < distance || result == null) {
-                result = entityraytraceresult;
-                distance = d2;
-            }
-        }
-        
-        return CommonPhysic.getEntityItem(player, position, position.add(vec3d1.x * distance, vec3d1.y * distance, vec3d1.z * distance), distance);
+        Vec3 view = player.getViewVector(partialTicks);
+        if (mc.hitResult != null && mc.hitResult.getType() != Type.MISS)
+            distance = mc.hitResult.getLocation().distanceTo(position);
+        return CommonPhysic.getEntityItem(player, position, position.add(view.x * distance, view.y * distance, view.z * distance));
         
     }
     
