@@ -53,7 +53,7 @@ public class ItemPhysicServer {
         
         double density = CommonPhysic.getViscosity(fluid.get(), item.level);
         double speed = -1 / density * 0.01;
-        if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack))
+        if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack) && !fluid.get().is(FluidTags.LAVA))
             speed = 0.1;
         
         if (item.getDeltaMovement().y > 0 && speed < item.getDeltaMovement().y)
@@ -67,11 +67,12 @@ public class ItemPhysicServer {
         item.setDeltaMovement(item.getDeltaMovement().add(0, speedreduction, 0));
         
         float f = item.getEyeHeight() - 0.11111111F;
-        if ((item.isInLava() && item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
+        if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
             item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
             for (int i = 0; i < 100; i++)
                 item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
                         .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
+            item.hurt(DamageSource.ON_FIRE, 3);
         }
         
     }
