@@ -51,20 +51,16 @@ public class ItemPhysicServer {
             return;
         }
         
-        double density = CommonPhysic.getViscosity(fluid.get(), item.level);
-        double speed = -1 / density * 0.01;
-        if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack) && !fluid.get().is(FluidTags.LAVA))
-            speed = 0.1;
-        
-        if (item.getDeltaMovement().y > 0 && speed < item.getDeltaMovement().y)
-            return;
-        double speedreduction = (speed - item.getDeltaMovement().y) / 2;
-        double maxSpeedReduction = 0.1;
-        if (speedreduction < -maxSpeedReduction)
-            speedreduction = -maxSpeedReduction;
-        if (speedreduction > maxSpeedReduction)
-            speedreduction = maxSpeedReduction;
-        item.setDeltaMovement(item.getDeltaMovement().add(0, speedreduction, 0));
+        double force = -0.02D / CommonPhysic.getViscosity(fluid.get(), item.level);
+        if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack) && !fluid.get().is(FluidTags.LAVA)) {
+            double maxSpeed = 0.1;
+            if (item.getDeltaMovement().y < maxSpeed)
+                force = Math.min(0.04, maxSpeed - item.getDeltaMovement().y);
+        } else if (item.getDeltaMovement().y < -0.1) {
+            force = 0;
+            item.setDeltaMovement(item.getDeltaMovement().multiply(1, 0.8, 1));
+        }
+        item.setDeltaMovement(item.getDeltaMovement().add(0, force, 0));
         
         float f = item.getEyeHeight() - 0.11111111F;
         if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
@@ -160,7 +156,7 @@ public class ItemPhysicServer {
                 item.setDeltaMovement(item.getDeltaMovement().multiply(1.0D, -0.5D, 1.0D));
         } else {
             float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level);
-            item.setDeltaMovement(item.getDeltaMovement().multiply(1 / viscosity, 1, 1 / viscosity));
+            item.setDeltaMovement(item.getDeltaMovement().multiply(1 / (1.2 * viscosity), 1, 1 / (1.2 * viscosity)));
         }
     }
     
