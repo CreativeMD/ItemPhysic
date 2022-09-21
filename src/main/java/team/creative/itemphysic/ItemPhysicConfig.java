@@ -67,6 +67,8 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public boolean showPickupTooltip = true;
         @CreativeConfig
+        public boolean showPickupTooltipKeybind = false;
+        @CreativeConfig
         public boolean disableThrowHUD = false;
         
     }

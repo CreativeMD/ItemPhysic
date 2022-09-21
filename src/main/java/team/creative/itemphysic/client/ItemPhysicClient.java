@@ -114,6 +114,7 @@ public class ItemPhysicClient {
                     if (entity != null && ItemPhysic.CONFIG.rendering.showPickupTooltip) {
                         int space = 15;
                         List<Component> list = new ArrayList<>();
+                        
                         try {
                             entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level, list, TooltipFlag.Default.NORMAL);
                             list.add(entity.getItem().getDisplayName());
@@ -121,6 +122,10 @@ public class ItemPhysicClient {
                             list = new ArrayList();
                             list.add(Component.literal("ERRORED"));
                         }
+                        
+                        if (ItemPhysic.CONFIG.rendering.showPickupTooltipKeybind)
+                            list.add(Component.translatable("item.tooltip.pickup.keybind", ItemPhysicClient.PICKUP.isUnbound() ? mc.options.keyUse
+                                    .getTranslatedKeyMessage() : ItemPhysicClient.PICKUP.getTranslatedKeyMessage()));
                         
                         int width = 0;
                         for (int i = 0; i < list.size(); i++) {
