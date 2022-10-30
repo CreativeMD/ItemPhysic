@@ -1,0 +1,5 @@
+{
+    "key.pickup.item": "Item de coleta",
+    "item.tooltip.pickup.keybind": "pressione '%s' para pegar",
+    "item.throw": "Poder: %s"
+}
