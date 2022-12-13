@@ -6,7 +6,6 @@ import java.util.List;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -179,8 +178,8 @@ public class ItemPhysicClient {
         if (motionMultiplier != null && motionMultiplier.lengthSqr() > 0)
             rotateBy *= motionMultiplier.x * 0.2;
         
-        pose.mulPose(Vector3f.XP.rotation((float) Math.PI / 2));
-        pose.mulPose(Vector3f.ZP.rotation(entity.getYRot()));
+        pose.mulPose(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
+        pose.mulPose(com.mojang.math.Axis.ZP.rotation(entity.getYRot()));
         
         boolean applyEffects = entity.getAge() != 0 && (flag || mc.options != null);
         
@@ -256,7 +255,7 @@ public class ItemPhysicClient {
             double height = 0.2;
             if (flag)
                 pose.translate(0, height, 0);
-            pose.mulPose(Vector3f.YP.rotation(entity.getXRot()));
+            pose.mulPose(com.mojang.math.Axis.YP.rotation(entity.getXRot()));
             if (flag)
                 pose.translate(0, -height, 0);
         }
