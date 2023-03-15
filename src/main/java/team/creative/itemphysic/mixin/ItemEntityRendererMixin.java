@@ -34,7 +34,7 @@ public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity>
     }
     
     @Inject(method = "render(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-            at = @At("HEAD"), cancellable = true)
+            at = @At("HEAD"), cancellable = true, require = 1)
     private void onRender(ItemEntity itemEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
         if (ItemPhysicClient.render(itemEntity, f, g, poseStack, multiBufferSource, i, this.itemRenderer, this.random)) {
             super.render(itemEntity, f, g, poseStack, multiBufferSource, i);

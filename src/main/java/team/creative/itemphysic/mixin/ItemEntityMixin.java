@@ -94,13 +94,13 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
         return ItemPhysicServer.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
     }
     
-    @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true, require = 1)
     public void playerTouchInject(Player player, CallbackInfo info) {
         if (ItemPhysicServer.playerTouch((ItemEntity) (Object) this, player))
             info.cancel();
     }
     
-    @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true, require = 1)
     public void fireImmuneInject(CallbackInfoReturnable<Boolean> info) {
         if (ItemPhysicServer.fireImmune((ItemEntity) (Object) this))
             info.setReturnValue(true);
@@ -126,7 +126,8 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
         return true;
     }
     
-    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1))
+    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1),
+            require = 1)
     public void update(CallbackInfo info) {
         ItemPhysicServer.update((ItemEntity) (Object) this);
     }

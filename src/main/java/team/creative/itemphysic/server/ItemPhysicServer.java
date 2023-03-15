@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -68,7 +69,7 @@ public class ItemPhysicServer {
             for (int i = 0; i < 100; i++)
                 item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
                         .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
-            item.hurt(DamageSource.ON_FIRE, 3);
+            item.hurt(item.damageSources().onFire(), 3);
         }
         
     }
@@ -147,7 +148,7 @@ public class ItemPhysicServer {
     public static void update(ItemEntity item) {
         float f = 0.98F;
         if (item.isOnGround())
-            f = item.level.getBlockState(new BlockPos(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
+            f = item.level.getBlockState(BlockPos.containing(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
         
         if (fluid.get() == null) {
             item.setDeltaMovement(item.getDeltaMovement().multiply(f, 0.98D, f));
@@ -189,8 +190,8 @@ public class ItemPhysicServer {
             
             ItemStack copy = itemstack.copy();
             if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity
-                    .getOwner() == null || CreativeCore.utils().getLifeSpan(entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity.getOwner()
-                            .equals(player.getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
+                    .getOwner() == null || CreativeCore.utils().getLifeSpan(entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity
+                            .getOwner() == player) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                 copy.setCount(copy.getCount() - entity.getItem().getCount());
                 CreativeCore.utils().firePlayerItemPickupEvent(player, entity, copy);
                 player.take(entity, i);
@@ -224,15 +225,16 @@ public class ItemPhysicServer {
         if (!item.getItem().isEmpty() && ItemPhysic.CONFIG.general.undestroyableItems.canPass(item.getItem()))
             return false;
         
-        if (!item.getItem().isEmpty() && item.getItem().getItem() == Items.NETHER_STAR && source.isExplosion())
+        if (!item.getItem().isEmpty() && item.getItem().getItem() == Items.NETHER_STAR && source.is(DamageTypeTags.IS_EXPLOSION))
             return false;
         
         if (!item.getItem().getItem().canBeHurtBy(source))
             return false;
-        if ((source == DamageSource.LAVA || source == DamageSource.ON_FIRE || source == DamageSource.IN_FIRE) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
+        if ((source.is(DamageTypeTags.IS_FIRE) || source == item.damageSources().lava() || source == item.damageSources().onFire() || source == item.damageSources()
+                .inFire()) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
             return false;
         
-        if (source == DamageSource.CACTUS)
+        if (source == item.damageSources().cactus())
             return false;
         
         ((ItemEntityPhysic) item).hurted();
