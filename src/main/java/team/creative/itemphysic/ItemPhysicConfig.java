@@ -51,6 +51,8 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public boolean pickupWhenSneaking = true;
         @CreativeConfig
+        public boolean pickupNormally = false;
+        @CreativeConfig
         public float maximumPickupRange = 5;
         
     }

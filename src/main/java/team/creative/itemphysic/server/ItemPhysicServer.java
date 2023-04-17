@@ -167,16 +167,14 @@ public class ItemPhysicServer {
     }
     
     public static boolean playerTouch(ItemEntity item, Player player) {
-        if (ItemPhysic.CONFIG.pickup.customPickup && (!player.isDiscrete()) || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking)
+        if (ItemPhysic.CONFIG.pickup.customPickup && (!player.isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally)
             return true;
         if (item.level.isClientSide || item.hasPickUpDelay())
             return true;
         return false;
     }
     
-    public static void playerTouch(ItemEntity entity, Player player, boolean needsSneak) {
-        if (ItemPhysic.CONFIG.pickup.customPickup && needsSneak && (!player.isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking))
-            return;
+    public static void playerPickup(ItemEntity entity, Player player) {
         if (!entity.level.isClientSide) {
             if (!ItemPhysic.CONFIG.pickup.customPickup && entity.hasPickUpDelay())
                 return;
@@ -209,7 +207,7 @@ public class ItemPhysicServer {
     
     public static InteractionResult interact(ItemEntity item, Player player, InteractionHand hand) {
         if (ItemPhysic.CONFIG.pickup.customPickup) {
-            playerTouch(item, player, false);
+            playerPickup(item, player);
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
