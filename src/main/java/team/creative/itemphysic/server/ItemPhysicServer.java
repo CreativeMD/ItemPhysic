@@ -17,7 +17,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -233,13 +232,6 @@ public class ItemPhysicServer {
         if (source == DamageSource.CACTUS)
             return false;
         
-        ((ItemEntityPhysic) item).hurted();
-        ((ItemEntityPhysic) item).health((int) (((ItemEntityPhysic) item).health() - amount));
-        item.gameEvent(GameEvent.ENTITY_DAMAGE, source.getEntity());
-        if (((ItemEntityPhysic) item).health() <= 0) {
-            item.getItem().onDestroyed(item);
-            item.discard();
-        }
         return true;
     }
     

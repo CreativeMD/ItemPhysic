@@ -1,7 +1,6 @@
 package team.creative.itemphysic.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -46,36 +45,14 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
     }
     
     @Override
-    public void hurted() {
-        markHurt();
-    }
-    
-    @Override
     public int age() {
         return age;
     }
     
-    @Override
-    public void age(int age) {
-        this.age = age;
-    }
-    
-    @Override
-    public int health() {
-        return health;
-    }
-    
-    @Override
-    public void health(int health) {
-        this.health = health;
-    }
-    
-    /** @reason behavior will be overwritten
-     * @author CreativeMD */
-    @Override
-    @Overwrite
-    public boolean hurt(DamageSource source, float value) {
-        return ItemPhysicServer.hurt((ItemEntity) (Object) this, source, value);
+    @Inject(at = @At("HEAD"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", cancellable = true)
+    public void hurtInject(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
+        if (!ItemPhysicServer.hurt((ItemEntity) (Object) this, source, amount))
+            callback.setReturnValue(false);
     }
     
     @Override
