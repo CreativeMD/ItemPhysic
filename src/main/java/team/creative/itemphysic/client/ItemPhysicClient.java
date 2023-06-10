@@ -11,6 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -94,14 +95,14 @@ public class ItemPhysicClient {
         }
     }
     
-    public static void renderTick() {
+    public static void renderTick(Object object) {
         lastTickTime = System.nanoTime();
         
         if (mc.screen == null)
-            renderTooltip();
+            renderTooltip((GuiGraphics) object);
     }
     
-    public static void renderTooltip() {
+    public static void renderTooltip(GuiGraphics graphics) {
         if (mc != null && mc.player != null && !mc.isPaused()) {
             if (ItemPhysic.CONFIG.pickup.customPickup) {
                 
@@ -115,7 +116,7 @@ public class ItemPhysicClient {
                         List<Component> list = new ArrayList<>();
                         
                         try {
-                            entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level, list, TooltipFlag.Default.NORMAL);
+                            entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level(), list, TooltipFlag.Default.NORMAL);
                             list.add(entity.getItem().getDisplayName());
                         } catch (Exception e) {
                             list = new ArrayList();
@@ -135,7 +136,7 @@ public class ItemPhysicClient {
                         RenderSystem.disableBlend();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            mc.font.drawShadow(new PoseStack(), text, mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow()
+                            graphics.drawString(mc.font, text, mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow()
                                     .getGuiScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
                         }
                         
@@ -164,7 +165,7 @@ public class ItemPhysicClient {
         pose.pushPose();
         ItemStack itemstack = entity.getItem();
         rand.setSeed(itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue());
-        BakedModel bakedmodel = itemRenderer.getModel(itemstack, entity.level, (LivingEntity) null, entity.getId());
+        BakedModel bakedmodel = itemRenderer.getModel(itemstack, entity.level(), (LivingEntity) null, entity.getId());
         boolean flag = bakedmodel.isGui3d();
         int j = getModelCount(itemstack);
         
@@ -184,13 +185,13 @@ public class ItemPhysicClient {
         //Handle Rotations
         if (applyEffects) {
             if (flag) {
-                if (!entity.isOnGround()) {
+                if (!entity.onGround()) {
                     rotateBy *= 2;
                     Fluid fluid = CommonPhysic.getFluid(entity);
                     if (fluid == null)
                         fluid = CommonPhysic.getFluid(entity, true);
                     if (fluid != null)
-                        rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.getLevel()));
+                        rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.level()));
                     
                     entity.setXRot(entity.getXRot() + rotateBy);
                 } else if (ItemPhysic.CONFIG.rendering.oldRotation) {
@@ -228,15 +229,15 @@ public class ItemPhysicClient {
                             
                     }
                 }
-            } else if (entity != null && !Double.isNaN(entity.getX()) && !Double.isNaN(entity.getY()) && !Double.isNaN(entity.getZ()) && entity.level != null) {
-                if (entity.isOnGround()) {
+            } else if (entity != null && !Double.isNaN(entity.getX()) && !Double.isNaN(entity.getY()) && !Double.isNaN(entity.getZ()) && entity.level() != null) {
+                if (entity.onGround()) {
                     if (!flag)
                         entity.setXRot(0);
                 } else {
                     rotateBy *= 2;
                     Fluid fluid = CommonPhysic.getFluid(entity);
                     if (fluid != null)
-                        rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.getLevel()));
+                        rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.level()));
                     
                     entity.setXRot(entity.getXRot() + rotateBy);
                 }
@@ -244,7 +245,7 @@ public class ItemPhysicClient {
             
             if (flag)
                 pose.translate(0, -0.2, -0.08);
-            else if (entity.level.getBlockState(entity.blockPosition()).getBlock() == Blocks.SNOW || entity.level.getBlockState(entity.blockPosition().below())
+            else if (entity.level().getBlockState(entity.blockPosition()).getBlock() == Blocks.SNOW || entity.level().getBlockState(entity.blockPosition().below())
                     .getBlock() == Blocks.SOUL_SAND)
                 pose.translate(0, 0.0, -0.14);
             else
@@ -319,7 +320,7 @@ public class ItemPhysicClient {
             if (!ItemPhysicClient.PICKUP.isUnbound())
                 return false;
             
-            return onPlayerInteractClient(player.level, player, true);
+            return onPlayerInteractClient(player.level(), player, true);
         }
         return false;
     }

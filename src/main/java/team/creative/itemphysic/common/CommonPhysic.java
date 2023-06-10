@@ -31,7 +31,7 @@ public class CommonPhysic {
     }
     
     public static Fluid getFluid(ItemEntity item, boolean below) {
-        if (item.level == null)
+        if (item.level() == null)
             return null;
         
         double d0 = item.getY();
@@ -39,7 +39,7 @@ public class CommonPhysic {
         if (below)
             pos = pos.below();
         
-        FluidState state = item.level.getFluidState(pos);
+        FluidState state = item.level().getFluidState(pos);
         Fluid fluid = state.getType();
         
         if (state.isEmpty() || fluid == null)
@@ -48,7 +48,7 @@ public class CommonPhysic {
         if (below)
             return fluid;
         
-        double filled = state.getHeight(item.level, pos);
+        double filled = state.getHeight(item.level(), pos);
         
         if (d0 - pos.getY() - 0.2 <= filled)
             return fluid;
@@ -63,7 +63,7 @@ public class CommonPhysic {
     
     public static HitResult getEntityItem(Player player, Vec3 position, Vec3 look) {
         Vec3 include = look.subtract(position);
-        List list = player.level.getEntities(player, player.getBoundingBox().expandTowards(include.x, include.y, include.z));
+        List list = player.level().getEntities(player, player.getBoundingBox().expandTowards(include.x, include.y, include.z));
         for (int i = 0; i < list.size(); ++i) {
             Entity entity = (Entity) list.get(i);
             if (entity instanceof ItemEntity) {

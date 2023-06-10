@@ -28,7 +28,7 @@ public class PickupPacket extends CreativePacket {
     
     @Override
     public void executeServer(ServerPlayer player) {
-        Entity item = ((ServerLevel) player.level).getEntity(uuid);
+        Entity item = ((ServerLevel) player.level()).getEntity(uuid);
         if (item != null && item instanceof ItemEntity && item.isAlive()) {
             ItemPhysicServer.interact((ItemEntity) item, player, InteractionHand.MAIN_HAND);
             player.swing(InteractionHand.MAIN_HAND);

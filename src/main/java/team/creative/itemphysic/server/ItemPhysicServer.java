@@ -51,7 +51,7 @@ public class ItemPhysicServer {
             return;
         }
         
-        double force = -0.02D / CommonPhysic.getViscosity(fluid.get(), item.level);
+        double force = -0.02D / CommonPhysic.getViscosity(fluid.get(), item.level());
         if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack) && !fluid.get().is(FluidTags.LAVA)) {
             double maxSpeed = 0.1;
             if (item.getDeltaMovement().y < maxSpeed)
@@ -66,7 +66,7 @@ public class ItemPhysicServer {
         if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
             item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
             for (int i = 0; i < 100; i++)
-                item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
+                item.level().addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
                         .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
             item.hurt(item.damageSources().onFire(), 3);
         }
@@ -99,14 +99,14 @@ public class ItemPhysicServer {
                 for (int i2 = k; i2 < l; ++i2) {
                     for (int j2 = i1; j2 < j1; ++j2) {
                         blockpos$mutableblockpos.set(l1, i2, j2);
-                        FluidState fluidstate = item.level.getFluidState(blockpos$mutableblockpos);
+                        FluidState fluidstate = item.level().getFluidState(blockpos$mutableblockpos);
                         if (fluidstate.is(fluidTag)) {
-                            double d1 = i2 + fluidstate.getHeight(item.level, blockpos$mutableblockpos);
+                            double d1 = i2 + fluidstate.getHeight(item.level(), blockpos$mutableblockpos);
                             if (d1 >= aabb.minY) {
                                 flag1 = true;
                                 d0 = Math.max(d1 - aabb.minY, d0);
                                 if (flag) {
-                                    Vec3 vec31 = fluidstate.getFlow(item.level, blockpos$mutableblockpos);
+                                    Vec3 vec31 = fluidstate.getFlow(item.level(), blockpos$mutableblockpos);
                                     if (d0 < 0.4D) {
                                         vec31 = vec31.scale(d0);
                                     }
@@ -146,16 +146,16 @@ public class ItemPhysicServer {
     
     public static void update(ItemEntity item) {
         float f = 0.98F;
-        if (item.isOnGround())
-            f = item.level.getBlockState(BlockPos.containing(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
+        if (item.onGround())
+            f = item.level().getBlockState(BlockPos.containing(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
         
         if (fluid.get() == null) {
             item.setDeltaMovement(item.getDeltaMovement().multiply(f, 0.98D, f));
             
-            if (item.isOnGround() && item.getDeltaMovement().y < 0.0D)
+            if (item.onGround() && item.getDeltaMovement().y < 0.0D)
                 item.setDeltaMovement(item.getDeltaMovement().multiply(1.0D, -0.5D, 1.0D));
         } else {
-            float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level);
+            float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level());
             item.setDeltaMovement(item.getDeltaMovement().multiply(1 / (1.2 * viscosity), 1, 1 / (1.2 * viscosity)));
         }
     }
@@ -168,13 +168,13 @@ public class ItemPhysicServer {
     public static boolean playerTouch(ItemEntity item, Player player) {
         if (ItemPhysic.CONFIG.pickup.customPickup && (!player.isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally)
             return true;
-        if (item.level.isClientSide || item.hasPickUpDelay())
+        if (item.level().isClientSide || item.hasPickUpDelay())
             return true;
         return false;
     }
     
     public static void playerPickup(ItemEntity entity, Player player) {
-        if (!entity.level.isClientSide) {
+        if (!entity.level().isClientSide) {
             if (!ItemPhysic.CONFIG.pickup.customPickup && entity.hasPickUpDelay())
                 return;
             ItemStack itemstack = entity.getItem();
@@ -213,7 +213,7 @@ public class ItemPhysicServer {
     }
     
     public static boolean hurt(ItemEntity item, DamageSource source, float amount) {
-        if (item.level.isClientSide || item.isRemoved())
+        if (item.level().isClientSide || item.isRemoved())
             return false; //Forge: Fixes MC-53850
             
         if (item.isInvulnerableTo(source))
