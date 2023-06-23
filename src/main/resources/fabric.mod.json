@@ -1,16 +1,14 @@
 {
     "schemaVersion": 1,
-    "id": "itemphysic",
-    "version": "${version}",
-    "name": "ItemPhysic (Fabric)",
-    "description": "",
+	"id": "${mod_id}",
+	"version": "${mod_version}",
+	"name": "${mod_name}",
+	"description": "${mod_description}",
     "authors": [
         "CreativeMD"
     ],
-    "contact": {
-    },
-    "license": "GNU LGPL v3.0",
-    "icon": "itemphysic.png",
+    "license": "${mod_license}",
+	"icon": "${mod_id}.png",
     "environment": "*",
     "entrypoints": {
         "main": [
@@ -24,9 +22,9 @@
         "itemphysic.mixins.json"
     ],
     "depends": {
-        "fabricloader": ">=0.14.0",
-        "fabric": "*",
-        "minecraft": ">=1.20",
-        "creativecore": ">=2.10.22"
-    }
+		"fabricloader": "${loader_version_range}",
+		"fabric": "*",
+		"minecraft": "${minecraft_version_range}",
+		"creativecore": ">=${creativecore_version}"
+	}
 }
