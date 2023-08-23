@@ -66,8 +66,8 @@ public class ItemPhysicServer {
         if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
             item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
             for (int i = 0; i < 100; i++)
-                item.level().addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
-                        .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
+                item.level().addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item.getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand
+                        .nextFloat() * 0.1) - 0.05);
             item.hurt(item.damageSources().onFire(), 3);
         }
         
@@ -186,9 +186,8 @@ public class ItemPhysicServer {
                 return;
             
             ItemStack copy = itemstack.copy();
-            if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity
-                    .getOwner() == null || CreativeCore.utils().getLifeSpan(entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity
-                            .getOwner() == player) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
+            if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwner() == null || CreativeCore.utils().getLifeSpan(
+                entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity.getOwner() == player) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                 copy.setCount(copy.getCount() - entity.getItem().getCount());
                 CreativeCore.utils().firePlayerItemPickupEvent(player, entity, copy);
                 player.take(entity, i);
@@ -231,7 +230,7 @@ public class ItemPhysicServer {
                 .inFire()) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
             return false;
         
-        if (source == item.damageSources().cactus())
+        if (ItemPhysic.CONFIG.general.disableCactusDamage && source == item.damageSources().cactus())
             return false;
         
         return true;
