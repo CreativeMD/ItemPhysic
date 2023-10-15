@@ -138,8 +138,8 @@ public class ItemPhysicClient {
                         RenderSystem.enableTexture();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            mc.font.drawShadow(new PoseStack(), text, mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow()
-                                    .getGuiScaledHeight() / 2 + ((list.size() / 2) * space - space * (i + 1)), 16579836);
+                            graphics.drawString(mc.font, text, mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow().getGuiScaledHeight() / 2 + ((list
+                                    .size() / 2) * space - space * (i + 1)), 16579836);
                         }
                         
                     }
@@ -328,13 +328,12 @@ public class ItemPhysicClient {
     }
     
     public static HitResult getEntityItem(Player player) {
-        
         double distance = CommonPhysic.getReachDistance(player);
         float partialTicks = mc.getDeltaFrameTime();
         Vec3 position = player.getEyePosition(partialTicks);
         Vec3 view = player.getViewVector(partialTicks);
         if (mc.hitResult != null && mc.hitResult.getType() != Type.MISS)
-            distance = mc.hitResult.getLocation().distanceTo(position);
+            distance = Math.min(mc.hitResult.getLocation().distanceTo(position), distance);
         return CommonPhysic.getEntityItem(player, position, position.add(view.x * distance, view.y * distance, view.z * distance));
         
     }
