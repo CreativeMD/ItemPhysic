@@ -1,0 +1,5 @@
+{
+    "key.pickup.item": "Eşyayı Yerden Alma",
+    "item.tooltip.pickup.keybind": "Yerden almak için '%s' tuşuna bas",
+    "item.throw": "Güç: %s"
+}
