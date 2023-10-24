@@ -21,32 +21,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
-import team.creative.itemphysic.common.ItemEntityPhysic;
 import team.creative.itemphysic.server.ItemPhysicServer;
 
 @Mixin(ItemEntity.class)
-public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic {
-    
-    @Shadow
-    public int age;
+public abstract class ItemEntityMixin extends Entity {
     
     @Shadow
     public int health;
     
-    public boolean skipPhysicRenderer;
-    
     private ItemEntityMixin(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
-    }
-    
-    @Override
-    public boolean skipRendering() {
-        return skipPhysicRenderer;
-    }
-    
-    @Override
-    public int age() {
-        return age;
     }
     
     @Inject(at = @At("HEAD"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", cancellable = true)

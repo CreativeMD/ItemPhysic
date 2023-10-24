@@ -90,6 +90,9 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public boolean disableThrowHUD = false;
         
+        @CreativeConfig
+        public SortingList vanillaRendered = new SortingList(true);
+        
     }
     
 }

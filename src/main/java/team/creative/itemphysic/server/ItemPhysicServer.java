@@ -24,7 +24,6 @@ import net.minecraft.world.phys.Vec3;
 import team.creative.creativecore.CreativeCore;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
-import team.creative.itemphysic.common.ItemEntityPhysic;
 import team.creative.itemphysic.mixin.EntityAccessor;
 
 public class ItemPhysicServer {
@@ -185,8 +184,8 @@ public class ItemPhysicServer {
                 return;
             
             ItemStack copy = itemstack.copy();
-            if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwner() == null || CreativeCore.utils().getLifeSpan(
-                entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity.getOwner() == player) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
+            if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity.getOwner() == null || CreativeCore.utils().getLifeSpan(entity) - entity
+                    .getAge() <= 200 || entity.getOwner() == player) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                 copy.setCount(copy.getCount() - entity.getItem().getCount());
                 CreativeCore.utils().firePlayerItemPickupEvent(player, entity, copy);
                 player.take(entity, i);

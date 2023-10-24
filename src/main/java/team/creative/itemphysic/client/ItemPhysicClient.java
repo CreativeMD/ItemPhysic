@@ -44,7 +44,6 @@ import team.creative.creativecore.ICreativeLoader;
 import team.creative.creativecore.client.CreativeCoreClient;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
-import team.creative.itemphysic.common.ItemEntityPhysic;
 import team.creative.itemphysic.common.packet.DropPacket;
 import team.creative.itemphysic.common.packet.PickupPacket;
 import team.creative.itemphysic.mixin.EntityAccessor;
@@ -116,8 +115,8 @@ public class ItemPhysicClient {
                         List<Component> list = new ArrayList<>();
                         
                         try {
-                            entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level, list, TooltipFlag.Default.NORMAL);
-                            list.add(entity.getItem().getDisplayName());
+                            entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level(), list, TooltipFlag.Default.NORMAL);
+                            list.add(entity.getItem().getHoverName());
                         } catch (Exception e) {
                             list = new ArrayList();
                             list.add(Component.literal("ERRORED"));
@@ -161,7 +160,7 @@ public class ItemPhysicClient {
     }
     
     public static boolean render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight, ItemRenderer itemRenderer, RandomSource rand) {
-        if (entity.getAge() == 0 || ((ItemEntityPhysic) entity).skipRendering() || ItemPhysic.CONFIG.rendering.vanillaRendering)
+        if (entity.getAge() == 0 || ((ItemEntityRendering) entity).skipRendering() || ItemPhysic.CONFIG.rendering.vanillaRendering)
             return false;
         
         pose.pushPose();
