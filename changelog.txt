@@ -1,0 +1,2 @@
+1.6.15
+Added vanillaRendered to rendering config to allow to exclude items from changed rendering
