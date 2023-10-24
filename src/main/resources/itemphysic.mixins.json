@@ -12,6 +12,7 @@
     ],
     "client": [
         "ItemEntityRendererMixin",
+        "ItemEntityMixinClient",
         "LocalPlayerMixin",
         "MinecraftMixin"
     ],
