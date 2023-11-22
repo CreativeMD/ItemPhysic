@@ -1,2 +1,5 @@
+1.6.16
+Fixed not being able to pickup items dropped by another player
+
 1.6.15
 Added vanillaRendered to rendering config to allow to exclude items from changed rendering
