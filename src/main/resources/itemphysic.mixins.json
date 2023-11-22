@@ -6,6 +6,7 @@
     "server": [
     ],
     "mixins": [
+        "ItemEntityAccessor",
         "ItemEntityMixin",
         "PlayerMixin",
         "EntityAccessor"
