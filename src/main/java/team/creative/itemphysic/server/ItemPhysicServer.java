@@ -165,7 +165,9 @@ public class ItemPhysicServer {
     }
     
     public static boolean playerTouch(ItemEntity item, Player player) {
-        if (ItemPhysic.CONFIG.pickup.customPickup && (!player.isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally)
+        if (ItemPhysic.CONFIG.pickup.customPickup && (!player
+                .isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally && !ItemPhysic.CONFIG.pickup.alwaysPickup.canPass(item
+                        .getItem()))
             return true;
         if (item.level.isClientSide || item.hasPickUpDelay())
             return true;

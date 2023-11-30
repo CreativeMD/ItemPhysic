@@ -72,6 +72,8 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public float maximumPickupRange = 5;
         
+        @CreativeConfig
+        public SortingList alwaysPickup = new SortingList();
     }
     
     public static class Rendering {
