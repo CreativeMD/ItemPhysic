@@ -86,7 +86,7 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public boolean showPickupTooltip = true;
         @CreativeConfig
-        public boolean showPickupTooltipExtended = true;
+        public boolean showPickupTooltipExtended = false;
         @CreativeConfig
         public boolean showPickupTooltipKeybind = false;
         @CreativeConfig
