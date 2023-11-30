@@ -111,13 +111,15 @@ public class ItemPhysicClient {
                         onPlayerInteractClient(mc.level, mc.player, false);
                     ItemEntity entity = (ItemEntity) ((EntityHitResult) result).getEntity();
                     if (entity != null && ItemPhysic.CONFIG.rendering.showPickupTooltip) {
-                        int space = 15;
+                        int space = 2;
                         List<Component> list = new ArrayList<>();
                         
                         try {
                             if (ItemPhysic.CONFIG.rendering.showPickupTooltipExtended)
-                                entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level(), list, TooltipFlag.Default.NORMAL);
-                            list.add(entity.getItem().getHoverName());
+                                list.addAll(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL));
+                            else
+                                list.add(entity.getItem().getHoverName());
+                            
                         } catch (Exception e) {
                             list = new ArrayList();
                             list.add(Component.literal("ERRORED"));
@@ -133,11 +135,12 @@ public class ItemPhysicClient {
                             width = Math.max(width, mc.font.width(text) + 10);
                         }
                         
+                        int height = list.size() * (mc.font.lineHeight + space) / 2;
                         RenderSystem.disableBlend();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            graphics.drawString(mc.font, text, mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow().getGuiScaledHeight() / 2 + ((list
-                                    .size() / 2) * space - space * (i + 1)), 16579836);
+                            graphics.drawString(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow()
+                                    .getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i, 16579836);
                         }
                         
                     }
