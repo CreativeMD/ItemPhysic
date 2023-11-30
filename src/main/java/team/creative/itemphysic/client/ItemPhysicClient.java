@@ -115,7 +115,8 @@ public class ItemPhysicClient {
                         List<Component> list = new ArrayList<>();
                         
                         try {
-                            entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level(), list, TooltipFlag.Default.NORMAL);
+                            if (ItemPhysic.CONFIG.rendering.showPickupTooltipExtended)
+                                entity.getItem().getItem().appendHoverText(entity.getItem(), mc.player.level(), list, TooltipFlag.Default.NORMAL);
                             list.add(entity.getItem().getHoverName());
                         } catch (Exception e) {
                             list = new ArrayList();
