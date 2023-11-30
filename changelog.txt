@@ -1,3 +1,8 @@
+1.7.0
+Added option always pickup for items to be picked up when walking over them even if custom pickup is enabled
+Added showPickupTooltipExtended config option (disabled by default). Allows you to only display the item name
+Reworked tooltip displayed when using custom pickup
+
 1.6.16
 Fixed not being able to pickup items dropped by another player
 
