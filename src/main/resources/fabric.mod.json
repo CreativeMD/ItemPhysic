@@ -1,14 +1,14 @@
 {
     "schemaVersion": 1,
-	"id": "${mod_id}",
-	"version": "${mod_version}",
-	"name": "${mod_name}",
-	"description": "${mod_description}",
+    "id": "itemphysic",
+    "version": "1.7.0",
+    "name": "ItemPhysic",
+    "description": "Enhances the rendering of items and introduces some more physics.",
     "authors": [
         "CreativeMD"
     ],
-    "license": "${mod_license}",
-	"icon": "${mod_id}.png",
+    "license": "LGPL-3.0-only",
+    "icon": "itemphysic.png",
     "environment": "*",
     "entrypoints": {
         "main": [
@@ -22,9 +22,9 @@
         "itemphysic.mixins.json"
     ],
     "depends": {
-		"fabricloader": "${loader_version_range}",
-		"fabric-api": "*",
-		"minecraft": "${minecraft_version_range}",
-		"creativecore": ">=${creativecore_version}"
-	}
+        "fabricloader": ">=0.14.0",
+        "fabric-api": "*",
+        "minecraft": ">=1.20",
+        "creativecore": ">=2.11.5"
+    }
 }
