@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[46,)"
+loaderVersion="[1,)"
 issueTrackerURL="https://github.com/CreativeMD/ItemPhysic/issues"
 license="LGPL-3.0-only"
 
@@ -13,16 +13,16 @@ license="LGPL-3.0-only"
     description='''Enhances the rendering of items and introduces some more physics.'''
 
 [[dependencies.itemphysic]]
-    modId="forge"
-    mandatory=true
-    versionRange="[46,)"
+    modId="neoforge"
+    type="required"
+    versionRange="[20.4,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.itemphysic]]
     modId="minecraft"
-    mandatory=true
-    versionRange="[1.20,1.21)"
+    type="required"
+    versionRange="[1.20.4,1.21)"
     ordering="NONE"
     side="BOTH"
 
@@ -31,5 +31,8 @@ license="LGPL-3.0-only"
    mandatory=true
    ordering="NONE"
    side="BOTH"
-   versionRange="2.11.5"
+   versionRange="[2.11.5,)"
+
+[[mixins]]
+   config="itemphysic.mixins.json"
 

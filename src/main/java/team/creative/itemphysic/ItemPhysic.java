@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.ICreativeLoader;
 import team.creative.creativecore.client.ClientLoader;
