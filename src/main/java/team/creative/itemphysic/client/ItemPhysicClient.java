@@ -53,9 +53,10 @@ import team.creative.itemphysic.mixin.EntityAccessor;
 public class ItemPhysicClient {
     
     public static final KeyMapping PICKUP = new KeyMapping("key.pickup.item", InputConstants.UNKNOWN.getValue(), "key.categories.gameplay");
-    public static final Minecraft mc = Minecraft.getInstance();;
+    public static final Minecraft mc = Minecraft.getInstance();
     public static int throwingPower;
     public static long lastTickTime;
+    private static final double RANDOM_Y_OFFSET_SCALE = 0.05 / (Math.PI * 2);
     
     public static void init() {
         ICreativeLoader loader = CreativeCore.loader();
@@ -252,9 +253,9 @@ public class ItemPhysicClient {
                 pose.translate(0, -0.2, -0.08);
             else if (entity.level.getBlockState(entity.blockPosition()).getBlock() == Blocks.SNOW || entity.level.getBlockState(entity.blockPosition().below())
                     .getBlock() == Blocks.SOUL_SAND)
-                pose.translate(0, 0.0, -0.14);
+                pose.translate(0, 0.0, -0.14 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
             else
-                pose.translate(0, 0, -0.04);
+                pose.translate(0, 0, -0.04 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
             
             double height = 0.2;
             if (flag)
