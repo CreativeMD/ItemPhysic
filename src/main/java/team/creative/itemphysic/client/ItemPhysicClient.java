@@ -142,8 +142,8 @@ public class ItemPhysicClient {
                         RenderSystem.enableTexture();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            graphics.drawString(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow()
-                                    .getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i, 16579836);
+                            graphics.drawString(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX,
+                                mc.getWindow().getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY, 16579836);
                         }
                         
                     }
