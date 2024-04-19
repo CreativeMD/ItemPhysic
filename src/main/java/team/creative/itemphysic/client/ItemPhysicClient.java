@@ -119,7 +119,7 @@ public class ItemPhysicClient {
                             if (ItemPhysic.CONFIG.rendering.showPickupTooltipExtended)
                                 list.addAll(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL));
                             else
-                                list.add(entity.getItem().getHoverName());
+                                list.add(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL).get(0));
                             
                         } catch (Exception e) {
                             list = new ArrayList();
