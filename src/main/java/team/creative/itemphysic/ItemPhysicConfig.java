@@ -97,6 +97,11 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public SortingList vanillaRendered = new SortingList(true);
         
+        @CreativeConfig
+        public int tooltipOffsetX = 0;
+        @CreativeConfig
+        public int tooltipOffsetY = 0;
+        
     }
     
 }
