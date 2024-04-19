@@ -1,3 +1,8 @@
+1.7.1
+Added tooltipOffsetX and tooltipOffsetY to configure a custom offset for the tooltip
+Added random offset to items laying on the ground (used vanilla's bobOffs)
+Fixed pickup tooltip not respecting the color of the item
+
 1.7.0
 Added option always pickup for items to be picked up when walking over them even if custom pickup is enabled
 Added showPickupTooltipExtended config option (disabled by default). Allows you to only display the item name
