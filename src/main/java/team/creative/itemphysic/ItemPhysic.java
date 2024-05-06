@@ -24,7 +24,7 @@ public class ItemPhysic {
     
     public static final Logger LOGGER = LogManager.getLogger(ItemPhysic.MODID);
     public static final String MODID = "itemphysic";
-    public static final CreativeNetwork NETWORK = new CreativeNetwork("1.0", LOGGER, new ResourceLocation(ItemPhysic.MODID, "main"));
+    public static final CreativeNetwork NETWORK = new CreativeNetwork(2, LOGGER, new ResourceLocation(ItemPhysic.MODID, "main"));
     public static ItemPhysicConfig CONFIG;
     
     public ItemPhysic() {
