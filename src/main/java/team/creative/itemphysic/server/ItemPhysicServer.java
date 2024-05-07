@@ -146,10 +146,8 @@ public class ItemPhysicServer {
     
     public static void update(ItemEntity item) {
         float f = 0.98F;
-        if (item.onGround()) {
-            BlockPos groundPos = ((EntityAccessor) item).callGetBlockPosBelowThatAffectsMyMovement();
-            f = item.level().getBlockState(groundPos).getFriction(item.level(), groundPos, item) * 0.98F;
-        }
+        if (item.onGround())
+            f = CreativeCore.loader().getFriction(item.level(), ((EntityAccessor) item).callGetBlockPosBelowThatAffectsMyMovement(), item) * 0.98F;
         
         if (fluid.get() == null) {
             item.setDeltaMovement(item.getDeltaMovement().multiply(f, 0.98D, f));

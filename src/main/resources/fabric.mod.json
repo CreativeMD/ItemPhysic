@@ -24,7 +24,7 @@
     "depends": {
         "fabricloader": ">=0.15.0",
         "fabric-api": "*",
-        "minecraft": ">=1.20.4",
-        "creativecore": ">=2.11.5"
+        "minecraft": ">=1.20.6",
+        "creativecore": ">=2.11.29"
     }
 }
