@@ -27,6 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -117,9 +118,9 @@ public class ItemPhysicClient {
                         
                         try {
                             if (ItemPhysic.CONFIG.rendering.showPickupTooltipExtended)
-                                list.addAll(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL));
+                                list.addAll(entity.getItem().getTooltipLines(TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL));
                             else
-                                list.add(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL).get(0));
+                                list.add(entity.getItem().getTooltipLines(TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL).get(0));
                             
                         } catch (Exception e) {
                             list = new ArrayList();

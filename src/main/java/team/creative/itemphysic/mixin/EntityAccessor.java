@@ -4,7 +4,9 @@ import java.util.Set;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.material.Fluid;
@@ -18,4 +20,7 @@ public interface EntityAccessor {
     
     @Accessor("fluidOnEyes")
     public Set<TagKey<Fluid>> getFluidOnEyes();
+    
+    @Invoker
+    public BlockPos callGetBlockPosBelowThatAffectsMyMovement();
 }

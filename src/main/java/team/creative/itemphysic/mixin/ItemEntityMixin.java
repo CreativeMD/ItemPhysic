@@ -82,19 +82,17 @@ public abstract class ItemEntityMixin extends Entity {
         return false;
     }
     
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isNoGravity()Z"), require = 1)
-    public boolean isNoGravityRedirect(ItemEntity entity) {
-        return true;
-    }
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;applyGravity()V"), require = 1)
+    public void isNoGravityRedirect(ItemEntity entity) {}
     
-    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1),
+    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 0),
             require = 1)
     public void update(CallbackInfo info) {
         ItemPhysicServer.update((ItemEntity) (Object) this);
     }
     
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"),
-            require = 3)
+            require = 2)
     public void setDeltaMovementRedirect(ItemEntity entity, Vec3 vec) {}
     
 }

@@ -146,8 +146,10 @@ public class ItemPhysicServer {
     
     public static void update(ItemEntity item) {
         float f = 0.98F;
-        if (item.onGround())
-            f = item.level().getBlockState(BlockPos.containing(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
+        if (item.onGround()) {
+            BlockPos groundPos = ((EntityAccessor) item).callGetBlockPosBelowThatAffectsMyMovement();
+            f = item.level().getBlockState(groundPos).getFriction(item.level(), groundPos, item) * 0.98F;
+        }
         
         if (fluid.get() == null) {
             item.setDeltaMovement(item.getDeltaMovement().multiply(f, 0.98D, f));
@@ -227,7 +229,7 @@ public class ItemPhysicServer {
         if (!item.getItem().isEmpty() && item.getItem().getItem() == Items.NETHER_STAR && source.is(DamageTypeTags.IS_EXPLOSION))
             return false;
         
-        if (!item.getItem().getItem().canBeHurtBy(source))
+        if (!item.getItem().canBeHurtBy(source))
             return false;
         if ((source.is(DamageTypeTags.IS_FIRE) || source == item.damageSources().lava() || source == item.damageSources().onFire() || source == item.damageSources()
                 .inFire()) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
