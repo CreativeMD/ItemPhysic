@@ -30,7 +30,7 @@ public abstract class ItemEntityMixinClient extends Entity implements ItemEntity
     @Inject(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"), require = 1)
     private void onSyncedDataUpdated(EntityDataAccessor<?> accessor, CallbackInfo callback) {
-        if (level().isClientSide)
+        if (level.isClientSide)
             skipPhysicRenderer = ItemPhysic.CONFIG.rendering.vanillaRendered.canPass(((ItemEntity) (Entity) this).getItem());
     }
     

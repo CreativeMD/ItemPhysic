@@ -2,6 +2,7 @@ package team.creative.itemphysic.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -21,8 +22,9 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -63,7 +65,7 @@ public class ItemPhysicClient {
         loader.registerKeybind(() -> PICKUP);
         
         loader.registerClientTick(ItemPhysicClient::gameTick);
-        loader.registerClientRender(ItemPhysicClient::renderTick);
+        loader.registerClientRenderGui(ItemPhysicClient::renderTick);
         CreativeCoreClient.registerClientConfig(ItemPhysic.MODID);
     }
     
@@ -95,7 +97,7 @@ public class ItemPhysicClient {
         }
     }
     
-    public static void renderTick() {
+    public static void renderTick(Object object) {
         lastTickTime = System.nanoTime();
         
         if (mc.screen == null)
@@ -117,17 +119,17 @@ public class ItemPhysicClient {
                         
                         try {
                             if (ItemPhysic.CONFIG.rendering.showPickupTooltipExtended)
-                                list.addAll(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL));
+                                list.addAll(entity.getItem().getTooltipLines(mc.player, TooltipFlag.Default.NORMAL));
                             else
-                                list.add(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL).get(0));
+                                list.add(entity.getItem().getTooltipLines(mc.player, TooltipFlag.Default.NORMAL).get(0));
                             
                         } catch (Exception e) {
                             list = new ArrayList();
-                            list.add(Component.literal("ERRORED"));
+                            list.add(new TextComponent("ERRORED"));
                         }
                         
                         if (ItemPhysic.CONFIG.rendering.showPickupTooltipKeybind)
-                            list.add(Component.translatable("item.tooltip.pickup.keybind", ItemPhysicClient.PICKUP.isUnbound() ? mc.options.keyUse
+                            list.add(new TranslatableComponent("item.tooltip.pickup.keybind", ItemPhysicClient.PICKUP.isUnbound() ? mc.options.keyUse
                                     .getTranslatedKeyMessage() : ItemPhysicClient.PICKUP.getTranslatedKeyMessage()));
                         
                         int width = 0;
@@ -140,10 +142,11 @@ public class ItemPhysicClient {
                         RenderSystem.disableBlend();
                         //RenderSystem.enableAlphaTest();
                         RenderSystem.enableTexture();
+                        PoseStack pose = new PoseStack();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            graphics.drawString(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX,
-                                mc.getWindow().getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY, 16579836);
+                            mc.font.drawShadow(pose, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX, mc
+                                    .getWindow().getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY, 16579836);
                         }
                         
                     }
@@ -158,13 +161,13 @@ public class ItemPhysicClient {
                         renderPower = 1;
                     if (renderPower > 6)
                         renderPower = 6;
-                    mc.player.displayClientMessage(Component.translatable("item.throw", renderPower), true);
+                    mc.player.displayClientMessage(new TranslatableComponent("item.throw", renderPower), true);
                 }
             }
         }
     }
     
-    public static boolean render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight, ItemRenderer itemRenderer, RandomSource rand) {
+    public static boolean render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight, ItemRenderer itemRenderer, Random rand) {
         if (entity.getAge() == 0 || ((ItemEntityRendering) entity).skipRendering() || ItemPhysic.CONFIG.rendering.vanillaRendering)
             return false;
         

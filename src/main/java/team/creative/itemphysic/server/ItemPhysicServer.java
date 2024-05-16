@@ -1,5 +1,7 @@
 package team.creative.itemphysic.server;
 
+import java.util.Random;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
@@ -7,7 +9,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -41,7 +42,7 @@ public class ItemPhysicServer {
         }
     }
     
-    public static void updatePre(ItemEntity item, RandomSource rand) {
+    public static void updatePre(ItemEntity item, Random rand) {
         ItemStack stack = item.getItem();
         fluid.set(CommonPhysic.getFluid(item));
         if (fluid.get() == null) {
@@ -65,9 +66,9 @@ public class ItemPhysicServer {
         if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
             item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
             for (int i = 0; i < 100; i++)
-                item.level().addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item.getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand
+                item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item.getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand
                         .nextFloat() * 0.1) - 0.05);
-            item.hurt(item.damageSources().onFire(), 3);
+            item.hurt(DamageSource.ON_FIRE, 3);
         }
         
     }
@@ -231,7 +232,7 @@ public class ItemPhysicServer {
         if ((source == DamageSource.LAVA || source == DamageSource.ON_FIRE || source == DamageSource.IN_FIRE) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
             return false;
         
-        if (ItemPhysic.CONFIG.general.disableCactusDamage && source == item.damageSources().cactus())
+        if (ItemPhysic.CONFIG.general.disableCactusDamage && source == DamageSource.CACTUS)
             return false;
         
         return true;

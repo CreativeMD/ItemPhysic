@@ -1,5 +1,7 @@
 package team.creative.itemphysic.mixin;
 
+import java.util.Random;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -14,7 +16,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import team.creative.itemphysic.client.ItemPhysicClient;
 
@@ -27,14 +28,14 @@ public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity>
     
     @Shadow
     @Final
-    private RandomSource random;
+    private Random random;
     
     protected ItemEntityRendererMixin(EntityRendererProvider.Context context) {
         super(context);
     }
     
     @Inject(method = "render(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-            at = @At("HEAD"), cancellable = true)
+            at = @At("HEAD"), cancellable = true, require = 1)
     private void onRender(ItemEntity itemEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
         if (ItemPhysicClient.render(itemEntity, f, g, poseStack, multiBufferSource, i, this.itemRenderer, this.random)) {
             super.render(itemEntity, f, g, poseStack, multiBufferSource, i);

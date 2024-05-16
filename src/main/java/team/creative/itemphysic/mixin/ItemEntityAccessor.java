@@ -10,7 +10,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 @Mixin(ItemEntity.class)
 public interface ItemEntityAccessor {
     
-    @Accessor
+    @Accessor("owner")
     public UUID getTarget();
     
 }

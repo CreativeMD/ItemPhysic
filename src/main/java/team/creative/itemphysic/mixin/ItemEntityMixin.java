@@ -33,7 +33,7 @@ public abstract class ItemEntityMixin extends Entity {
         super(p_19870_, p_19871_);
     }
     
-    @Inject(at = @At("HEAD"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", cancellable = true, require = 1)
     public void hurtInject(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
         if (!ItemPhysicServer.hurt((ItemEntity) (Object) this, source, amount))
             callback.setReturnValue(false);
@@ -55,13 +55,13 @@ public abstract class ItemEntityMixin extends Entity {
         return ItemPhysicServer.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
     }
     
-    @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true, require = 1)
     public void playerTouchInject(Player player, CallbackInfo info) {
         if (ItemPhysicServer.playerTouch((ItemEntity) (Object) this, player))
             info.cancel();
     }
     
-    @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true, require = 1)
     public void fireImmuneInject(CallbackInfoReturnable<Boolean> info) {
         if (ItemPhysicServer.fireImmune((ItemEntity) (Object) this))
             info.setReturnValue(true);
