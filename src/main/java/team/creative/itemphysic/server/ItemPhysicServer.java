@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -18,6 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -68,7 +68,7 @@ public class ItemPhysicServer {
             for (int i = 0; i < 100; i++)
                 item.level.addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item
                         .getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand.nextFloat() * 0.1) - 0.05);
-            item.hurt(item.damageSources().onFire(), 3);
+            item.hurt(DamageSource.ON_FIRE, 3);
         }
         
     }
@@ -147,7 +147,7 @@ public class ItemPhysicServer {
     public static void update(ItemEntity item) {
         float f = 0.98F;
         if (item.isOnGround())
-            f = item.level.getBlockState(BlockPos.containing(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
+            f = item.level.getBlockState(new BlockPos(item.getX(), item.getY() - 1.0D, item.getZ())).getBlock().getFriction() * 0.98F;
         
         if (fluid.get() == null) {
             item.setDeltaMovement(item.getDeltaMovement().multiply(f, 0.98D, f));
@@ -166,14 +166,16 @@ public class ItemPhysicServer {
     }
     
     public static boolean playerTouch(ItemEntity item, Player player) {
-        if (ItemPhysic.CONFIG.pickup.customPickup && (!player.isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally)
+        if (ItemPhysic.CONFIG.pickup.customPickup && (!player.isDiscrete()) || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking)
             return true;
         if (item.level.isClientSide || item.hasPickUpDelay())
             return true;
         return false;
     }
     
-    public static void playerPickup(ItemEntity entity, Player player) {
+    public static void playerTouch(ItemEntity entity, Player player, boolean needsSneak) {
+        if (ItemPhysic.CONFIG.pickup.customPickup && needsSneak && (!player.isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking))
+            return;
         if (!entity.level.isClientSide) {
             if (!ItemPhysic.CONFIG.pickup.customPickup && entity.hasPickUpDelay())
                 return;
@@ -187,8 +189,8 @@ public class ItemPhysicServer {
             
             ItemStack copy = itemstack.copy();
             if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (entity
-                    .getOwner() == null || CreativeCore.utils().getLifeSpan(entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity
-                            .getOwner() == player) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
+                    .getOwner() == null || CreativeCore.utils().getLifeSpan(entity) - ((ItemEntityPhysic) entity).age() <= 200 || entity.getOwner()
+                            .equals(player.getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                 copy.setCount(copy.getCount() - entity.getItem().getCount());
                 CreativeCore.utils().firePlayerItemPickupEvent(player, entity, copy);
                 player.take(entity, i);
@@ -206,7 +208,7 @@ public class ItemPhysicServer {
     
     public static InteractionResult interact(ItemEntity item, Player player, InteractionHand hand) {
         if (ItemPhysic.CONFIG.pickup.customPickup) {
-            playerPickup(item, player);
+            playerTouch(item, player, false);
             return InteractionResult.CONSUME;
         }
         return InteractionResult.PASS;
@@ -222,18 +224,24 @@ public class ItemPhysicServer {
         if (!item.getItem().isEmpty() && ItemPhysic.CONFIG.general.undestroyableItems.canPass(item.getItem()))
             return false;
         
-        if (!item.getItem().isEmpty() && item.getItem().getItem() == Items.NETHER_STAR && source.is(DamageTypeTags.IS_EXPLOSION))
+        if (!item.getItem().isEmpty() && item.getItem().getItem() == Items.NETHER_STAR && source.isExplosion())
             return false;
         
         if (!item.getItem().getItem().canBeHurtBy(source))
             return false;
-        if ((source.is(DamageTypeTags.IS_FIRE) || source == item.damageSources().lava() || source == item.damageSources().onFire() || source == item.damageSources()
-                .inFire()) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
+        if ((source == DamageSource.LAVA || source == DamageSource.ON_FIRE || source == DamageSource.IN_FIRE) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
             return false;
         
-        if (source == item.damageSources().cactus())
+        if (source == DamageSource.CACTUS)
             return false;
         
+        ((ItemEntityPhysic) item).hurted();
+        ((ItemEntityPhysic) item).health((int) (((ItemEntityPhysic) item).health() - amount));
+        item.gameEvent(GameEvent.ENTITY_DAMAGE, source.getEntity());
+        if (((ItemEntityPhysic) item).health() <= 0) {
+            item.getItem().onDestroyed(item);
+            item.discard();
+        }
         return true;
     }
     

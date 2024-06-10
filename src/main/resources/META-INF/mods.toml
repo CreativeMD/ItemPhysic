@@ -1,34 +1,20 @@
 modLoader="javafml"
-loaderVersion="${loader_version_range}"
-issueTrackerURL="https://github.com/${github_project}/issues"
-license="${mod_license}"
+loaderVersion="[24,)"
+issueTrackerURL="https://github.com/CreativeMD/ItemPhysic/issues"
+logoFile="itemphysic.png"
+license="GNU General Public License v3.0"
 
 [[mods]]
-    modId="${mod_id}"
-    logoFile="${mod_id}.png"
-    version="${mod_version}"
-    displayName="${mod_name}"
-    displayURL="${mod_display_url}"
-    authors="${mod_authors}"
-    description='''${mod_description}'''
-    
-[[dependencies.${mod_id}]]
-    modId="forge"
-    mandatory=true
-    versionRange="${forge_version_range}"
-    ordering="NONE"
-    side="BOTH"
-
-[[dependencies.${mod_id}]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="${minecraft_version_range}"
-    ordering="NONE"
-    side="BOTH"
-    
-[[dependencies.${mod_id}]]
-    modId="creativecore"
-    mandatory=true
-    ordering="NONE"
-    side="BOTH"
-    versionRange="${creativecore_version}"
+	modId="itemphysic"
+	version="${file.jarVersion}"
+	displayName="ItemPhysic"
+	displayURL="https://www.curseforge.com/minecraft/mc-mods/itemphysic"
+	authors=["CreativeMD"]
+	description='''Enhances the rendering of items and introduces some more physics'''
+	
+[[dependencies.itemphysic]]
+	modId="creativecore"
+	mandatory=true
+	ordering="NONE"
+	side="BOTH"
+	versionRange="[2.7.0,)"

@@ -1,6 +1,7 @@
 package team.creative.itemphysic.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -45,14 +46,36 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
     }
     
     @Override
+    public void hurted() {
+        markHurt();
+    }
+    
+    @Override
     public int age() {
         return age;
     }
     
-    @Inject(at = @At("HEAD"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", cancellable = true)
-    public void hurtInject(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
-        if (!ItemPhysicServer.hurt((ItemEntity) (Object) this, source, amount))
-            callback.setReturnValue(false);
+    @Override
+    public void age(int age) {
+        this.age = age;
+    }
+    
+    @Override
+    public int health() {
+        return health;
+    }
+    
+    @Override
+    public void health(int health) {
+        this.health = health;
+    }
+    
+    /** @reason behavior will be overwritten
+     * @author CreativeMD */
+    @Override
+    @Overwrite
+    public boolean hurt(DamageSource source, float value) {
+        return ItemPhysicServer.hurt((ItemEntity) (Object) this, source, value);
     }
     
     @Override
@@ -71,13 +94,13 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
         return ItemPhysicServer.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
     }
     
-    @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true, require = 1)
+    @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true)
     public void playerTouchInject(Player player, CallbackInfo info) {
         if (ItemPhysicServer.playerTouch((ItemEntity) (Object) this, player))
             info.cancel();
     }
     
-    @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true, require = 1)
+    @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true)
     public void fireImmuneInject(CallbackInfoReturnable<Boolean> info) {
         if (ItemPhysicServer.fireImmune((ItemEntity) (Object) this))
             info.setReturnValue(true);
@@ -103,8 +126,7 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityPhysic
         return true;
     }
     
-    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1),
-            require = 1)
+    @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1))
     public void update(CallbackInfo info) {
         ItemPhysicServer.update((ItemEntity) (Object) this);
     }
