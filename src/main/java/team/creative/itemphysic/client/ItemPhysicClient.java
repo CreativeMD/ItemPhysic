@@ -63,7 +63,7 @@ public class ItemPhysicClient {
         loader.registerKeybind(() -> PICKUP);
         
         loader.registerClientTick(ItemPhysicClient::gameTick);
-        loader.registerClientRender(ItemPhysicClient::renderTick);
+        loader.registerClientRenderStart(ItemPhysicClient::renderTick);
         CreativeCoreClient.registerClientConfig(ItemPhysic.MODID);
     }
     
