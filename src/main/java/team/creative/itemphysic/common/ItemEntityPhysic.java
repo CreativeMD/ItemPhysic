@@ -6,4 +6,12 @@ public interface ItemEntityPhysic {
     
     public int age();
     
+    public void age(int age);
+    
+    public int health();
+    
+    public void health(int health);
+    
+    public void hurted();
+    
 }

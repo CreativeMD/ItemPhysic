@@ -12,7 +12,7 @@ import team.creative.itemphysic.client.ItemPhysicClient;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
     
-    @Inject(method = "startUseItem()V", at = @At("TAIL"), require = 1)
+    @Inject(method = "startUseItem()V", at = @At("TAIL"))
     public void rightClickEmpty(CallbackInfo info) {
         HitResult result = ((Minecraft) (Object) this).hitResult;
         if (result == null || result.getType() == HitResult.Type.MISS)

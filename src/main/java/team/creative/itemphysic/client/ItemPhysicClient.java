@@ -6,6 +6,7 @@ import java.util.List;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,6 +14,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
@@ -26,7 +28,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -62,7 +63,7 @@ public class ItemPhysicClient {
         loader.registerKeybind(() -> PICKUP);
         
         loader.registerClientTick(ItemPhysicClient::gameTick);
-        loader.registerClientRenderGui(ItemPhysicClient::renderTick);
+        loader.registerClientRenderStart(ItemPhysicClient::renderTick);
         CreativeCoreClient.registerClientConfig(ItemPhysic.MODID);
     }
     
@@ -133,6 +134,8 @@ public class ItemPhysicClient {
                         }
                         
                         RenderSystem.disableBlend();
+                        //RenderSystem.enableAlphaTest();
+                        RenderSystem.enableTexture();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
                             mc.font.drawShadow(new PoseStack(), text, mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2, mc.getWindow()
@@ -176,8 +179,8 @@ public class ItemPhysicClient {
         if (motionMultiplier != null && motionMultiplier.lengthSqr() > 0)
             rotateBy *= motionMultiplier.x * 0.2;
         
-        pose.mulPose(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
-        pose.mulPose(com.mojang.math.Axis.ZP.rotation(entity.getYRot()));
+        pose.mulPose(Vector3f.XP.rotation((float) Math.PI / 2));
+        pose.mulPose(Vector3f.ZP.rotation(entity.getYRot()));
         
         boolean applyEffects = entity.getAge() != 0 && (flag || mc.options != null);
         
@@ -253,7 +256,7 @@ public class ItemPhysicClient {
             double height = 0.2;
             if (flag)
                 pose.translate(0, height, 0);
-            pose.mulPose(com.mojang.math.Axis.YP.rotation(entity.getXRot()));
+            pose.mulPose(Vector3f.YP.rotation(entity.getXRot()));
             if (flag)
                 pose.translate(0, -height, 0);
         }
@@ -276,7 +279,7 @@ public class ItemPhysicClient {
                 }
             }
             
-            itemRenderer.render(itemstack, ItemDisplayContext.GROUND, false, pose, buffer, packedLight, OverlayTexture.NO_OVERLAY, bakedmodel);
+            itemRenderer.render(itemstack, ItemTransforms.TransformType.GROUND, false, pose, buffer, packedLight, OverlayTexture.NO_OVERLAY, bakedmodel);
             pose.popPose();
             if (!flag)
                 pose.translate(0.0, 0.0, 0.09375F); // pose.translate(0.0, 0.0, 0.05375F);
