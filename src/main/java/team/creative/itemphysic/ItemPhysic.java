@@ -21,7 +21,7 @@ public class ItemPhysic implements ClientLoader, CommonLoader {
     
     public static final Logger LOGGER = LogManager.getLogger(ItemPhysic.MODID);
     public static final String MODID = "itemphysic";
-    public static final CreativeNetwork NETWORK = new CreativeNetwork(1, LOGGER, new ResourceLocation(ItemPhysic.MODID, "main"));
+    public static final CreativeNetwork NETWORK = new CreativeNetwork(1, LOGGER, ResourceLocation.tryBuild(ItemPhysic.MODID, "main"));
     public static ItemPhysicConfig CONFIG;
     
     public ItemPhysic() {

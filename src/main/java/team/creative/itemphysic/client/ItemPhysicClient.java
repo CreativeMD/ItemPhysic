@@ -332,7 +332,7 @@ public class ItemPhysicClient {
     
     public static HitResult getEntityItem(Player player) {
         double distance = CommonPhysic.getReachDistance(player);
-        float partialTicks = mc.getDeltaFrameTime();
+        float partialTicks = mc.getTimer().getGameTimeDeltaPartialTick(false);
         Vec3 position = player.getEyePosition(partialTicks);
         Vec3 view = player.getViewVector(partialTicks);
         if (mc.hitResult != null && mc.hitResult.getType() != Type.MISS)
