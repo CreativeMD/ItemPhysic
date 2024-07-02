@@ -43,7 +43,6 @@ public class ItemPhysicServer {
     }
     
     public static void updatePre(ItemEntity item, RandomSource rand) {
-        ItemStack stack = item.getItem();
         fluid.set(CommonPhysic.getFluid(item));
         if (fluid.get() == null) {
             if (!item.isNoGravity())
@@ -52,7 +51,7 @@ public class ItemPhysicServer {
         }
         
         double force = -0.02D / CommonPhysic.getViscosity(fluid.get(), item.level());
-        if (ItemPhysic.CONFIG.general.swimmingItems.canPass(stack) && !fluid.get().is(FluidTags.LAVA)) {
+        if (((ItemEntityExtender) item).canSwim() && !fluid.get().is(FluidTags.LAVA)) {
             double maxSpeed = 0.1;
             if (item.getDeltaMovement().y < maxSpeed)
                 force = Math.min(0.04, maxSpeed - item.getDeltaMovement().y);
@@ -63,7 +62,7 @@ public class ItemPhysicServer {
         item.setDeltaMovement(item.getDeltaMovement().add(0, force, 0));
         
         float f = item.getEyeHeight() - 0.11111111F;
-        if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem())) {
+        if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ((ItemEntityExtender) item).canBurn()) {
             item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
             for (int i = 0; i < 100; i++)
                 item.level().addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item.getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand
@@ -75,7 +74,7 @@ public class ItemPhysicServer {
     
     public static boolean updateFluidHeightAndDoFluidPushing(ItemEntity item, TagKey<Fluid> fluidTag, double p_210500_2_) {
         double size = -0.001D;
-        if (fluidTag == FluidTags.WATER && ItemPhysic.CONFIG.general.swimmingItems.canPass(item.getItem()))
+        if (fluidTag == FluidTags.WATER && ((ItemEntityExtender) item).canSwim())
             size = 0.3;
         
         if (item.touchingUnloadedChunk()) {
@@ -141,7 +140,7 @@ public class ItemPhysicServer {
     }
     
     public static boolean fireImmune(ItemEntity item) {
-        return !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem());
+        return !((ItemEntityExtender) item).canBurn();
     }
     
     public static void update(ItemEntity item) {
@@ -230,7 +229,7 @@ public class ItemPhysicServer {
         if (!item.getItem().getItem().canBeHurtBy(source))
             return false;
         if ((source.is(DamageTypeTags.IS_FIRE) || source == item.damageSources().lava() || source == item.damageSources().onFire() || source == item.damageSources()
-                .inFire()) && !ItemPhysic.CONFIG.general.burningItems.canPass(item.getItem()))
+                .inFire()) && !((ItemEntityExtender) item).canBurn())
             return false;
         
         if (ItemPhysic.CONFIG.general.disableCactusDamage && source == item.damageSources().cactus())
