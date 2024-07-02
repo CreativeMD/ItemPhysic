@@ -2,6 +2,7 @@ package team.creative.itemphysic.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -9,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,13 +23,21 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
+import team.creative.itemphysic.ItemPhysic;
+import team.creative.itemphysic.server.ItemEntityExtender;
 import team.creative.itemphysic.server.ItemPhysicServer;
 
 @Mixin(ItemEntity.class)
-public abstract class ItemEntityMixin extends Entity {
+public abstract class ItemEntityMixin extends Entity implements ItemEntityExtender {
     
     @Shadow
     public int health;
+    
+    @Unique
+    private boolean swim;
+    
+    @Unique
+    private boolean burn;
     
     private ItemEntityMixin(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
@@ -94,5 +104,22 @@ public abstract class ItemEntityMixin extends Entity {
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"),
             require = 2)
     public void setDeltaMovementRedirect(ItemEntity entity, Vec3 vec) {}
+    
+    @Inject(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"), require = 1)
+    private void onSyncedDataUpdated(EntityDataAccessor<?> accessor, CallbackInfo callback) {
+        swim = ItemPhysic.CONFIG.general.swimmingItems.canPass(((ItemEntity) (Entity) this).getItem());
+        burn = ItemPhysic.CONFIG.general.burningItems.canPass(((ItemEntity) (Entity) this).getItem());
+    }
+    
+    @Override
+    public boolean canBurn() {
+        return burn;
+    }
+    
+    @Override
+    public boolean canSwim() {
+        return swim;
+    }
     
 }
