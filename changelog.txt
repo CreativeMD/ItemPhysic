@@ -1,3 +1,7 @@
+1.7.2
+Added blockRequireOffset and blockBelowRequireOffset configuration
+Adapted CreativeCore 2.12.0 changes
+
 1.7.1
 Added tooltipOffsetX and tooltipOffsetY to configure a custom offset for the tooltip
 Added random offset to items laying on the ground (used vanilla's bobOffs)
