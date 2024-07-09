@@ -32,7 +32,6 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -250,8 +249,8 @@ public class ItemPhysicClient {
             
             if (flag)
                 pose.translate(0, -0.2, -0.08);
-            else if (entity.level().getBlockState(entity.blockPosition()).getBlock() == Blocks.SNOW || entity.level().getBlockState(entity.blockPosition().below())
-                    .getBlock() == Blocks.SOUL_SAND)
+            else if (ItemPhysic.CONFIG.rendering.blockRequireOffset.is(entity.level().getBlockState(entity.blockPosition())) || ItemPhysic.CONFIG.rendering.blockBelowRequireOffset
+                    .is(entity.level().getBlockState(entity.blockPosition().below())))
                 pose.translate(0, 0.0, -0.14 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
             else
                 pose.translate(0, 0, -0.04 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
