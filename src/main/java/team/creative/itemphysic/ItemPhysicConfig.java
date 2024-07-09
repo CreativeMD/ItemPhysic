@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.Blocks;
 import team.creative.creativecore.common.config.api.CreativeConfig;
 import team.creative.creativecore.common.config.sync.ConfigSynchronization;
 import team.creative.creativecore.common.util.ingredient.CreativeIngredientFuel;
+import team.creative.creativecore.common.util.type.list.SortingBlockList;
 import team.creative.creativecore.common.util.type.list.SortingList;
 
 public class ItemPhysicConfig {
@@ -101,6 +102,12 @@ public class ItemPhysicConfig {
         public int tooltipOffsetX = 0;
         @CreativeConfig
         public int tooltipOffsetY = 0;
+        
+        @CreativeConfig
+        public SortingBlockList blockRequireOffset = new SortingBlockList().add(Blocks.SNOW).add(Blocks.SOUL_SAND);
+        
+        @CreativeConfig
+        public SortingBlockList blockBelowRequireOffset = new SortingBlockList();
         
     }
     
