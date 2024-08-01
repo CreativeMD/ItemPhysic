@@ -1,0 +1,5 @@
+{
+    "key.pickup.item": "撿起物品",
+    "item.tooltip.pickup.keybind": "按下「%s」撿起",
+    "item.throw": "力量： %s"
+}
