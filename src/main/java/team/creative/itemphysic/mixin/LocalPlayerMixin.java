@@ -13,7 +13,7 @@ public class LocalPlayerMixin {
     
     @Inject(method = "drop(Z)Z", at = @At("HEAD"), cancellable = true, require = 1)
     public void drop(boolean all, CallbackInfoReturnable<Boolean> info) {
-        if (ItemPhysic.CONFIG.general.customThrow)
+        if (ItemPhysic.CONFIG.throwConfig.enabled)
             info.setReturnValue(true);
     }
     

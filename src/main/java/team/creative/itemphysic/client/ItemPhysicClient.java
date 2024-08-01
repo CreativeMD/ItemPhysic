@@ -17,10 +17,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -54,7 +51,7 @@ public class ItemPhysicClient {
     
     public static final KeyMapping PICKUP = new KeyMapping("key.pickup.item", InputConstants.UNKNOWN.getValue(), "key.categories.gameplay");
     public static final Minecraft mc = Minecraft.getInstance();
-    public static int throwingPower;
+    public static int throwCharge;
     public static long lastTickTime;
     private static final double RANDOM_Y_OFFSET_SCALE = 0.05 / (Math.PI * 2);
     
@@ -67,30 +64,24 @@ public class ItemPhysicClient {
         CreativeCoreClient.registerClientConfig(ItemPhysic.MODID);
     }
     
+    public static int getChargeStage() {
+        return Math.min(1 + throwCharge / ItemPhysic.CONFIG.throwConfig.stageChargeTime, ItemPhysic.CONFIG.throwConfig.maxStages);
+    }
+    
     public static void gameTick() {
-        if (mc.player != null && mc.player.getMainHandItem() != null) {
-            if (ItemPhysic.CONFIG.general.customThrow) {
-                if (mc.options.keyDrop.isDown())
-                    throwingPower++;
-                else {
-                    if (throwingPower > 0) {
-                        throwingPower /= 6;
-                        if (throwingPower < 1)
-                            throwingPower = 1;
-                        if (throwingPower > 6)
-                            throwingPower = 6;
-                        
-                        boolean dropAll = Screen.hasControlDown();
-                        
-                        ItemPhysic.NETWORK.sendToServer(new DropPacket(throwingPower));
-                        ServerboundPlayerActionPacket.Action cplayerdiggingpacket$action = dropAll ? ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS : ServerboundPlayerActionPacket.Action.DROP_ITEM;
-                        mc.player.connection.send(new ServerboundPlayerActionPacket(cplayerdiggingpacket$action, BlockPos.ZERO, Direction.DOWN));
-                        if (mc.player.getInventory().removeItem(mc.player.getInventory().selected, dropAll && !mc.player.getInventory().getSelected().isEmpty() ? mc.player
-                                .getInventory().getSelected().getCount() : 1) != ItemStack.EMPTY)
-                            mc.player.swing(InteractionHand.MAIN_HAND);
-                    }
-                    throwingPower = 0;
+        if (mc.player != null && !mc.player.getMainHandItem().isEmpty() && ItemPhysic.CONFIG.throwConfig.enabled) {
+            if (mc.options.keyDrop.isDown())
+                throwCharge++;
+            else {
+                if (throwCharge > 0) {
+                    boolean dropAll = Screen.hasControlDown();
+                    
+                    ItemPhysic.NETWORK.sendToServer(new DropPacket(Screen.hasControlDown(), getChargeStage()));
+                    if (mc.player.getInventory().removeItem(mc.player.getInventory().selected, dropAll && !mc.player.getInventory().getSelected().isEmpty() ? mc.player
+                            .getInventory().getSelected().getCount() : 1) != ItemStack.EMPTY)
+                        mc.player.swing(InteractionHand.MAIN_HAND);
                 }
+                throwCharge = 0;
             }
         }
     }
@@ -148,17 +139,8 @@ public class ItemPhysicClient {
                 }
             }
             
-            if (ItemPhysic.CONFIG.general.customThrow && !ItemPhysic.CONFIG.rendering.disableThrowHUD) {
-                if (throwingPower > 0) {
-                    int renderPower = throwingPower;
-                    renderPower /= 6;
-                    if (renderPower < 1)
-                        renderPower = 1;
-                    if (renderPower > 6)
-                        renderPower = 6;
-                    mc.player.displayClientMessage(Component.translatable("item.throw", renderPower), true);
-                }
-            }
+            if (ItemPhysic.CONFIG.throwConfig.enabled && !ItemPhysic.CONFIG.rendering.disableThrowHUD && throwCharge > 0)
+                mc.player.displayClientMessage(Component.translatable("item.throw", getChargeStage()), true);
         }
     }
     
