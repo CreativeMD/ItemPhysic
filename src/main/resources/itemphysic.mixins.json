@@ -8,7 +8,6 @@
     "mixins": [
         "ItemEntityAccessor",
         "ItemEntityMixin",
-        "PlayerMixin",
         "EntityAccessor"
     ],
     "client": [

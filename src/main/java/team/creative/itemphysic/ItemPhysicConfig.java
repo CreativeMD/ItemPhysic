@@ -17,11 +17,10 @@ public class ItemPhysicConfig {
     public Pickup pickup = new Pickup();
     @CreativeConfig(type = ConfigSynchronization.CLIENT)
     public Rendering rendering = new Rendering();
+    @CreativeConfig(name = "throw")
+    public Throw throwConfig = new Throw();
     
     public static class General {
-        
-        @CreativeConfig
-        public boolean customThrow = true;
         
         @CreativeConfig
         public boolean fallSounds = true;
@@ -108,6 +107,23 @@ public class ItemPhysicConfig {
         
         @CreativeConfig
         public SortingBlockList blockBelowRequireOffset = new SortingBlockList();
+        
+    }
+    
+    public static class Throw {
+        
+        @CreativeConfig
+        public boolean enabled = true;
+        
+        @CreativeConfig
+        @CreativeConfig.IntRange(min = 1, max = 20)
+        public int maxStages = 6;
+        
+        @CreativeConfig
+        public double multiplierPerStage = 1;
+        
+        @CreativeConfig
+        public int stageChargeTime = 10;
         
     }
     

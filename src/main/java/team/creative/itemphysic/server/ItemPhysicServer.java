@@ -31,16 +31,8 @@ import team.creative.itemphysic.mixin.ItemEntityAccessor;
 public class ItemPhysicServer {
     
     public static final ThreadLocal<Fluid> fluid = new ThreadLocal<>();
-    public static int tempDroppower = 1;
     
     public static void init() {}
-    
-    public static void drop(ItemEntity item) {
-        if (ItemPhysic.CONFIG.general.customThrow) {
-            item.setDeltaMovement(item.getDeltaMovement().scale(ItemPhysicServer.tempDroppower));
-            ItemPhysicServer.tempDroppower = 1;
-        }
-    }
     
     public static void updatePre(ItemEntity item, RandomSource rand) {
         fluid.set(CommonPhysic.getFluid(item));
