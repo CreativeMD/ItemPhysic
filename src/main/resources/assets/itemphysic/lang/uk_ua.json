@@ -1,0 +1,5 @@
+{
+    "key.pickup.item": "Підняти предмет",
+    "item.tooltip.pickup.keybind": "Натисніть '%s', щоб підняти",
+    "item.throw": "Потужність: %s"
+}
