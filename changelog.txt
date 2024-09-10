@@ -1,3 +1,7 @@
+1.8.1
+Added uk_ua.json (Thanks to Tarteroycc)
+Added zh_tw.json (Thanks to yichifauzi)
+
 1.8.0
 Reworked custom throw
 
