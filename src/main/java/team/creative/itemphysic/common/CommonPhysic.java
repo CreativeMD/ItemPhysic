@@ -67,7 +67,7 @@ public class CommonPhysic {
         for (int i = 0; i < list.size(); ++i) {
             Entity entity = (Entity) list.get(i);
             if (entity instanceof ItemEntity) {
-                AABB axisalignedbb = entity.getBoundingBox().inflate(0.2);
+                AABB axisalignedbb = entity.getBoundingBox().inflate(ItemPhysic.CONFIG.pickup.hitboxIncrease);
                 Optional<Vec3> vec = axisalignedbb.clip(position, look);
                 if (vec.isPresent())
                     return new EntityHitResult(entity, vec.get());
