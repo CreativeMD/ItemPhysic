@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
     "id": "itemphysic",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "name": "ItemPhysic",
     "description": "Enhances the rendering of items and introduces some more physics.",
     "authors": [
