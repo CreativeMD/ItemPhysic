@@ -71,6 +71,9 @@ public class ItemPhysicConfig {
         public boolean pickupNormally = false;
         @CreativeConfig
         public float maximumPickupRange = 5;
+        @CreativeConfig
+        @CreativeConfig.DecimalRange(min = 0, max = 1)
+        public double hitboxIncrease = 0.2;
         
         @CreativeConfig
         public SortingList alwaysPickup = new SortingList();
