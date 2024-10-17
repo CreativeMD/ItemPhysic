@@ -6,7 +6,7 @@ license="LGPL-3.0-only"
 [[mods]]
     modId="itemphysic"
     logoFile="itemphysic.png"
-    version="1.8.1"
+    version="1.8.2"
     displayName="ItemPhysic"
     displayURL="https://modrinth.com/mod/itemphysic"
     authors="CreativeMD"
