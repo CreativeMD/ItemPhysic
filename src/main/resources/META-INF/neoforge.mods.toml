@@ -31,7 +31,7 @@ license="LGPL-3.0-only"
    type="required"
    ordering="NONE"
    side="BOTH"
-   versionRange="[2.12.0,)"
+   versionRange="[2.12.19,)"
 
 [[mixins]]
    config="itemphysic.mixins.json"
