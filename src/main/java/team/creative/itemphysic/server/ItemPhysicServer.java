@@ -175,15 +175,17 @@ public class ItemPhysicServer {
             int i = itemstack.getCount();
             
             int hook = CreativeCore.utils().fireItemPickupPre(entity, player);
-            if (hook < 0)
+            if (hook == 2)
                 return;
             
             ItemStack copy = itemstack.copy();
             ItemEntityAccessor ie = (ItemEntityAccessor) entity;
-            if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (ie.getTarget() == null || ie.getTarget().equals(player
-                    .getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
-                copy.setCount(copy.getCount() - entity.getItem().getCount());
+            if ((hook == 0 || !entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (ie.getTarget() == null || ie.getTarget().equals(player.getUUID())) && player
+                    .getInventory().add(itemstack)) {
+                
+                i = copy.getCount() - itemstack.getCount();
                 CreativeCore.utils().fireItemPickupPost(entity, player, copy);
+                
                 player.take(entity, i);
                 if (itemstack.isEmpty()) {
                     entity.discard();
