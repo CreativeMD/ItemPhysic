@@ -70,7 +70,7 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public boolean pickupNormally = false;
         @CreativeConfig
-        public float maximumPickupRange = 5;
+        public double maximumPickupRange = 5;
         @CreativeConfig
         @CreativeConfig.DecimalRange(min = 0, max = 1)
         public double hitboxIncrease = 0.2;
