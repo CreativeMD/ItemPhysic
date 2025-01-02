@@ -106,7 +106,7 @@ public class ItemPhysicConfig {
         public int tooltipOffsetY = 0;
         
         @CreativeConfig
-        public SortingBlockList blockRequireOffset = new SortingBlockList().add(Blocks.SNOW).add(Blocks.SOUL_SAND);
+        public SortingBlockList blockRequireOffset = new SortingBlockList().add(Blocks.SNOW).add(Blocks.SOUL_SAND).add(Blocks.MUD);
         
         @CreativeConfig
         public SortingBlockList blockBelowRequireOffset = new SortingBlockList();
