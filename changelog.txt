@@ -1,3 +1,6 @@
+1.8.4
+Added mud to blocks require offset to prevent the item from being invisible
+
 1.8.3
 Fixed customPickup not working probably (neoforge)
 
