@@ -1,4 +1,5 @@
 {
-	"key.pickup.item": "아이템 픽업",
-	"item.throw": "힘: %s"
+    "key.pickup.item": "아이템 줍기",
+    "item.tooltip.pickup.keybind": "'%s'를 눌러 줍기",
+    "item.throw": "힘: %s"
 }
