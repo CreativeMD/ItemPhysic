@@ -31,7 +31,7 @@ public abstract class ItemEntityMixinClient extends Entity implements ItemEntity
             target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"), require = 1)
     private void onSyncedDataUpdated(EntityDataAccessor<?> accessor, CallbackInfo callback) {
         if (level().isClientSide)
-            skipPhysicRenderer = ItemPhysic.CONFIG.rendering.vanillaRendered.canPass(((ItemEntity) (Entity) this).getItem());
+            skipPhysicRenderer = ItemPhysic.CONFIG.rendering.vanillaRendered.canPass(level(), ((ItemEntity) (Entity) this).getItem());
     }
     
 }

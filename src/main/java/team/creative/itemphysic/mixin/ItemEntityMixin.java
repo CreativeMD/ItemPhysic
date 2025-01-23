@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,7 +25,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import team.creative.itemphysic.ItemPhysic;
-import team.creative.itemphysic.server.ItemEntityExtender;
+import team.creative.itemphysic.common.CommonPhysic;
+import team.creative.itemphysic.common.ItemEntityExtender;
 import team.creative.itemphysic.server.ItemPhysicServer;
 
 @Mixin(ItemEntity.class)
@@ -38,6 +40,9 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     
     @Unique
     private boolean burn;
+    
+    @Unique
+    private Fluid fluid;
     
     private ItemEntityMixin(EntityType<?> p_19870_, Level p_19871_) {
         super(p_19870_, p_19871_);
@@ -56,13 +61,15 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     
     @Override
     protected void checkFallDamage(double height, boolean fall, BlockState state, BlockPos pos) {
-        ItemPhysicServer.checkFallDamage((ItemEntity) (Object) this, height, fall, state, pos);
+        var item = (ItemEntity) (Object) this;
+        if (fall && item.fallDistance > 0.0F && ItemPhysic.CONFIG.general.fallSounds)
+            item.playSound(SoundEvents.WOOL_FALL, Math.min(1, item.fallDistance / 10), (float) Math.random() * 1F + 1);
         super.checkFallDamage(height, fall, state, pos);
     }
     
     @Override
     public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> fluid, double p_204033_) {
-        return ItemPhysicServer.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
+        return CommonPhysic.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
     }
     
     @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true, require = 1)
@@ -73,13 +80,13 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     
     @Inject(method = "fireImmune()Z", at = @At("HEAD"), cancellable = true, require = 1)
     public void fireImmuneInject(CallbackInfoReturnable<Boolean> info) {
-        if (ItemPhysicServer.fireImmune((ItemEntity) (Object) this))
+        if (CommonPhysic.fireImmune((ItemEntity) (Object) this))
             info.setReturnValue(true);
     }
     
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInWater()Z"), require = 1)
     public void updatePre(CallbackInfo info) {
-        ItemPhysicServer.updatePre((ItemEntity) (Object) this, random);
+        CommonPhysic.updatePre((ItemEntity) (Object) this, random);
     }
     
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;isInWater()Z"), require = 1)
@@ -98,7 +105,7 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 0),
             require = 1)
     public void update(CallbackInfo info) {
-        ItemPhysicServer.update((ItemEntity) (Object) this);
+        CommonPhysic.update((ItemEntity) (Object) this);
     }
     
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"),
@@ -108,8 +115,8 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     @Inject(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"), require = 1)
     private void onSyncedDataUpdated(EntityDataAccessor<?> accessor, CallbackInfo callback) {
-        swim = ItemPhysic.CONFIG.general.swimmingItems.canPass(((ItemEntity) (Entity) this).getItem());
-        burn = ItemPhysic.CONFIG.general.burningItems.canPass(((ItemEntity) (Entity) this).getItem());
+        swim = ItemPhysic.CONFIG.general.swimmingItems.canPass(level(), ((ItemEntity) (Entity) this).getItem());
+        burn = ItemPhysic.CONFIG.general.burningItems.canPass(level(), ((ItemEntity) (Entity) this).getItem());
     }
     
     @Override
@@ -122,4 +129,13 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
         return swim;
     }
     
+    @Override
+    public Fluid getFluid() {
+        return fluid;
+    }
+    
+    @Override
+    public void setFluid(Fluid fluid) {
+        this.fluid = fluid;
+    }
 }

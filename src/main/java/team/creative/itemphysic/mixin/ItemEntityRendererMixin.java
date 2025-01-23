@@ -13,17 +13,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
+import team.creative.itemphysic.client.ItemEntityRenderStateExtender;
 import team.creative.itemphysic.client.ItemPhysicClient;
 
 @Mixin(ItemEntityRenderer.class)
-public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity> {
-    
-    @Shadow
-    @Final
-    private ItemRenderer itemRenderer;
+public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity, ItemEntityRenderState> {
     
     @Shadow
     @Final
@@ -33,13 +30,18 @@ public abstract class ItemEntityRendererMixin extends EntityRenderer<ItemEntity>
         super(context);
     }
     
-    @Inject(method = "render(Lnet/minecraft/world/entity/item/ItemEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
+    @Inject(method = "render(Lnet/minecraft/client/renderer/entity/state/ItemEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At("HEAD"), cancellable = true, require = 1)
-    private void onRender(ItemEntity itemEntity, float f, float g, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
-        if (ItemPhysicClient.render(itemEntity, f, g, poseStack, multiBufferSource, i, this.itemRenderer, this.random)) {
-            super.render(itemEntity, f, g, poseStack, multiBufferSource, i);
+    private void render(ItemEntityRenderState state, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, CallbackInfo ci) {
+        if (ItemPhysicClient.render(state, poseStack, multiBufferSource, i, this.random)) {
+            super.render(state, poseStack, multiBufferSource, i);
             ci.cancel();
         }
     }
     
+    @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/client/renderer/entity/state/ItemEntityRenderState;F)V", at = @At("TAIL"),
+            require = 1)
+    public void injectExtract(ItemEntity item, ItemEntityRenderState state, float partialTicks, CallbackInfo info) {
+        ((ItemEntityRenderStateExtender) state).extractPhysic(item);
+    }
 }

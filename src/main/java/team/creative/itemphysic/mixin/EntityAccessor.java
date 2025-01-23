@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
@@ -23,4 +24,7 @@ public interface EntityAccessor {
     
     @Invoker
     public BlockPos callGetBlockPosBelowThatAffectsMyMovement();
+    
+    @Invoker
+    public boolean callIsInvulnerableToBase(DamageSource source);
 }

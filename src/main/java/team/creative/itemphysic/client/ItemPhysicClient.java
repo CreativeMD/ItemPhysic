@@ -14,22 +14,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Item.TooltipContext;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
@@ -43,7 +38,6 @@ import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
 import team.creative.itemphysic.common.packet.DropPacket;
 import team.creative.itemphysic.common.packet.PickupPacket;
-import team.creative.itemphysic.mixin.EntityAccessor;
 
 @Environment(EnvType.CLIENT)
 @OnlyIn(Dist.CLIENT)
@@ -52,7 +46,6 @@ public class ItemPhysicClient {
     public static final KeyMapping PICKUP = new KeyMapping("key.pickup.item", InputConstants.UNKNOWN.getValue(), "key.categories.gameplay");
     public static final Minecraft mc = Minecraft.getInstance();
     public static int throwCharge;
-    public static long lastTickTime;
     private static final double RANDOM_Y_OFFSET_SCALE = 0.05 / (Math.PI * 2);
     
     public static void init() {
@@ -87,8 +80,6 @@ public class ItemPhysicClient {
     }
     
     public static void renderTick(Object object) {
-        lastTickTime = System.nanoTime();
-        
         if (mc.screen == null)
             renderTooltip((GuiGraphics) object);
     }
@@ -97,7 +88,7 @@ public class ItemPhysicClient {
         if (mc != null && mc.player != null && !mc.isPaused()) {
             if (ItemPhysic.CONFIG.pickup.customPickup) {
                 
-                HitResult result = getEntityItem(mc.player);
+                HitResult result = getItemInFocus(mc.player);
                 if (result != null && result.getType() == HitResult.Type.ENTITY) {
                     if (ItemPhysicClient.PICKUP.isDown())
                         onPlayerInteractClient(mc.level, mc.player, false);
@@ -144,152 +135,82 @@ public class ItemPhysicClient {
         }
     }
     
-    public static boolean render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight, ItemRenderer itemRenderer, RandomSource rand) {
-        if (entity.getAge() == 0 || ((ItemEntityRendering) entity).skipRendering() || ItemPhysic.CONFIG.rendering.vanillaRendering)
+    public static boolean render(ItemEntityRenderState state, PoseStack pose, MultiBufferSource buffer, int packedLight, RandomSource rand) {
+        if (state.ageInTicks < 1 || ((ItemEntityRenderStateExtender) state).skipRendering() || ItemPhysic.CONFIG.rendering.vanillaRendering)
             return false;
         
         pose.pushPose();
-        ItemStack itemstack = entity.getItem();
-        rand.setSeed(itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue());
-        BakedModel bakedmodel = itemRenderer.getModel(itemstack, entity.level(), (LivingEntity) null, entity.getId());
-        boolean flag = bakedmodel.isGui3d();
-        int j = getModelCount(itemstack);
         
-        float rotateBy = (System.nanoTime() - lastTickTime) / 200000000F * ItemPhysic.CONFIG.rendering.rotateSpeed;
-        if (mc.isPaused())
-            rotateBy = 0;
-        
-        Vec3 motionMultiplier = ((EntityAccessor) entity).getStuckSpeedMultiplier();
-        if (motionMultiplier != null && motionMultiplier.lengthSqr() > 0)
-            rotateBy *= motionMultiplier.x * 0.2;
+        rand.setSeed(state.seed);
+        int j = getModelCount(state.count);
+        boolean gui3d = state.item.isGui3d();
         
         pose.mulPose(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
-        pose.mulPose(com.mojang.math.Axis.ZP.rotation(entity.getYRot()));
+        pose.mulPose(com.mojang.math.Axis.ZP.rotation(((ItemEntityRenderStateExtender) state).getYRot()));
         
-        boolean applyEffects = entity.getAge() != 0 && (flag || mc.options != null);
-        
-        //Handle Rotations
-        if (applyEffects) {
-            if (flag) {
-                if (!entity.onGround()) {
-                    rotateBy *= 2;
-                    Fluid fluid = CommonPhysic.getFluid(entity);
-                    if (fluid == null)
-                        fluid = CommonPhysic.getFluid(entity, true);
-                    if (fluid != null)
-                        rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.level()));
-                    
-                    entity.setXRot(entity.getXRot() + rotateBy);
-                } else if (ItemPhysic.CONFIG.rendering.oldRotation) {
-                    for (int side = 0; side < 4; side++) {
-                        double rotation = side * 90;
-                        double range = 5;
-                        if (entity.getXRot() > rotation - range && entity.getXRot() < rotation + range)
-                            entity.setXRot((float) rotation);
-                    }
-                    if (entity.getXRot() != 0 && entity.getXRot() != 90 && entity.getXRot() != 180 && entity.getXRot() != 270) {
-                        double Abstand0 = Math.abs(entity.getXRot());
-                        double Abstand90 = Math.abs(entity.getXRot() - 90);
-                        double Abstand180 = Math.abs(entity.getXRot() - 180);
-                        double Abstand270 = Math.abs(entity.getXRot() - 270);
-                        if (Abstand0 <= Abstand90 && Abstand0 <= Abstand180 && Abstand0 <= Abstand270)
-                            if (entity.getXRot() < 0)
-                                entity.setXRot(entity.getXRot() + rotateBy);
-                            else
-                                entity.setXRot(entity.getXRot() - rotateBy);
-                        if (Abstand90 < Abstand0 && Abstand90 <= Abstand180 && Abstand90 <= Abstand270)
-                            if (entity.getXRot() - 90 < 0)
-                                entity.setXRot(entity.getXRot() + rotateBy);
-                            else
-                                entity.setXRot(entity.getXRot() - rotateBy);
-                        if (Abstand180 < Abstand90 && Abstand180 < Abstand0 && Abstand180 <= Abstand270)
-                            if (entity.getXRot() - 180 < 0)
-                                entity.setXRot(entity.getXRot() + rotateBy);
-                            else
-                                entity.setXRot(entity.getXRot() - rotateBy);
-                        if (Abstand270 < Abstand90 && Abstand270 < Abstand180 && Abstand270 < Abstand0)
-                            if (entity.getXRot() - 270 < 0)
-                                entity.setXRot(entity.getXRot() + rotateBy);
-                            else
-                                entity.setXRot(entity.getXRot() - rotateBy);
-                            
-                    }
-                }
-            } else if (entity != null && !Double.isNaN(entity.getX()) && !Double.isNaN(entity.getY()) && !Double.isNaN(entity.getZ()) && entity.level() != null) {
-                if (entity.onGround()) {
-                    if (!flag)
-                        entity.setXRot(0);
-                } else {
-                    rotateBy *= 2;
-                    Fluid fluid = CommonPhysic.getFluid(entity);
-                    if (fluid != null)
-                        rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.level()));
-                    
-                    entity.setXRot(entity.getXRot() + rotateBy);
-                }
-            }
-            
-            if (flag)
+        if (state.ageInTicks != 0 && (gui3d || mc.options != null)) {
+            if (gui3d)
                 pose.translate(0, -0.2, -0.08);
-            else if (ItemPhysic.CONFIG.rendering.blockRequireOffset.is(entity.level().getBlockState(entity.blockPosition())) || ItemPhysic.CONFIG.rendering.blockBelowRequireOffset
-                    .is(entity.level().getBlockState(entity.blockPosition().below())))
-                pose.translate(0, 0.0, -0.14 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
+            else if (((ItemEntityRenderStateExtender) state).hasAdditionalOffset())
+                pose.translate(0, 0.0, -0.14 - state.bobOffset * RANDOM_Y_OFFSET_SCALE);
             else
-                pose.translate(0, 0, -0.04 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
+                pose.translate(0, 0, -0.04 - state.bobOffset * RANDOM_Y_OFFSET_SCALE);
             
-            double height = 0.2;
-            if (flag)
+            double height = state.item.transform().scale.y();
+            if (gui3d)
                 pose.translate(0, height, 0);
-            pose.mulPose(com.mojang.math.Axis.YP.rotation(entity.getXRot()));
-            if (flag)
+            pose.mulPose(com.mojang.math.Axis.YP.rotation(((ItemEntityRenderStateExtender) state).getXRot()));
+            if (gui3d)
                 pose.translate(0, -height, 0);
         }
         
-        if (!flag) {
+        if (!gui3d) {
             float f7 = -0.0F * (j - 1) * 0.5F;
             float f8 = -0.0F * (j - 1) * 0.5F;
             float f9 = -0.09375F * (j - 1) * 0.5F;
             pose.translate(f7, f8, f9);
         }
         
+        float f = state.item.transform().scale.x();
+        float f1 = state.item.transform().scale.y();
+        float f2 = state.item.transform().scale.z();
+        
         for (int k = 0; k < j; ++k) {
             pose.pushPose();
             if (k > 0) {
-                if (flag) {
-                    float f11 = (rand.nextFloat() * 2.0F - 1.0F) * 0.15F;
-                    float f13 = (rand.nextFloat() * 2.0F - 1.0F) * 0.15F;
-                    float f10 = (rand.nextFloat() * 2.0F - 1.0F) * 0.15F;
+                if (gui3d) {
+                    float f11 = (rand.nextFloat() * 2.0F - 1.0F) * f;
+                    float f13 = (rand.nextFloat() * 2.0F - 1.0F) * f1;
+                    float f10 = (rand.nextFloat() * 2.0F - 1.0F) * f2;
                     pose.translate(f11, f13, f10);
                 }
             }
             
-            itemRenderer.render(itemstack, ItemDisplayContext.GROUND, false, pose, buffer, packedLight, OverlayTexture.NO_OVERLAY, bakedmodel);
+            state.item.render(pose, buffer, packedLight, OverlayTexture.NO_OVERLAY);
             pose.popPose();
-            if (!flag)
-                pose.translate(0.0, 0.0, 0.09375F); // pose.translate(0.0, 0.0, 0.05375F);
-                
+            if (!gui3d)
+                pose.translate(0.0F * f, 0.0F * f1, 0.09375F * f2);
         }
         
         pose.popPose();
         return true;
     }
     
-    public static int getModelCount(ItemStack stack) {
-        
-        if (stack.getCount() > 48)
+    public static int getModelCount(int count) {
+        if (count > 48)
             return 5;
-        if (stack.getCount() > 32)
+        if (count > 32)
             return 4;
-        if (stack.getCount() > 16)
+        if (count > 16)
             return 3;
-        if (stack.getCount() > 1)
+        if (count > 1)
             return 2;
         
         return 1;
     }
     
     public static boolean onPlayerInteractClient(Level level, Player player, boolean rightClick) {
-        HitResult result = getEntityItem(mc.player);
+        HitResult result = getItemInFocus(mc.player);
         if (result != null && result.getType() == HitResult.Type.ENTITY) {
             ItemEntity entity = (ItemEntity) ((EntityHitResult) result).getEntity();
             if (level.isClientSide && entity != null) {
@@ -305,20 +226,19 @@ public class ItemPhysicClient {
         if (ItemPhysic.CONFIG.pickup.customPickup) {
             if (!ItemPhysicClient.PICKUP.isUnbound())
                 return false;
-            
             return onPlayerInteractClient(player.level(), player, true);
         }
         return false;
     }
     
-    public static HitResult getEntityItem(Player player) {
+    public static HitResult getItemInFocus(Player player) {
         double distance = CommonPhysic.getReachDistance(player);
-        float partialTicks = mc.getTimer().getGameTimeDeltaPartialTick(false);
+        float partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         Vec3 position = player.getEyePosition(partialTicks);
         Vec3 view = player.getViewVector(partialTicks);
         if (mc.hitResult != null && mc.hitResult.getType() != Type.MISS)
             distance = Math.min(mc.hitResult.getLocation().distanceTo(position), distance);
-        return CommonPhysic.getEntityItem(player, position, position.add(view.x * distance, view.y * distance, view.z * distance));
+        return CommonPhysic.getItemInFocus(player, position, position.add(view.x * distance, view.y * distance, view.z * distance));
         
     }
     

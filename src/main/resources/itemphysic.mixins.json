@@ -6,13 +6,14 @@
     "server": [
     ],
     "mixins": [
+        "EntityAccessor",
         "ItemEntityAccessor",
-        "ItemEntityMixin",
-        "EntityAccessor"
+        "ItemEntityMixin"
     ],
     "client": [
-        "ItemEntityRendererMixin",
         "ItemEntityMixinClient",
+        "ItemEntityRendererMixin",
+        "ItemEntityRenderStateMixin",
         "LocalPlayerMixin",
         "MinecraftMixin"
     ],
