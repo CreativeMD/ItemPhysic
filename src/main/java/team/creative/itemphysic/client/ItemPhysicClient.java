@@ -102,7 +102,7 @@ public class ItemPhysicClient {
                     if (ItemPhysicClient.PICKUP.isDown())
                         onPlayerInteractClient(mc.level, mc.player, false);
                     ItemEntity entity = (ItemEntity) ((EntityHitResult) result).getEntity();
-                    if (entity != null && ItemPhysic.CONFIG.rendering.showPickupTooltip) {
+                    if (entity != null && ItemPhysic.CONFIG.rendering.showPickupTooltip && (!ItemPhysic.CONFIG.rendering.showPickupTooltipOnlyOnGround || entity.onGround())) {
                         int space = 2;
                         List<Component> list = new ArrayList<>();
                         
@@ -144,7 +144,8 @@ public class ItemPhysicClient {
         }
     }
     
-    public static boolean render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight, ItemRenderer itemRenderer, RandomSource rand) {
+    public static boolean render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight, ItemRenderer itemRenderer,
+            RandomSource rand) {
         if (entity.getAge() == 0 || ((ItemEntityRendering) entity).skipRendering() || ItemPhysic.CONFIG.rendering.vanillaRendering)
             return false;
         
