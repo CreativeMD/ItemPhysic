@@ -1,3 +1,8 @@
+1.8.5
+Adapted to CreativeCore 2.13.0
+Added showPickupTooltipOnlyOnGround option
+Update ko_kr.json (Thanks to ISTP7880)
+
 1.8.4
 Added mud to blocks require offset to prevent the item from being invisible
 
