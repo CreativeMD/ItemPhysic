@@ -91,6 +91,8 @@ public class ItemPhysicConfig {
         @CreativeConfig
         public boolean showPickupTooltip = true;
         @CreativeConfig
+        public boolean showPickupTooltipOnlyOnGround = false;
+        @CreativeConfig
         public boolean showPickupTooltipExtended = false;
         @CreativeConfig
         public boolean showPickupTooltipKeybind = false;
