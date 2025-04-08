@@ -42,7 +42,7 @@ public class ItemPhysicServer {
             return;
         }
         
-        double force = -0.02D / CommonPhysic.getViscosity(fluid.get(), item.level());
+        double force = -0.02D / Math.max(1, CommonPhysic.getViscosity(fluid.get(), item.level()));
         if (((ItemEntityExtender) item).canSwim() && !fluid.get().is(FluidTags.LAVA)) {
             double maxSpeed = 0.1;
             if (item.getDeltaMovement().y < maxSpeed)
