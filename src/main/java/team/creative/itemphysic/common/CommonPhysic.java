@@ -61,7 +61,7 @@ public class CommonPhysic {
             return;
         }
         
-        double force = -0.02D / CommonPhysic.getViscosity(fluid, item.level());
+        double force = -0.02D / Math.max(1, CommonPhysic.getViscosity(fluid, item.level()));
         if (((ItemEntityExtender) item).canSwim() && !fluid.is(FluidTags.LAVA)) {
             double maxSpeed = 0.1;
             if (item.getDeltaMovement().y < maxSpeed)
