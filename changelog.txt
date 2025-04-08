@@ -1,3 +1,6 @@
+1.8.6
+Fixed fluid with zero viscosity causing troubles
+
 1.8.5
 Adapted to CreativeCore 2.13.0
 Added showPickupTooltipOnlyOnGround option
