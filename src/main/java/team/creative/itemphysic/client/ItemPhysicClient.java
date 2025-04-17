@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.fabricmc.api.EnvType;
@@ -38,13 +37,14 @@ import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
 import team.creative.itemphysic.common.packet.DropPacket;
 import team.creative.itemphysic.common.packet.PickupPacket;
+import team.creative.itemphysic.mixin.ItemStackRenderStateAccessor;
+import team.creative.itemphysic.mixin.LayerRenderStateAccessor;
 
 @Environment(EnvType.CLIENT)
 @OnlyIn(Dist.CLIENT)
 public class ItemPhysicClient {
     
     public static final KeyMapping PICKUP = new KeyMapping("key.pickup.item", InputConstants.UNKNOWN.getValue(), "key.categories.gameplay");
-    public static final Minecraft mc = Minecraft.getInstance();
     public static int throwCharge;
     private static final double RANDOM_Y_OFFSET_SCALE = 0.05 / (Math.PI * 2);
     
@@ -62,6 +62,7 @@ public class ItemPhysicClient {
     }
     
     public static void gameTick() {
+        var mc = Minecraft.getInstance();
         if (mc.player != null && !mc.player.getMainHandItem().isEmpty() && ItemPhysic.CONFIG.throwConfig.enabled) {
             if (mc.options.keyDrop.isDown())
                 throwCharge++;
@@ -70,8 +71,8 @@ public class ItemPhysicClient {
                     boolean dropAll = Screen.hasControlDown();
                     
                     ItemPhysic.NETWORK.sendToServer(new DropPacket(Screen.hasControlDown(), getChargeStage()));
-                    if (mc.player.getInventory().removeItem(mc.player.getInventory().selected, dropAll && !mc.player.getInventory().getSelected().isEmpty() ? mc.player
-                            .getInventory().getSelected().getCount() : 1) != ItemStack.EMPTY)
+                    if (mc.player.getInventory().removeItem(mc.player.getInventory().getSelectedSlot(), dropAll && !mc.player.getInventory().getSelectedItem().isEmpty() ? mc.player
+                            .getInventory().getSelectedItem().getCount() : 1) != ItemStack.EMPTY)
                         mc.player.swing(InteractionHand.MAIN_HAND);
                 }
                 throwCharge = 0;
@@ -80,11 +81,12 @@ public class ItemPhysicClient {
     }
     
     public static void renderTick(Object object) {
-        if (mc.screen == null)
+        if (Minecraft.getInstance().screen == null)
             renderTooltip((GuiGraphics) object);
     }
     
     public static void renderTooltip(GuiGraphics graphics) {
+        var mc = Minecraft.getInstance();
         if (mc != null && mc.player != null && !mc.isPaused()) {
             if (ItemPhysic.CONFIG.pickup.customPickup) {
                 
@@ -119,7 +121,7 @@ public class ItemPhysicClient {
                         }
                         
                         int height = list.size() * (mc.font.lineHeight + space) / 2;
-                        RenderSystem.disableBlend();
+                        //RenderSystem.disableBlend();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
                             graphics.drawString(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX,
@@ -143,10 +145,13 @@ public class ItemPhysicClient {
         
         rand.setSeed(state.seed);
         int j = getModelCount(state.count);
-        boolean gui3d = state.item.isGui3d();
+        boolean gui3d = ((ItemEntityRenderStateExtender) state).isBlock();
+        var transform = ((LayerRenderStateAccessor) ((ItemStackRenderStateAccessor) state.item).callFirstLayer()).getTransform();
         
         pose.mulPose(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
         pose.mulPose(com.mojang.math.Axis.ZP.rotation(((ItemEntityRenderStateExtender) state).getYRot()));
+        
+        var mc = Minecraft.getInstance();
         
         if (state.ageInTicks != 0 && (gui3d || mc.options != null)) {
             if (gui3d)
@@ -156,7 +161,7 @@ public class ItemPhysicClient {
             else
                 pose.translate(0, 0, -0.04 - state.bobOffset * RANDOM_Y_OFFSET_SCALE);
             
-            double height = state.item.transform().scale.y();
+            double height = transform.scale().y();
             if (gui3d)
                 pose.translate(0, height, 0);
             pose.mulPose(com.mojang.math.Axis.YP.rotation(((ItemEntityRenderStateExtender) state).getXRot()));
@@ -171,9 +176,9 @@ public class ItemPhysicClient {
             pose.translate(f7, f8, f9);
         }
         
-        float f = state.item.transform().scale.x();
-        float f1 = state.item.transform().scale.y();
-        float f2 = state.item.transform().scale.z();
+        float f = transform.scale().x();
+        float f1 = transform.scale().y();
+        float f2 = transform.scale().z();
         
         for (int k = 0; k < j; ++k) {
             pose.pushPose();
@@ -210,6 +215,7 @@ public class ItemPhysicClient {
     }
     
     public static boolean onPlayerInteractClient(Level level, Player player, boolean rightClick) {
+        var mc = Minecraft.getInstance();
         HitResult result = getItemInFocus(mc.player);
         if (result != null && result.getType() == HitResult.Type.ENTITY) {
             ItemEntity entity = (ItemEntity) ((EntityHitResult) result).getEntity();
@@ -232,6 +238,7 @@ public class ItemPhysicClient {
     }
     
     public static HitResult getItemInFocus(Player player) {
+        var mc = Minecraft.getInstance();
         double distance = CommonPhysic.getReachDistance(player);
         float partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         Vec3 position = player.getEyePosition(partialTicks);

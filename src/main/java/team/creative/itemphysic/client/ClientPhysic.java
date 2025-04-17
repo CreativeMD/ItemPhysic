@@ -23,7 +23,7 @@ public class ClientPhysic {
         if (motionMultiplier != null && motionMultiplier.lengthSqr() > 0)
             rotateBy *= motionMultiplier.x * 0.2;
         
-        boolean gui3d = state.item.isGui3d();
+        boolean gui3d = ((ItemEntityRenderStateExtender) state).isBlock();
         
         if (gui3d) {
             if (!entity.onGround()) {

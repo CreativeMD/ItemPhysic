@@ -21,6 +21,8 @@ public class ItemEntityRenderStateMixin implements ItemEntityRenderStateExtender
     public boolean skipRendering;
     @Unique
     public boolean additionalOffset;
+    @Unique
+    public boolean isBlock;
     
     @Override
     public float getXRot() {
@@ -43,13 +45,22 @@ public class ItemEntityRenderStateMixin implements ItemEntityRenderStateExtender
     }
     
     @Override
+    public boolean isBlock() {
+        return isBlock;
+    }
+    
+    @Override
     public void extractPhysic(ItemEntity entity) {
-        ClientPhysic.calculateRotation(entity, (ItemEntityRenderState) (Object) this);
+        ItemEntityRenderState state = (ItemEntityRenderState) (Object) this;
+        isBlock = state.item.usesBlockLight() && ((LayerRenderStateAccessor) ((ItemStackRenderStateAccessor) state.item).callFirstLayer()).getRenderType().getName().equals(
+            "item_entity_translucent_cull");
+        ClientPhysic.calculateRotation(entity, state);
         skipRendering = ((ItemEntityRendering) entity).skipRendering();
         additionalOffset = ItemPhysic.CONFIG.rendering.blockRequireOffset.is(entity.level().getBlockState(entity
                 .blockPosition())) || ItemPhysic.CONFIG.rendering.blockBelowRequireOffset.is(entity.level().getBlockState(entity.blockPosition().below()));
         rotX = entity.getXRot();
         rotY = entity.getYRot();
+        
     }
     
 }

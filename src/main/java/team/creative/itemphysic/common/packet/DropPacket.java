@@ -65,7 +65,7 @@ public class DropPacket extends CreativePacket {
     public void executeServer(ServerPlayer player) {
         Inventory inventory = player.getInventory();
         ItemStack itemStack = inventory.removeFromSelected(all);
-        player.containerMenu.findSlot(inventory, inventory.selected).ifPresent(i -> player.containerMenu.setRemoteSlot(i, inventory.getSelected()));
+        player.containerMenu.findSlot(inventory, inventory.getSelectedSlot()).ifPresent(i -> player.containerMenu.setRemoteSlot(i, inventory.getSelectedItem()));
         var itemEntity = createEntity(itemStack, player, false, true);
         if (itemEntity == null)
             return;

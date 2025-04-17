@@ -10,7 +10,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
@@ -63,13 +65,27 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     protected void checkFallDamage(double height, boolean fall, BlockState state, BlockPos pos) {
         var item = (ItemEntity) (Object) this;
         if (fall && item.fallDistance > 0.0F && ItemPhysic.CONFIG.general.fallSounds)
-            item.playSound(SoundEvents.WOOL_FALL, Math.min(1, item.fallDistance / 10), (float) Math.random() * 1F + 1);
+            item.playSound(SoundEvents.WOOL_FALL, Math.min(1F, (float) item.fallDistance / 10F), (float) Math.random() * 1F + 1);
         super.checkFallDamage(height, fall, state, pos);
     }
     
     @Override
     public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> fluid, double p_204033_) {
         return CommonPhysic.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
+    }
+    
+    @Override
+    public void lavaHurt() {
+        if (!this.fireImmune()) {
+            if (this.level() instanceof ServerLevel serverlevel) {
+                if (hurtServer(serverlevel, this.damageSources().lava(), 4.0F))
+                    serverlevel.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_BURN, this.getSoundSource(), 0.4F, 2.0F + this.random
+                            .nextFloat() * 0.4F);
+            } else
+                for (int i = 0; i < 100; i++)
+                    level().addParticle(ParticleTypes.SMOKE, getX(), getY(), getZ(), (random.nextFloat() * 0.1) - 0.05, 0.2 * random.nextDouble(), (random
+                            .nextFloat() * 0.1) - 0.05);
+        }
     }
     
     @Inject(method = "playerTouch(Lnet/minecraft/world/entity/player/Player;)V", at = @At("HEAD"), cancellable = true, require = 1)

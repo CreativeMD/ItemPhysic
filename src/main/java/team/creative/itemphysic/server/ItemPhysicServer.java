@@ -42,7 +42,7 @@ public class ItemPhysicServer {
             int i = itemstack.getCount();
             
             int hook = CreativeCore.utils().fireItemPickupPre(entity, player);
-            if (hook == 2)
+            if (hook == 1)
                 return;
             
             ItemStack copy = itemstack.copy();

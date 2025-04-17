@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -73,16 +71,6 @@ public class CommonPhysic {
             item.setDeltaMovement(item.getDeltaMovement().multiply(1, 0.8, 1));
         }
         item.setDeltaMovement(item.getDeltaMovement().add(0, force, 0));
-        
-        float f = item.getEyeHeight() - 0.11111111F;
-        if ((item.isEyeInFluid(FluidTags.LAVA) || item.getFluidHeight(FluidTags.LAVA) > f || item.isOnFire()) && ((ItemEntityExtender) item).canBurn()) {
-            item.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + rand.nextFloat() * 0.4F);
-            for (int i = 0; i < 100; i++)
-                item.level().addParticle(ParticleTypes.SMOKE, item.getX(), item.getY(), item.getZ(), (rand.nextFloat() * 0.1) - 0.05, 0.2 * rand.nextDouble(), (rand
-                        .nextFloat() * 0.1) - 0.05);
-            item.hurt(item.damageSources().onFire(), 3);
-        }
-        
     }
     
     public static Fluid calculateFluid(ItemEntity item) {
