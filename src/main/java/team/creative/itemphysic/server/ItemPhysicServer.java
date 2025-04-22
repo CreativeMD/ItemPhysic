@@ -146,7 +146,7 @@ public class ItemPhysicServer {
             if (item.onGround() && item.getDeltaMovement().y < 0.0D)
                 item.setDeltaMovement(item.getDeltaMovement().multiply(1.0D, -0.5D, 1.0D));
         } else {
-            float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level());
+            float viscosity = Math.max(1, CommonPhysic.getViscosity(fluid.get(), item.level()));
             item.setDeltaMovement(item.getDeltaMovement().multiply(1 / (1.2 * viscosity), 1, 1 / (1.2 * viscosity)));
         }
     }
