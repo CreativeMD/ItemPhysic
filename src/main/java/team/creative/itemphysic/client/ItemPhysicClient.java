@@ -15,15 +15,23 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
@@ -243,10 +251,35 @@ public class ItemPhysicClient {
         float partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         Vec3 position = player.getEyePosition(partialTicks);
         Vec3 view = player.getViewVector(partialTicks);
-        if (mc.hitResult != null && mc.hitResult.getType() != Type.MISS)
-            distance = Math.min(mc.hitResult.getLocation().distanceTo(position), distance);
+        double d0 = player.blockInteractionRange();
+        double d1 = player.entityInteractionRange();
+        var hitResult = pick(player, d0, d1, partialTicks, position, view, position.add(view.x * distance, view.y * distance, view.z * distance));
+        if (hitResult != null && hitResult.getType() != Type.MISS)
+            distance = Math.min(hitResult.getLocation().distanceTo(position), distance);
         return CommonPhysic.getItemInFocus(player, position, position.add(view.x * distance, view.y * distance, view.z * distance));
         
     }
     
+    private static HitResult pick(Entity entity, double blockInteraction, double entityItneraction, float partialTicks, Vec3 position, Vec3 view, Vec3 endPosition) {
+        double d0 = Math.max(blockInteraction, entityItneraction);
+        double d1 = Mth.square(d0);
+        HitResult hitresult = entity.level().clip(new ClipContext(position, endPosition, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
+        double d2 = hitresult.getLocation().distanceToSqr(position);
+        if (hitresult.getType() != HitResult.Type.MISS) {
+            d1 = d2;
+            d0 = Math.sqrt(d2);
+        }
+        
+        AABB aabb = entity.getBoundingBox().expandTowards(view.scale(d0)).inflate(1.0, 1.0, 1.0);
+        EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(entity, position, endPosition, aabb, x -> !x.isSpectator() && x.isPickable(), d1);
+        return entityhitresult != null && entityhitresult.getLocation().distanceToSqr(position) < d2 ? filterHitResult(entityhitresult, position,
+            entityItneraction) : filterHitResult(hitresult, position, blockInteraction);
+    }
+    
+    private static HitResult filterHitResult(HitResult hit, Vec3 vec, double range) {
+        Vec3 hitVec = hit.getLocation();
+        if (!hitVec.closerThan(vec, range))
+            return BlockHitResult.miss(hitVec, Direction.getApproximateNearest(hitVec.x - vec.x, hitVec.y - vec.y, hitVec.z - vec.z), BlockPos.containing(hitVec));
+        return hit;
+    }
 }
