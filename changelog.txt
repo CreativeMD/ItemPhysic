@@ -1,3 +1,6 @@
+1.8.8
+Fixed not being able to pickup items through grass
+
 1.8.7
 Fixed crash when rendering a chest
 
