@@ -1,3 +1,6 @@
+1.8.9
+Adapted CreativeCore v2.14.0
+
 1.8.8
 Fixed not being able to pickup items through grass
 

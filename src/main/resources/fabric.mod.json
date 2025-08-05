@@ -1,7 +1,7 @@
 {
     "schemaVersion": 1,
     "id": "itemphysic",
-    "version": "1.8.8",
+    "version": "1.8.9",
     "name": "ItemPhysic",
     "description": "Enhances the rendering of items and introduces some more physics.",
     "authors": [
@@ -25,6 +25,6 @@
         "fabricloader": ">=0.16.14",
         "fabric-api": "*",
         "minecraft": ">=1.21.6",
-        "creativecore": ">=2.13.0"
+        "creativecore": ">=2.14.0"
     }
 }
