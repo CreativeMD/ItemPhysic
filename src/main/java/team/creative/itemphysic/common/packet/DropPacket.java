@@ -9,8 +9,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import team.creative.creativecore.common.network.CreativePacket;
 import team.creative.itemphysic.ItemPhysic;
 
@@ -27,7 +25,6 @@ public class DropPacket extends CreativePacket {
     }
     
     @Override
-    @OnlyIn(Dist.CLIENT)
     public void executeClient(Player player) {}
     
     public ItemEntity createEntity(ItemStack itemStack, Player player, boolean bl, boolean bl2) {

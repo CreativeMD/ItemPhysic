@@ -6,8 +6,6 @@ import java.util.List;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -36,8 +34,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.ICreativeLoader;
 import team.creative.creativecore.client.CreativeCoreClient;
@@ -48,8 +44,6 @@ import team.creative.itemphysic.common.packet.PickupPacket;
 import team.creative.itemphysic.mixin.ItemStackRenderStateAccessor;
 import team.creative.itemphysic.mixin.LayerRenderStateAccessor;
 
-@Environment(EnvType.CLIENT)
-@OnlyIn(Dist.CLIENT)
 public class ItemPhysicClient {
     
     public static final KeyMapping PICKUP = new KeyMapping("key.pickup.item", InputConstants.UNKNOWN.getValue(), "key.categories.gameplay");
