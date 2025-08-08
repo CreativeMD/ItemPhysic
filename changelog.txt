@@ -1,3 +1,6 @@
+1.8.10
+Fixed being able to pickup in spectator mode
+
 1.8.9
 Adapted CreativeCore v2.14.0
 
