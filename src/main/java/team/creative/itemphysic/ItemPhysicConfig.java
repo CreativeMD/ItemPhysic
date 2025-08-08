@@ -1,11 +1,14 @@
 package team.creative.itemphysic;
 
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import team.creative.creativecore.common.config.api.CreativeConfig;
 import team.creative.creativecore.common.config.sync.ConfigSynchronization;
 import team.creative.creativecore.common.util.ingredient.CreativeIngredientFuel;
+import team.creative.creativecore.common.util.mc.PlayerUtils;
 import team.creative.creativecore.common.util.type.list.SortingBlockList;
 import team.creative.creativecore.common.util.type.list.SortingList;
 
@@ -77,6 +80,11 @@ public class ItemPhysicConfig {
         
         @CreativeConfig
         public SortingList alwaysPickup = new SortingList();
+        
+        public boolean canPickup(Player player) {
+            return customPickup && PlayerUtils.getGameType(player) != GameType.SPECTATOR;
+        }
+        
     }
     
     public static class Rendering {
