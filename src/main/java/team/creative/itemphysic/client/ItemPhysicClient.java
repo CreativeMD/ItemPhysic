@@ -103,7 +103,7 @@ public class ItemPhysicClient {
     
     public static void renderTooltip(GuiGraphics graphics) {
         if (mc != null && mc.player != null && !mc.isPaused()) {
-            if (ItemPhysic.CONFIG.pickup.customPickup) {
+            if (ItemPhysic.CONFIG.pickup.canPickup(mc.player)) {
                 
                 HitResult result = getEntityItem(mc.player);
                 if (result != null && result.getType() == HitResult.Type.ENTITY) {
@@ -311,7 +311,7 @@ public class ItemPhysicClient {
     }
     
     public static boolean onPlayerInteract(Player player) {
-        if (ItemPhysic.CONFIG.pickup.customPickup) {
+        if (ItemPhysic.CONFIG.pickup.canPickup(player)) {
             if (!ItemPhysicClient.PICKUP.isUnbound())
                 return false;
             
