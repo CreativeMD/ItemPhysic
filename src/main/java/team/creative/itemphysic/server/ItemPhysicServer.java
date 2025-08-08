@@ -24,7 +24,7 @@ public class ItemPhysicServer {
     public static void init() {}
     
     public static boolean playerTouch(ItemEntity item, Player player) {
-        if (ItemPhysic.CONFIG.pickup.customPickup && (!player
+        if (ItemPhysic.CONFIG.pickup.canPickup(player) && (!player
                 .isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally && !ItemPhysic.CONFIG.pickup.alwaysPickup.canPass(item
                         .level(), item.getItem()))
             return true;
@@ -35,7 +35,7 @@ public class ItemPhysicServer {
     
     public static void playerPickup(ItemEntity entity, Player player) {
         if (!entity.level().isClientSide) {
-            if (!ItemPhysic.CONFIG.pickup.customPickup && entity.hasPickUpDelay())
+            if (!ItemPhysic.CONFIG.pickup.canPickup(player) && entity.hasPickUpDelay())
                 return;
             ItemStack itemstack = entity.getItem();
             Item item = itemstack.getItem();
@@ -67,7 +67,7 @@ public class ItemPhysicServer {
     }
     
     public static InteractionResult interact(ItemEntity item, Player player, InteractionHand hand) {
-        if (ItemPhysic.CONFIG.pickup.customPickup) {
+        if (ItemPhysic.CONFIG.pickup.canPickup(player)) {
             playerPickup(item, player);
             return InteractionResult.CONSUME;
         }
