@@ -46,6 +46,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.ICreativeLoader;
 import team.creative.creativecore.client.CreativeCoreClient;
+import team.creative.creativecore.common.util.mc.PlayerUtils;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
 import team.creative.itemphysic.common.packet.DropPacket;
@@ -138,8 +139,9 @@ public class ItemPhysicClient {
                         RenderSystem.disableBlend();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            graphics.drawString(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX,
-                                mc.getWindow().getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY, 16579836);
+                            graphics.drawString(mc.font, list
+                                    .get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX, mc.getWindow()
+                                            .getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY, 16579836);
                         }
                         
                     }
@@ -323,8 +325,8 @@ public class ItemPhysicClient {
         float partialTicks = mc.getDeltaFrameTime();
         Vec3 position = player.getEyePosition(partialTicks);
         Vec3 view = player.getViewVector(partialTicks);
-        double d0 = player.getBlockReach();
-        double d1 = player.getEntityReach();
+        double d0 = PlayerUtils.getReach(player);
+        double d1 = d0;
         var hitResult = pick(player, d0, d1, partialTicks, position, view, position.add(view.x * distance, view.y * distance, view.z * distance));
         if (hitResult != null && hitResult.getType() != Type.MISS)
             distance = Math.min(hitResult.getLocation().distanceTo(position), distance);
@@ -344,8 +346,8 @@ public class ItemPhysicClient {
         
         AABB aabb = entity.getBoundingBox().expandTowards(view.scale(d0)).inflate(1.0, 1.0, 1.0);
         EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(entity, position, endPosition, aabb, x -> !x.isSpectator() && x.isPickable(), d1);
-        return entityhitresult != null && entityhitresult.getLocation().distanceToSqr(position) < d2 ? filterHitResult(entityhitresult, position,
-            entityItneraction) : filterHitResult(hitresult, position, blockInteraction);
+        return entityhitresult != null && entityhitresult.getLocation()
+                .distanceToSqr(position) < d2 ? filterHitResult(entityhitresult, position, entityItneraction) : filterHitResult(hitresult, position, blockInteraction);
     }
     
     private static HitResult filterHitResult(HitResult hit, Vec3 vec, double range) {
