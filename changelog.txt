@@ -1,3 +1,6 @@
+1.8.11
+Fixed custom throw not reseting when player is not holding an item (causing an item to disappear)
+
 1.8.10
 Fixed being able to pickup in spectator mode
 
