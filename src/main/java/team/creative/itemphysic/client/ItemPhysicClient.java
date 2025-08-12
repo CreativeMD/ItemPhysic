@@ -77,11 +77,11 @@ public class ItemPhysicClient {
     }
     
     public static void gameTick() {
-        if (mc.player != null && !mc.player.getMainHandItem().isEmpty() && ItemPhysic.CONFIG.throwConfig.enabled) {
-            if (mc.options.keyDrop.isDown())
+        if (mc.player != null && ItemPhysic.CONFIG.throwConfig.enabled) {
+            if (mc.options.keyDrop.isDown() && !mc.player.getMainHandItem().isEmpty())
                 throwCharge++;
             else {
-                if (throwCharge > 0) {
+                if (throwCharge > 0 && !mc.player.getMainHandItem().isEmpty()) {
                     boolean dropAll = Screen.hasControlDown();
                     
                     ItemPhysic.NETWORK.sendToServer(new DropPacket(Screen.hasControlDown(), getChargeStage()));
@@ -148,7 +148,7 @@ public class ItemPhysicClient {
                 }
             }
             
-            if (ItemPhysic.CONFIG.throwConfig.enabled && !ItemPhysic.CONFIG.rendering.disableThrowHUD && throwCharge > 0)
+            if (ItemPhysic.CONFIG.throwConfig.enabled && !ItemPhysic.CONFIG.rendering.disableThrowHUD && throwCharge > 0 && !mc.player.getMainHandItem().isEmpty())
                 mc.player.displayClientMessage(Component.translatable("item.throw", getChargeStage()), true);
         }
     }
