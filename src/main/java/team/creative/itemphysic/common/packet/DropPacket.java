@@ -31,7 +31,7 @@ public class DropPacket extends CreativePacket {
         if (itemStack.isEmpty()) {
             return null;
         }
-        if (player.level().isClientSide) {
+        if (player.level().isClientSide()) {
             player.swing(InteractionHand.MAIN_HAND);
         }
         double d = player.getEyeY() - 0.3f;

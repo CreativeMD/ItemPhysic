@@ -28,13 +28,13 @@ public class ItemPhysicServer {
                 .isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally && !ItemPhysic.CONFIG.pickup.alwaysPickup.canPass(item
                         .level(), item.getItem()))
             return true;
-        if (item.level().isClientSide || item.hasPickUpDelay())
+        if (item.level().isClientSide() || item.hasPickUpDelay())
             return true;
         return false;
     }
     
     public static void playerPickup(ItemEntity entity, Player player) {
-        if (!entity.level().isClientSide) {
+        if (!entity.level().isClientSide()) {
             if (!ItemPhysic.CONFIG.pickup.canPickup(player) && entity.hasPickUpDelay())
                 return;
             ItemStack itemstack = entity.getItem();
@@ -75,7 +75,7 @@ public class ItemPhysicServer {
     }
     
     public static boolean hurt(ItemEntity item, DamageSource source, float amount) {
-        if (item.level().isClientSide || item.isRemoved())
+        if (item.level().isClientSide() || item.isRemoved())
             return false; //Forge: Fixes MC-53850
             
         if (((EntityAccessor) item).callIsInvulnerableToBase(source))
