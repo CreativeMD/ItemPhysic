@@ -2,5 +2,5 @@
     "key.pickup.item": "Підняти предмет",
     "item.tooltip.pickup.keybind": "Натисніть «%s», аби підняти",
     "item.throw": "Сила: %s",
-    "modmenu.descriptionTranslation.itemphysic": "Покращує промальовування предметів і додає трохи більше фізики"
+    "modmenu.descriptionTranslation.itemphysic": "Покращує промальовування предметів і додає трохи більше фізики."
 }
