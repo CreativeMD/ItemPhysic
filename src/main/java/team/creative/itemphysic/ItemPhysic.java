@@ -3,7 +3,7 @@ package team.creative.itemphysic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.common.Mod;
 import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.ICreativeLoader;
@@ -21,7 +21,7 @@ public class ItemPhysic implements ClientLoader, CommonLoader {
     
     public static final Logger LOGGER = LogManager.getLogger(ItemPhysic.MODID);
     public static final String MODID = "itemphysic";
-    public static final CreativeNetwork NETWORK = new CreativeNetwork(1, LOGGER, ResourceLocation.tryBuild(ItemPhysic.MODID, "main"));
+    public static final CreativeNetwork NETWORK = new CreativeNetwork(1, LOGGER, Identifier.tryBuild(ItemPhysic.MODID, "main"));
     public static ItemPhysicConfig CONFIG;
     
     public ItemPhysic() {

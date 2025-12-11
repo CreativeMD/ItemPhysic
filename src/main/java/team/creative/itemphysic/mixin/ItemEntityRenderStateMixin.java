@@ -53,7 +53,7 @@ public class ItemEntityRenderStateMixin implements ItemEntityRenderStateExtender
     public void extractPhysic(ItemEntity entity) {
         ItemEntityRenderState state = (ItemEntityRenderState) (Object) this;
         var renderType = ((LayerRenderStateAccessor) ((ItemStackRenderStateAccessor) state.item).callFirstLayer()).getRenderType();
-        isBlock = state.item.usesBlockLight() && (renderType == null || renderType.getName().equals("item_entity_translucent_cull"));
+        isBlock = state.item.usesBlockLight() && (renderType == null || ((RenderTypeAccessor) renderType).getName().equals("item_entity_translucent_cull"));
         ClientPhysic.calculateRotation(entity, state);
         skipRendering = ((ItemEntityRendering) entity).skipRendering();
         additionalOffset = ItemPhysic.CONFIG.rendering.blockRequireOffset.is(entity.level().getBlockState(entity
