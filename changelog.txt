@@ -1,3 +1,6 @@
+1.8.12
+Fixed tooltip of pickup items not working correctly
+
 1.8.11
 Fixed custom throw not reseting when player is not holding an item (causing an item to disappear)
 
