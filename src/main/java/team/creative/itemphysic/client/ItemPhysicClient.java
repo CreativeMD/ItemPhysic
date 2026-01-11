@@ -2,11 +2,10 @@ package team.creative.itemphysic.client;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
@@ -20,6 +19,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -43,11 +43,13 @@ import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.ICreativeLoader;
 import team.creative.creativecore.client.CreativeCoreClient;
 import team.creative.creativecore.common.util.mc.PlayerUtils;
 import team.creative.itemphysic.ItemPhysic;
+import team.creative.itemphysic.ItemPhysicConfig;
 import team.creative.itemphysic.common.CommonPhysic;
 import team.creative.itemphysic.common.packet.DropPacket;
 import team.creative.itemphysic.common.packet.PickupPacket;
@@ -56,26 +58,26 @@ import team.creative.itemphysic.mixin.EntityAccessor;
 @Environment(EnvType.CLIENT)
 @OnlyIn(Dist.CLIENT)
 public class ItemPhysicClient {
-    
+
     public static final KeyMapping PICKUP = new KeyMapping("key.pickup.item", InputConstants.UNKNOWN.getValue(), "key.categories.gameplay");
     public static final Minecraft mc = Minecraft.getInstance();
     public static int throwCharge;
     public static long lastTickTime;
     private static final double RANDOM_Y_OFFSET_SCALE = 0.05 / (Math.PI * 2);
-    
+
     public static void init() {
         ICreativeLoader loader = CreativeCore.loader();
         loader.registerKeybind(() -> PICKUP);
-        
+
         loader.registerClientTick(ItemPhysicClient::gameTick);
         loader.registerClientRenderGui(ItemPhysicClient::renderTick);
         CreativeCoreClient.registerClientConfig(ItemPhysic.MODID);
     }
-    
+
     public static int getChargeStage() {
         return Math.min(1 + throwCharge / ItemPhysic.CONFIG.throwConfig.stageChargeTime, ItemPhysic.CONFIG.throwConfig.maxStages);
     }
-    
+
     public static void gameTick() {
         if (mc.player != null && ItemPhysic.CONFIG.throwConfig.enabled) {
             if (mc.options.keyDrop.isDown() && !mc.player.getMainHandItem().isEmpty())
@@ -83,7 +85,7 @@ public class ItemPhysicClient {
             else {
                 if (throwCharge > 0 && !mc.player.getMainHandItem().isEmpty()) {
                     boolean dropAll = Screen.hasControlDown();
-                    
+
                     ItemPhysic.NETWORK.sendToServer(new DropPacket(Screen.hasControlDown(), getChargeStage()));
                     if (mc.player.getInventory().removeItem(mc.player.getInventory().selected, dropAll && !mc.player.getInventory().getSelected().isEmpty() ? mc.player
                             .getInventory().getSelected().getCount() : 1) != ItemStack.EMPTY)
@@ -93,18 +95,18 @@ public class ItemPhysicClient {
             }
         }
     }
-    
+
     public static void renderTick(Object object) {
         lastTickTime = System.nanoTime();
-        
+
         if (mc.screen == null)
             renderTooltip((GuiGraphics) object);
     }
-    
+
     public static void renderTooltip(GuiGraphics graphics) {
         if (mc != null && mc.player != null && !mc.isPaused()) {
             if (ItemPhysic.CONFIG.pickup.canPickup(mc.player)) {
-                
+
                 HitResult result = getEntityItem(mc.player);
                 if (result != null && result.getType() == HitResult.Type.ENTITY) {
                     if (ItemPhysicClient.PICKUP.isDown())
@@ -113,28 +115,28 @@ public class ItemPhysicClient {
                     if (entity != null && ItemPhysic.CONFIG.rendering.showPickupTooltip && (!ItemPhysic.CONFIG.rendering.showPickupTooltipOnlyOnGround || entity.onGround())) {
                         int space = 2;
                         List<Component> list = new ArrayList<>();
-                        
+
                         try {
                             if (ItemPhysic.CONFIG.rendering.showPickupTooltipExtended)
                                 list.addAll(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL));
                             else
                                 list.add(entity.getItem().getTooltipLines(mc.player, TooltipFlag.NORMAL).get(0));
-                            
+
                         } catch (Exception e) {
                             list = new ArrayList();
                             list.add(Component.literal("ERRORED"));
                         }
-                        
+
                         if (ItemPhysic.CONFIG.rendering.showPickupTooltipKeybind)
                             list.add(Component.translatable("item.tooltip.pickup.keybind", ItemPhysicClient.PICKUP.isUnbound() ? mc.options.keyUse
                                     .getTranslatedKeyMessage() : ItemPhysicClient.PICKUP.getTranslatedKeyMessage()));
-                        
+
                         int width = 0;
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
                             width = Math.max(width, mc.font.width(text) + 10);
                         }
-                        
+
                         int height = list.size() * (mc.font.lineHeight + space) / 2;
                         RenderSystem.disableBlend();
                         for (int i = 0; i < list.size(); i++) {
@@ -143,40 +145,64 @@ public class ItemPhysicClient {
                                     .get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX, mc.getWindow()
                                             .getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY, 16579836);
                         }
-                        
+
                     }
                 }
             }
-            
+
             if (ItemPhysic.CONFIG.throwConfig.enabled && !ItemPhysic.CONFIG.rendering.disableThrowHUD && throwCharge > 0 && !mc.player.getMainHandItem().isEmpty())
                 mc.player.displayClientMessage(Component.translatable("item.throw", getChargeStage()), true);
         }
     }
-    
+
     public static boolean render(ItemEntity entity, float entityYaw, float partialTicks, PoseStack pose, MultiBufferSource buffer, int packedLight, ItemRenderer itemRenderer, RandomSource rand) {
         if (entity.getAge() == 0 || ((ItemEntityRendering) entity).skipRendering() || ItemPhysic.CONFIG.rendering.vanillaRendering)
             return false;
-        
+
         pose.pushPose();
         ItemStack itemstack = entity.getItem();
         rand.setSeed(itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue());
         BakedModel bakedmodel = itemRenderer.getModel(itemstack, entity.level(), (LivingEntity) null, entity.getId());
         boolean flag = bakedmodel.isGui3d();
         int j = getModelCount(itemstack);
-        
+
         float rotateBy = (System.nanoTime() - lastTickTime) / 200000000F * ItemPhysic.CONFIG.rendering.rotateSpeed;
         if (mc.isPaused())
             rotateBy = 0;
-        
+
         Vec3 motionMultiplier = ((EntityAccessor) entity).getStuckSpeedMultiplier();
         if (motionMultiplier != null && motionMultiplier.lengthSqr() > 0)
             rotateBy *= motionMultiplier.x * 0.2;
-        
+
         pose.mulPose(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
         pose.mulPose(com.mojang.math.Axis.ZP.rotation(entity.getYRot()));
-        
+
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(itemstack.getItem());
+        if (id != null) {
+            ItemPhysicConfig.ItemRotation rotation = ItemPhysic.CONFIG.rendering.getRotationFor(id.toString());
+            if (rotation != null) {
+                int transitionTicks = ItemPhysic.CONFIG.rendering.rotationTransitionTicks;
+                float progress = Math.min(entity.getAge() / (float) transitionTicks, 1.0F);
+                progress = 1.0F - (1.0F - progress) * (1.0F - progress);
+
+                if (rotation.xOffset != 0 || rotation.yOffset != 0 || rotation.zOffset != 0) {
+                    pose.translate(rotation.xOffset * progress, rotation.yOffset * progress, rotation.zOffset * progress);
+                }
+
+                if (rotation.xRot != 0) {
+                    pose.mulPose(Axis.XP.rotationDegrees(rotation.xRot * progress));
+                }
+                if (rotation.yRot != 0) {
+                    pose.mulPose(Axis.YP.rotationDegrees(rotation.yRot * progress));
+                }
+                if (rotation.zRot != 0) {
+                    pose.mulPose(Axis.ZP.rotationDegrees(rotation.zRot * progress));
+                }
+            }
+        }
+
         boolean applyEffects = entity.getAge() != 0 && (flag || mc.options != null);
-        
+
         //Handle Rotations
         if (applyEffects) {
             if (flag) {
@@ -187,7 +213,7 @@ public class ItemPhysicClient {
                         fluid = CommonPhysic.getFluid(entity, true);
                     if (fluid != null)
                         rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.level()));
-                    
+
                     entity.setXRot(entity.getXRot() + rotateBy);
                 } else if (ItemPhysic.CONFIG.rendering.oldRotation) {
                     for (int side = 0; side < 4; side++) {
@@ -221,7 +247,7 @@ public class ItemPhysicClient {
                                 entity.setXRot(entity.getXRot() + rotateBy);
                             else
                                 entity.setXRot(entity.getXRot() - rotateBy);
-                            
+
                     }
                 }
             } else if (entity != null && !Double.isNaN(entity.getX()) && !Double.isNaN(entity.getY()) && !Double.isNaN(entity.getZ()) && entity.level() != null) {
@@ -233,11 +259,11 @@ public class ItemPhysicClient {
                     Fluid fluid = CommonPhysic.getFluid(entity);
                     if (fluid != null)
                         rotateBy /= (1 + CommonPhysic.getViscosity(fluid, entity.level()));
-                    
+
                     entity.setXRot(entity.getXRot() + rotateBy);
                 }
             }
-            
+
             if (flag)
                 pose.translate(0, -0.2, -0.08);
             else if (ItemPhysic.CONFIG.rendering.blockRequireOffset.is(entity.level().getBlockState(entity.blockPosition())) || ItemPhysic.CONFIG.rendering.blockBelowRequireOffset
@@ -245,7 +271,7 @@ public class ItemPhysicClient {
                 pose.translate(0, 0.0, -0.14 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
             else
                 pose.translate(0, 0, -0.04 - entity.bobOffs * RANDOM_Y_OFFSET_SCALE);
-            
+
             double height = 0.2;
             if (flag)
                 pose.translate(0, height, 0);
@@ -253,14 +279,14 @@ public class ItemPhysicClient {
             if (flag)
                 pose.translate(0, -height, 0);
         }
-        
+
         if (!flag) {
             float f7 = -0.0F * (j - 1) * 0.5F;
             float f8 = -0.0F * (j - 1) * 0.5F;
             float f9 = -0.09375F * (j - 1) * 0.5F;
             pose.translate(f7, f8, f9);
         }
-        
+
         for (int k = 0; k < j; ++k) {
             pose.pushPose();
             if (k > 0) {
@@ -271,20 +297,20 @@ public class ItemPhysicClient {
                     pose.translate(f11, f13, f10);
                 }
             }
-            
+
             itemRenderer.render(itemstack, ItemDisplayContext.GROUND, false, pose, buffer, packedLight, OverlayTexture.NO_OVERLAY, bakedmodel);
             pose.popPose();
             if (!flag)
                 pose.translate(0.0, 0.0, 0.09375F); // pose.translate(0.0, 0.0, 0.05375F);
-                
+
         }
-        
+
         pose.popPose();
         return true;
     }
-    
+
     public static int getModelCount(ItemStack stack) {
-        
+
         if (stack.getCount() > 48)
             return 5;
         if (stack.getCount() > 32)
@@ -293,10 +319,10 @@ public class ItemPhysicClient {
             return 3;
         if (stack.getCount() > 1)
             return 2;
-        
+
         return 1;
     }
-    
+
     public static boolean onPlayerInteractClient(Level level, Player player, boolean rightClick) {
         HitResult result = getEntityItem(mc.player);
         if (result != null && result.getType() == HitResult.Type.ENTITY) {
@@ -309,17 +335,17 @@ public class ItemPhysicClient {
         }
         return false;
     }
-    
+
     public static boolean onPlayerInteract(Player player) {
         if (ItemPhysic.CONFIG.pickup.canPickup(player)) {
             if (!ItemPhysicClient.PICKUP.isUnbound())
                 return false;
-            
+
             return onPlayerInteractClient(player.level(), player, true);
         }
         return false;
     }
-    
+
     public static HitResult getEntityItem(Player player) {
         double distance = CommonPhysic.getReachDistance(player);
         float partialTicks = mc.getDeltaFrameTime();
@@ -331,9 +357,9 @@ public class ItemPhysicClient {
         if (hitResult != null && hitResult.getType() != Type.MISS)
             distance = Math.min(hitResult.getLocation().distanceTo(position), distance);
         return CommonPhysic.getEntityItem(player, position, position.add(view.x * distance, view.y * distance, view.z * distance));
-        
+
     }
-    
+
     private static HitResult pick(Entity entity, double blockInteraction, double entityItneraction, float partialTicks, Vec3 position, Vec3 view, Vec3 endPosition) {
         double d0 = Math.max(blockInteraction, entityItneraction);
         double d1 = Mth.square(d0);
@@ -343,13 +369,13 @@ public class ItemPhysicClient {
             d1 = d2;
             d0 = Math.sqrt(d2);
         }
-        
+
         AABB aabb = entity.getBoundingBox().expandTowards(view.scale(d0)).inflate(1.0, 1.0, 1.0);
         EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(entity, position, endPosition, aabb, x -> !x.isSpectator() && x.isPickable(), d1);
         return entityhitresult != null && entityhitresult.getLocation()
                 .distanceToSqr(position) < d2 ? filterHitResult(entityhitresult, position, entityItneraction) : filterHitResult(hitresult, position, blockInteraction);
     }
-    
+
     private static HitResult filterHitResult(HitResult hit, Vec3 vec, double range) {
         Vec3 hitVec = hit.getLocation();
         if (!hitVec.closerThan(vec, range))

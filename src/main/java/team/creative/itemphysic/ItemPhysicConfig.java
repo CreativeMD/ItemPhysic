@@ -1,5 +1,7 @@
 package team.creative.itemphysic;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -13,7 +15,7 @@ import team.creative.creativecore.common.util.type.list.SortingBlockList;
 import team.creative.creativecore.common.util.type.list.SortingList;
 
 public class ItemPhysicConfig {
-    
+
     @CreativeConfig
     public General general = new General();
     @CreativeConfig
@@ -22,22 +24,22 @@ public class ItemPhysicConfig {
     public Rendering rendering = new Rendering();
     @CreativeConfig(name = "throw")
     public Throw throwConfig = new Throw();
-    
+
     public static class General {
-        
+
         @CreativeConfig
         public boolean fallSounds = true;
-        
+
         @CreativeConfig
         public boolean disableCactusDamage = true;
-        
+
         @CreativeConfig
         public SortingList swimmingItems = new SortingList();
         @CreativeConfig
         public SortingList burningItems = new SortingList();
         @CreativeConfig
         public SortingList undestroyableItems = new SortingList();
-        
+
         public General() {
             swimmingItems.addSortingObjects(BlockTags.MINEABLE_WITH_AXE, BlockTags.LOGS, BlockTags.PLANKS, Blocks.SPONGE, Blocks.WET_SPONGE, BlockTags.ICE, BlockTags.LEAVES,
                 BlockTags.FLOWERS, BlockTags.SMALL_FLOWERS, BlockTags.TALL_FLOWERS, BlockTags.SNOW, Blocks.CACTUS, Blocks.CAKE, Blocks.COBWEB, Blocks.SNOW, Items.APPLE, Items.BOW,
@@ -47,7 +49,7 @@ public class ItemPhysicConfig {
                 Items.POTATO, Items.POISONOUS_POTATO, Items.BAKED_POTATO, Items.PUMPKIN_PIE, Items.ELYTRA, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT, Items.COOKED_RABBIT,
                 Items.RABBIT_STEW, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.BEETROOT_SOUP, Items.SHIELD, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS,
                 Items.SNOWBALL);
-            
+
             burningItems.addSortingObjects(BlockTags.MINEABLE_WITH_AXE, BlockTags.LOGS_THAT_BURN, BlockTags.PLANKS, Blocks.SPONGE, Blocks.WET_SPONGE, BlockTags.ICE,
                 BlockTags.LEAVES, BlockTags.WOOL, BlockTags.WOOL_CARPETS, BlockTags.FLOWERS, BlockTags.SMALL_FLOWERS, BlockTags.TALL_FLOWERS, BlockTags.SNOW, Blocks.CACTUS,
                 Blocks.CAKE, Blocks.COBWEB, Blocks.SNOW, Items.APPLE, Items.BOW, Items.BOWL, Items.ARROW, Items.APPLE, Items.STRING, Items.FEATHER, Items.WHEAT, Items.BREAD,
@@ -58,14 +60,14 @@ public class ItemPhysicConfig {
                 Items.FILLED_MAP, Items.PUMPKIN_PIE, Items.NAME_TAG, Items.ENCHANTED_BOOK, Items.ELYTRA, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT, Items.COOKED_RABBIT,
                 Items.RABBIT_STEW, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.BEETROOT_SOUP, Items.SHIELD, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS,
                 new CreativeIngredientFuel(), Items.SPIDER_EYE, Items.ROTTEN_FLESH, Items.SNOWBALL);
-            
+
             undestroyableItems.addSortingObjects(Items.NETHER_STAR, Blocks.BEDROCK, Blocks.OBSIDIAN, Blocks.BARRIER);
         }
-        
+
     }
-    
+
     public static class Pickup {
-        
+
         @CreativeConfig
         public boolean customPickup = false;
         @CreativeConfig
@@ -77,18 +79,18 @@ public class ItemPhysicConfig {
         @CreativeConfig
         @CreativeConfig.DecimalRange(min = 0, max = 1)
         public double hitboxIncrease = 0.2;
-        
+
         @CreativeConfig
         public SortingList alwaysPickup = new SortingList();
-        
+
         public boolean canPickup(Player player) {
             return customPickup && PlayerUtils.getGameType(player) != GameType.SPECTATOR;
         }
-        
+
     }
-    
+
     public static class Rendering {
-        
+
         @CreativeConfig
         public boolean oldRotation = false;
         @CreativeConfig
@@ -106,38 +108,90 @@ public class ItemPhysicConfig {
         public boolean showPickupTooltipKeybind = false;
         @CreativeConfig
         public boolean disableThrowHUD = false;
-        
+
         @CreativeConfig
         public SortingList vanillaRendered = new SortingList(true);
-        
+
         @CreativeConfig
         public int tooltipOffsetX = 0;
         @CreativeConfig
         public int tooltipOffsetY = 0;
-        
+
         @CreativeConfig
         public SortingBlockList blockRequireOffset = new SortingBlockList().add(Blocks.SNOW).add(Blocks.SOUL_SAND).add(Blocks.MUD);
-        
+
         @CreativeConfig
         public SortingBlockList blockBelowRequireOffset = new SortingBlockList();
-        
+
+        @CreativeConfig
+        public List<ItemRotation> customItemRotations = new ArrayList<>();
+
+        @CreativeConfig
+        public int rotationTransitionTicks = 20;
+
+        public Rendering() {
+            customItemRotations.add(new ItemRotation("tacz:modern_kinetic_gun", 0.0F, 90.0F, 0.0F, 0F, 0F, -0.03F));
+        }
+
+        public ItemRotation getRotationFor(String itemId) {
+            for (ItemRotation rotation : customItemRotations) {
+                if (rotation.itemId.equals(itemId)) {
+                    return rotation;
+                }
+            }
+            return null;
+        }
+
     }
-    
+
+    public static class ItemRotation {
+        @CreativeConfig
+        public String itemId = "";
+        @CreativeConfig
+        public float xRot = 0.0F;
+        @CreativeConfig
+        public float yRot = 0.0F;
+        @CreativeConfig
+        public float zRot = 0.0F;
+        @CreativeConfig
+        public float xOffset = 0.0F;
+        @CreativeConfig
+        public float yOffset = 0.0F;
+        @CreativeConfig
+        public float zOffset = 0.0F;
+
+        public ItemRotation() {}
+
+        public ItemRotation(String itemId, float xRot, float yRot, float zRot) {
+            this(itemId, xRot, yRot, zRot, 0.0F, 0.0F, 0.0F);
+        }
+
+        public ItemRotation(String itemId, float xRot, float yRot, float zRot, float xOffset, float yOffset, float zOffset) {
+            this.itemId = itemId;
+            this.xRot = xRot;
+            this.yRot = yRot;
+            this.zRot = zRot;
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+            this.zOffset = zOffset;
+        }
+    }
+
     public static class Throw {
-        
+
         @CreativeConfig
         public boolean enabled = true;
-        
+
         @CreativeConfig
         @CreativeConfig.IntRange(min = 1, max = 20)
         public int maxStages = 6;
-        
+
         @CreativeConfig
         public double multiplierPerStage = 1;
-        
+
         @CreativeConfig
         public int stageChargeTime = 10;
-        
+
     }
-    
+
 }
