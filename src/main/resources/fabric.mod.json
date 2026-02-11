@@ -7,6 +7,11 @@
     "authors": [
         "CreativeMD"
     ],
+    "contact": {
+        "sources": "https://github.com/CreativeMD/ItemPhysic",
+        "homepage": "https://modrinth.com/mod/itemphysic",
+        "issues": "https://github.com/CreativeMD/ItemPhysic/issues"
+    },
     "license": "LGPL-3.0-only",
     "icon": "itemphysic.png",
     "environment": "*",
