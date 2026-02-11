@@ -1,3 +1,6 @@
+1.8.13
+Added contact information to fabric.mod.json
+
 1.8.12
 Fixed tooltip of pickup items not working correctly
 
