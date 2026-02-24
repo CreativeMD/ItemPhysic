@@ -1,3 +1,6 @@
+1.8.11
+Added walkOverRange configuration
+
 1.8.10
 Added contact information to fabric.mod.json
 
