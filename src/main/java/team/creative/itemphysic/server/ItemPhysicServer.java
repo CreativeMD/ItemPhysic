@@ -157,6 +157,12 @@ public class ItemPhysicServer {
     }
     
     public static boolean playerTouch(ItemEntity item, Player player) {
+        if (ItemPhysic.CONFIG.pickup.walkOverRange < 1) {
+            var range = ItemPhysic.CONFIG.pickup.walkOverRange;
+            if (!item.getBoundingBox().intersects(player.getBoundingBox().inflate(range, Math.max(0.5, range), range)))
+                return true;
+        }
+        
         if (ItemPhysic.CONFIG.pickup.canPickup(player) && (!player
                 .isCrouching() || !ItemPhysic.CONFIG.pickup.pickupWhenSneaking) && !ItemPhysic.CONFIG.pickup.pickupNormally && !ItemPhysic.CONFIG.pickup.alwaysPickup.canPass(item
                         .getItem()))
