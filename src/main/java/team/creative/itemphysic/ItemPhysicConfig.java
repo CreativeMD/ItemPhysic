@@ -72,6 +72,11 @@ public class ItemPhysicConfig {
         public boolean pickupWhenSneaking = true;
         @CreativeConfig
         public boolean pickupNormally = false;
+        
+        @CreativeConfig
+        @CreativeConfig.DecimalRange(min = 0, max = 1, slider = true)
+        public double walkOverRange = 1;
+        
         @CreativeConfig
         public double maximumPickupRange = 5;
         @CreativeConfig
