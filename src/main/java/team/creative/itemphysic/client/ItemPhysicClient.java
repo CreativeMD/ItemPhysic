@@ -8,10 +8,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.ItemEntityRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -85,10 +85,10 @@ public class ItemPhysicClient {
     
     public static void renderTick(Object object) {
         if (Minecraft.getInstance().screen == null)
-            renderTooltip((GuiGraphics) object);
+            renderTooltip((GuiGraphicsExtractor) object);
     }
     
-    public static void renderTooltip(GuiGraphics graphics) {
+    public static void renderTooltip(GuiGraphicsExtractor graphics) {
         var mc = Minecraft.getInstance();
         if (mc != null && mc.player != null && !mc.isPaused()) {
             if (ItemPhysic.CONFIG.pickup.canPickup(mc.player)) {
@@ -127,8 +127,9 @@ public class ItemPhysicClient {
                         //RenderSystem.disableBlend();
                         for (int i = 0; i < list.size(); i++) {
                             String text = list.get(i).getString();
-                            graphics.drawString(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX,
-                                mc.getWindow().getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY, ColorUtils.WHITE);
+                            graphics.text(mc.font, list.get(i), mc.getWindow().getGuiScaledWidth() / 2 - mc.font.width(text) / 2 + ItemPhysic.CONFIG.rendering.tooltipOffsetX, mc
+                                    .getWindow().getGuiScaledHeight() / 2 - height + (mc.font.lineHeight + space) * i + ItemPhysic.CONFIG.rendering.tooltipOffsetY,
+                                ColorUtils.WHITE);
                         }
                         
                     }
@@ -136,7 +137,7 @@ public class ItemPhysicClient {
             }
             
             if (ItemPhysic.CONFIG.throwConfig.enabled && !ItemPhysic.CONFIG.rendering.disableThrowHUD && throwCharge > 0 && !mc.player.getMainHandItem().isEmpty())
-                mc.player.displayClientMessage(Component.translatable("item.throw", getChargeStage()), true);
+                mc.player.sendOverlayMessage(Component.translatable("item.throw", getChargeStage()));
         }
     }
     
@@ -149,7 +150,7 @@ public class ItemPhysicClient {
         rand.setSeed(state.seed);
         int j = getModelCount(state.count);
         boolean gui3d = ((ItemEntityRenderStateExtender) state).isBlock();
-        var transform = ((LayerRenderStateAccessor) ((ItemStackRenderStateAccessor) state.item).callFirstLayer()).getTransform();
+        var transform = ((LayerRenderStateAccessor) ((ItemStackRenderStateAccessor) state.item).callFirstLayer()).getItemTransform();
         
         pose.mulPose(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
         pose.mulPose(com.mojang.math.Axis.ZP.rotation(((ItemEntityRenderStateExtender) state).getYRot()));

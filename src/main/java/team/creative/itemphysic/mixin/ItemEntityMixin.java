@@ -1,5 +1,6 @@
 package team.creative.itemphysic.mixin;
 
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -14,7 +15,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -25,6 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import team.creative.itemphysic.ItemPhysic;
 import team.creative.itemphysic.common.CommonPhysic;
@@ -57,7 +58,7 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     }
     
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
+    public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
         return ItemPhysicServer.interact((ItemEntity) (Object) this, player, hand);
     }
     
@@ -70,8 +71,11 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
     }
     
     @Override
-    public boolean updateFluidHeightAndDoFluidPushing(TagKey<Fluid> fluid, double p_204033_) {
-        return CommonPhysic.updateFluidHeightAndDoFluidPushing((ItemEntity) (Object) this, fluid, p_204033_);
+    public @Nullable AABB getFluidInteractionBox() {
+        var bb = super.getFluidInteractionBox();
+        if (canSwim())
+            bb = bb.inflate(0.3);
+        return bb;
     }
     
     @Override
@@ -128,9 +132,9 @@ public abstract class ItemEntityMixin extends Entity implements ItemEntityExtend
             require = 2)
     public void setDeltaMovementRedirect(ItemEntity entity, Vec3 vec) {}
     
-    @Inject(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"), require = 1)
-    private void onSyncedDataUpdated(EntityDataAccessor<?> accessor, CallbackInfo callback) {
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        super.onSyncedDataUpdated(accessor);
         swim = ItemPhysic.CONFIG.general.swimmingItems.canPass(level(), ((ItemEntity) (Entity) this).getItem());
         burn = ItemPhysic.CONFIG.general.burningItems.canPass(level(), ((ItemEntity) (Entity) this).getItem());
     }

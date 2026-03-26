@@ -1,9 +1,9 @@
 package team.creative.itemphysic.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.Entity;
@@ -27,9 +27,9 @@ public abstract class ItemEntityMixinClient extends Entity implements ItemEntity
         return skipPhysicRenderer;
     }
     
-    @Inject(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;setEntityRepresentation(Lnet/minecraft/world/entity/Entity;)V"), require = 1)
-    private void onSyncedDataUpdated(EntityDataAccessor<?> accessor, CallbackInfo callback) {
+    @WrapMethod(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", require = 1)
+    public void onSyncedDataUpdatedWrapper(EntityDataAccessor<?> accessor, Operation<Void> original) {
+        original.call(accessor);
         if (level().isClientSide())
             skipPhysicRenderer = ItemPhysic.CONFIG.rendering.vanillaRendered.canPass(level(), ((ItemEntity) (Entity) this).getItem());
     }

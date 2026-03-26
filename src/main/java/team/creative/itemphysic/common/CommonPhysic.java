@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -57,7 +55,7 @@ public class CommonPhysic {
         
         if (fluid == null) {
             if (!item.isNoGravity())
-                item.setDeltaMovement(item.getDeltaMovement().add(0.0D, -0.04D, 0.0D));
+                item.setDeltaMovement(item.getDeltaMovement().add(0.0D, -item.getGravity(), 0.0D));
             return;
         }
         
@@ -65,7 +63,7 @@ public class CommonPhysic {
         if (((ItemEntityExtender) item).canSwim() && !fluid.is(FluidTags.LAVA)) {
             double maxSpeed = 0.1;
             if (item.getDeltaMovement().y < maxSpeed)
-                force = Math.min(0.04, maxSpeed - item.getDeltaMovement().y);
+                force = Math.min(item.getGravity(), maxSpeed - item.getDeltaMovement().y);
         } else if (item.getDeltaMovement().y < -0.1) {
             force = 0;
             item.setDeltaMovement(item.getDeltaMovement().multiply(1, 0.8, 1));
@@ -100,73 +98,6 @@ public class CommonPhysic {
         if (d0 - pos.getY() - 0.2 <= filled)
             return fluid;
         return null;
-    }
-    
-    public static boolean updateFluidHeightAndDoFluidPushing(ItemEntity item, TagKey<Fluid> fluidTag, double p_210500_2_) {
-        double size = -0.001D;
-        if (fluidTag == FluidTags.WATER && ((ItemEntityExtender) item).canSwim())
-            size = 0.3;
-        
-        if (item.touchingUnloadedChunk()) {
-            return false;
-        } else {
-            AABB aabb = item.getBoundingBox().inflate(size);
-            int i = Mth.floor(aabb.minX);
-            int j = Mth.ceil(aabb.maxX);
-            int k = Mth.floor(aabb.minY);
-            int l = Mth.ceil(aabb.maxY);
-            int i1 = Mth.floor(aabb.minZ);
-            int j1 = Mth.ceil(aabb.maxZ);
-            double d0 = 0.0D;
-            boolean flag = item.isPushedByFluid();
-            boolean flag1 = false;
-            Vec3 vec3 = Vec3.ZERO;
-            int k1 = 0;
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-            
-            for (int l1 = i; l1 < j; ++l1) {
-                for (int i2 = k; i2 < l; ++i2) {
-                    for (int j2 = i1; j2 < j1; ++j2) {
-                        blockpos$mutableblockpos.set(l1, i2, j2);
-                        FluidState fluidstate = item.level().getFluidState(blockpos$mutableblockpos);
-                        if (fluidstate.is(fluidTag)) {
-                            double d1 = i2 + fluidstate.getHeight(item.level(), blockpos$mutableblockpos);
-                            if (d1 >= aabb.minY) {
-                                flag1 = true;
-                                d0 = Math.max(d1 - aabb.minY, d0);
-                                if (flag) {
-                                    Vec3 vec31 = fluidstate.getFlow(item.level(), blockpos$mutableblockpos);
-                                    if (d0 < 0.4D) {
-                                        vec31 = vec31.scale(d0);
-                                    }
-                                    
-                                    vec3 = vec3.add(vec31);
-                                    ++k1;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-            if (vec3.length() > 0.0D) {
-                if (k1 > 0)
-                    vec3 = vec3.scale(1.0D / k1);
-                
-                vec3 = vec3.normalize();
-                
-                Vec3 vec32 = item.getDeltaMovement();
-                vec3 = vec3.scale(p_210500_2_ * 1.0D);
-                if (Math.abs(vec32.x) < 0.003D && Math.abs(vec32.z) < 0.003D && vec3.length() < 0.0045D)
-                    vec3 = vec3.normalize().scale(0.0045D);
-                
-                item.setDeltaMovement(item.getDeltaMovement().add(vec3));
-            }
-            
-            ((EntityAccessor) item).getFluidOnEyes().add(fluidTag);
-            
-            return flag1;
-        }
     }
     
     public static double getReachDistance(Player player) {
