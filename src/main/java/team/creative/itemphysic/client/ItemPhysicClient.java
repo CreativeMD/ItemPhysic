@@ -238,7 +238,7 @@ public class ItemPhysicClient {
                 }
             }
             
-            if (flag)
+            if (bakedmodel.usesBlockLight())
                 pose.translate(0, -0.2, -0.08);
             else if (ItemPhysic.CONFIG.rendering.blockRequireOffset.is(entity.level().getBlockState(entity.blockPosition())) || ItemPhysic.CONFIG.rendering.blockBelowRequireOffset
                     .is(entity.level().getBlockState(entity.blockPosition().below())))
