@@ -146,8 +146,15 @@ public class ItemPhysicServer {
             if (item.onGround() && item.getDeltaMovement().y < 0.0D)
                 item.setDeltaMovement(item.getDeltaMovement().multiply(1.0D, -0.5D, 1.0D));
         } else {
-            float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level());
-            item.setDeltaMovement(item.getDeltaMovement().multiply(1 / (1.2 * viscosity), 1, 1 / (1.2 * viscosity)));
+            if (ItemPhysic.CONFIG.general.vanillaFlowBehavior) {
+                if (item.isInWater() && item.getFluidHeight(FluidTags.WATER) > 0.1F)
+                    ((ItemEntityAccessor) item).callSetUnderwaterMovement();
+                else if (item.isInLava() && item.getFluidHeight(FluidTags.LAVA) > 0.1F)
+                    ((ItemEntityAccessor) item).callSetUnderLavaMovement();
+            } else {
+                float viscosity = CommonPhysic.getViscosity(fluid.get(), item.level());
+                item.setDeltaMovement(item.getDeltaMovement().multiply(1 / (1.2 * viscosity), 1, 1 / (1.2 * viscosity)));
+            }
         }
     }
     

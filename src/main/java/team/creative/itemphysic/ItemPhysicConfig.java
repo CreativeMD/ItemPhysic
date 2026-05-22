@@ -32,6 +32,9 @@ public class ItemPhysicConfig {
         public boolean disableCactusDamage = true;
         
         @CreativeConfig
+        public boolean vanillaFlowBehavior = false;
+        
+        @CreativeConfig
         public SortingList swimmingItems = new SortingList();
         @CreativeConfig
         public SortingList burningItems = new SortingList();
