@@ -3,6 +3,7 @@ package team.creative.itemphysic.server;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
@@ -193,6 +194,7 @@ public class ItemPhysicServer {
             
             ItemStack copy = itemstack.copy();
             ItemEntityAccessor ie = (ItemEntityAccessor) entity;
+            int sizeBefore = itemstack.getCount();
             if ((!entity.hasPickUpDelay() || ItemPhysic.CONFIG.pickup.customPickup) && (ie.getTarget() == null || ie.getTarget().equals(player
                     .getUUID())) && (hook == 1 || i <= 0 || player.getInventory().add(itemstack))) {
                 copy.setCount(copy.getCount() - entity.getItem().getCount());
@@ -201,10 +203,17 @@ public class ItemPhysicServer {
                 if (itemstack.isEmpty()) {
                     entity.discard();
                     itemstack.setCount(i);
-                }
+                } else
+                    entity.setItem(itemstack.copy());
                 
                 player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
                 player.onItemPickup(entity);
+            } else if (sizeBefore > itemstack.getCount()) {
+                entity.setItem(itemstack.copy());
+                player.awardStat(Stats.ITEM_PICKED_UP.get(item), i);
+                player.onItemPickup(entity);
+                player.level().playSound(null, entity.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, (entity.level().random.nextFloat() - entity
+                        .level().random.nextFloat()) * 1.4F + 2.0F);
             }
             
         }
