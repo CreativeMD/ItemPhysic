@@ -84,7 +84,7 @@ public class ItemPhysicClient {
     }
     
     public static void renderTick(Object object) {
-        if (Minecraft.getInstance().screen == null)
+        if (Minecraft.getInstance().gui.screen() == null)
             renderTooltip((GuiGraphicsExtractor) object);
     }
     

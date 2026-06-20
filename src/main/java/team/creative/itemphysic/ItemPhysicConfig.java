@@ -1,5 +1,6 @@
 package team.creative.itemphysic;
 
+import net.minecraft.tags.BlockItemTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -48,7 +49,7 @@ public class ItemPhysicConfig {
                 Items.BAKED_POTATO, Items.PUMPKIN_PIE, Items.ELYTRA, Items.MUTTON, Items.COOKED_MUTTON, Items.RABBIT, Items.COOKED_RABBIT, Items.RABBIT_STEW, Items.BEETROOT,
                 Items.BEETROOT_SEEDS, Items.BEETROOT_SOUP, Items.SHIELD, Items.WHEAT_SEEDS, Items.PUMPKIN_SEEDS, Items.MELON_SEEDS, Items.SNOWBALL);
             
-            burningItems.addSortingObjects(BlockTags.MINEABLE_WITH_AXE, BlockTags.LOGS_THAT_BURN, BlockTags.PLANKS, Blocks.SPONGE, Blocks.WET_SPONGE, BlockTags.ICE,
+            burningItems.addSortingObjects(BlockTags.MINEABLE_WITH_AXE, BlockItemTags.LOGS_THAT_BURN, BlockTags.PLANKS, Blocks.SPONGE, Blocks.WET_SPONGE, BlockTags.ICE,
                 BlockTags.LEAVES, BlockTags.WOOL, BlockTags.WOOL_CARPETS, BlockTags.FLOWERS, BlockTags.SMALL_FLOWERS, BlockTags.SNOW, Blocks.CACTUS, Blocks.CAKE, Blocks.COBWEB,
                 Blocks.SNOW, Items.APPLE, Items.BOW, Items.BOWL, Items.ARROW, Items.APPLE, Items.STRING, Items.FEATHER, Items.WHEAT, Items.BREAD, Items.LEATHER,
                 Items.LEATHER_BOOTS, Items.LEATHER_CHESTPLATE, Items.LEATHER_HELMET, Items.LEATHER_LEGGINGS, Items.LEAD, Items.PAINTING, Items.ACACIA_BOAT, Items.ACACIA_DOOR,
