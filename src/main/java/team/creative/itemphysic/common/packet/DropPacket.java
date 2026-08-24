@@ -39,6 +39,9 @@ public class DropPacket extends CreativePacket {
         }
         double d = player.getEyeY() - 0.3f;
         ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), d, player.getZ(), itemStack);
+        ItemTossEvent event = new ItemTossEvent(itemEntity, player);
+        if (MinecraftForge.EVENT_BUS.post(event))
+            return null;
         itemEntity.setPickUpDelay(40);
         RandomSource random = player.getRandom();
         if (bl2) {
