@@ -9,6 +9,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.SwingAnimation;
 import team.creative.creativecore.common.network.CreativePacket;
 import team.creative.itemphysic.ItemPhysic;
 
@@ -28,12 +29,10 @@ public class DropPacket extends CreativePacket {
     public void executeClient(Player player) {}
     
     public ItemEntity createEntity(ItemStack itemStack, Player player, boolean bl, boolean bl2) {
-        if (itemStack.isEmpty()) {
+        if (itemStack.isEmpty())
             return null;
-        }
-        if (player.level().isClientSide()) {
-            player.swing(InteractionHand.MAIN_HAND);
-        }
+        if (player.level().isClientSide())
+            player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
         double d = player.getEyeY() - 0.3f;
         ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), d, player.getZ(), itemStack);
         itemEntity.setPickUpDelay(40);

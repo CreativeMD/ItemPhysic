@@ -16,8 +16,8 @@
         "ItemEntityRenderStateMixin",
         "ItemStackRenderStateAccessor",
         "LayerRenderStateAccessor",
-        "LocalPlayerMixin",
         "MinecraftMixin",
+        "MultiPlayerGameModeMixin",
         "RenderTypeAccessor"
     ],
     "minVersion": "0.8"

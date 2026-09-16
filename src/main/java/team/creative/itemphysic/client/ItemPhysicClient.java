@@ -26,6 +26,7 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -76,7 +77,7 @@ public class ItemPhysicClient {
                     ItemPhysic.NETWORK.sendToServer(new DropPacket(mc.hasControlDown(), getChargeStage()));
                     if (mc.player.getInventory().removeItem(mc.player.getInventory().getSelectedSlot(), dropAll && !mc.player.getInventory().getSelectedItem().isEmpty() ? mc.player
                             .getInventory().getSelectedItem().getCount() : 1) != ItemStack.EMPTY)
-                        mc.player.swing(InteractionHand.MAIN_HAND);
+                        mc.player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                 }
                 throwCharge = 0;
             }
@@ -152,8 +153,8 @@ public class ItemPhysicClient {
         boolean gui3d = ((ItemEntityRenderStateExtender) state).isBlock();
         var transform = ((LayerRenderStateAccessor) ((ItemStackRenderStateAccessor) state.item).callFirstLayer()).getItemTransform();
         
-        pose.mulPose(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
-        pose.mulPose(com.mojang.math.Axis.ZP.rotation(((ItemEntityRenderStateExtender) state).getYRot()));
+        pose.rotate(com.mojang.math.Axis.XP.rotation((float) Math.PI / 2));
+        pose.rotate(com.mojang.math.Axis.ZP.rotation(((ItemEntityRenderStateExtender) state).getYRot()));
         
         var mc = Minecraft.getInstance();
         
@@ -168,7 +169,7 @@ public class ItemPhysicClient {
             double height = transform.scale().y();
             if (gui3d)
                 pose.translate(0, height, 0);
-            pose.mulPose(com.mojang.math.Axis.YP.rotation(((ItemEntityRenderStateExtender) state).getXRot()));
+            pose.rotate(com.mojang.math.Axis.YP.rotation(((ItemEntityRenderStateExtender) state).getXRot()));
             if (gui3d)
                 pose.translate(0, -height, 0);
         }
@@ -224,7 +225,7 @@ public class ItemPhysicClient {
         if (result != null && result.getType() == HitResult.Type.ENTITY) {
             ItemEntity entity = (ItemEntity) ((EntityHitResult) result).getEntity();
             if (level.isClientSide() && entity != null) {
-                player.swing(InteractionHand.MAIN_HAND);
+                player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
                 ItemPhysic.NETWORK.sendToServer(new PickupPacket(entity.getUUID(), rightClick));
                 return true;
             }
