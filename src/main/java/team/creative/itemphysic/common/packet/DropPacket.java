@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.common.network.CreativePacket;
 import team.creative.itemphysic.ItemPhysic;
 
@@ -31,14 +32,14 @@ public class DropPacket extends CreativePacket {
     public void executeClient(Player player) {}
     
     public ItemEntity createEntity(ItemStack itemStack, Player player, boolean bl, boolean bl2) {
-        if (itemStack.isEmpty()) {
+        if (itemStack.isEmpty())
             return null;
-        }
-        if (player.level().isClientSide) {
+        if (player.level().isClientSide)
             player.swing(InteractionHand.MAIN_HAND);
-        }
         double d = player.getEyeY() - 0.3f;
         ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), d, player.getZ(), itemStack);
+        if (CreativeCore.loader().onItemToss(itemEntity, player))
+            return null;
         itemEntity.setPickUpDelay(40);
         RandomSource random = player.getRandom();
         if (bl2) {
