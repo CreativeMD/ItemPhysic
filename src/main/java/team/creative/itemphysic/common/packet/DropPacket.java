@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.SwingAnimation;
+import team.creative.creativecore.CreativeCore;
 import team.creative.creativecore.common.network.CreativePacket;
 import team.creative.itemphysic.ItemPhysic;
 
@@ -35,6 +36,8 @@ public class DropPacket extends CreativePacket {
             player.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false);
         double d = player.getEyeY() - 0.3f;
         ItemEntity itemEntity = new ItemEntity(player.level(), player.getX(), d, player.getZ(), itemStack);
+        if (CreativeCore.loader().onItemToss(itemEntity, player))
+            return null;
         itemEntity.setPickUpDelay(40);
         RandomSource random = player.getRandom();
         if (bl2) {
