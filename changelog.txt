@@ -1,3 +1,6 @@
+1.8.16
+Added missing toss event with custom throw
+
 1.8.15
 Added option vanillaFlowBehavior
 Fixed issue when picking up item and inventory is already full
