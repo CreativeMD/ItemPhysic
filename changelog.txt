@@ -1,3 +1,6 @@
+1.8.17
+Fixed performance and logging issue when looking at sable contraptions
+
 1.8.16
 Added missing toss event with custom throw
 
