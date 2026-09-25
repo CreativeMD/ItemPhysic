@@ -19,7 +19,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -257,18 +256,18 @@ public class ItemPhysicClient {
         
     }
     
-    private static HitResult pick(Entity entity, double blockInteraction, double entityItneraction, float partialTicks, Vec3 position, Vec3 view, Vec3 endPosition) {
+    private static HitResult pick(Player player, double blockInteraction, double entityItneraction, float partialTicks, Vec3 position, Vec3 view, Vec3 endPosition) {
         double d0 = Math.max(blockInteraction, entityItneraction);
         double d1 = Mth.square(d0);
-        HitResult hitresult = entity.level().clip(new ClipContext(position, endPosition, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity));
-        double d2 = hitresult.getLocation().distanceToSqr(position);
+        HitResult hitresult = player.level().clip(new ClipContext(position, endPosition, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player));
+        double d2 = Math.min(hitresult.getLocation().distanceToSqr(position), player.entityInteractionRange());
         if (hitresult.getType() != HitResult.Type.MISS) {
             d1 = d2;
             d0 = Math.sqrt(d2);
         }
         
-        AABB aabb = entity.getBoundingBox().expandTowards(view.scale(d0)).inflate(1.0, 1.0, 1.0);
-        EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(entity, position, endPosition, aabb, x -> !x.isSpectator() && x.isPickable(), d1);
+        AABB aabb = player.getBoundingBox().expandTowards(view.scale(d0)).inflate(1.0, 1.0, 1.0);
+        EntityHitResult entityhitresult = ProjectileUtil.getEntityHitResult(player, position, endPosition, aabb, x -> !x.isSpectator() && x.isPickable(), d1);
         return entityhitresult != null && entityhitresult.getLocation().distanceToSqr(position) < d2 ? filterHitResult(entityhitresult, position,
             entityItneraction) : filterHitResult(hitresult, position, blockInteraction);
     }
