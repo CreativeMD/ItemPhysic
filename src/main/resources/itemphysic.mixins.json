@@ -1,8 +1,7 @@
 {
     "required": true,
     "package": "team.creative.itemphysic.mixin",
-    "compatibilityLevel": "JAVA_17",
-    "refmap": "itemphysic.mixin.refmap.json",
+    "compatibilityLevel": "JAVA_21",
     "server": [
     ],
     "mixins": [
