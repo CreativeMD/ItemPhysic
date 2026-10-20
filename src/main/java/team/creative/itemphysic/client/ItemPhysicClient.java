@@ -51,9 +51,17 @@ public class ItemPhysicClient {
     public static int throwCharge;
     private static final double RANDOM_Y_OFFSET_SCALE = 0.05 / (Math.PI * 2);
     
+    private static boolean LOADED_EARLY = false;
+    
+    public static void initEarly() {
+        if (LOADED_EARLY)
+            return;
+        CreativeCoreClient.loader().registerKeybind(PICKUP);
+        LOADED_EARLY = true;
+    }
+    
     public static void init() {
         ICreativeLoader loader = CreativeCore.loader();
-        loader.registerKeybind(() -> PICKUP);
         
         loader.registerClientTick(ItemPhysicClient::gameTick);
         loader.registerClientRenderGui(ItemPhysicClient::renderTick);

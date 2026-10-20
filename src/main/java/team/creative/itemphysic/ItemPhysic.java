@@ -28,6 +28,8 @@ public class ItemPhysic implements ClientLoader, CommonLoader {
         ICreativeLoader loader = CreativeCore.loader();
         loader.register(this);
         loader.registerClient(this);
+        if (loader.getOverallSide().isClient())
+            ItemPhysicClient.initEarly();
     }
     
     @Override
